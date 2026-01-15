@@ -1,0 +1,14 @@
+[package]
+name = "daad-player"
+version = "1.0.0"
+edition = "2021"
+authors = ["DAADDAH Project"]
+description = "Standalone DAAD game player - loads and plays .json game files"
+
+[[bin]]
+name = "daad-player"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

@@ -51,10 +51,20 @@ fn main() {
             // Flags and messages editor systems
             builder::editors::property_forms::render_flags_editor,
             builder::editors::property_forms::render_messages_editor,
+            builder::editors::property_forms::render_property_editor,
             builder::editors::property_forms::handle_flag_card_clicks,
             builder::editors::property_forms::handle_message_card_clicks,
             builder::editors::property_forms::handle_add_flag_button,
             builder::editors::property_forms::handle_add_message_button,
+            builder::editors::property_forms::handle_save_flag_button,
+            builder::editors::property_forms::handle_save_message_button,
+            builder::editors::property_forms::handle_close_editor_button,
+        ))
+        .add_systems(Update, (
+            // Text input systems
+            builder::ui::text_input::handle_text_input,
+            builder::ui::text_input::handle_text_input_focus,
+            builder::ui::text_input::update_text_input_labels,
         ))
         .add_systems(Update, (
             // Preview/playtest systems
