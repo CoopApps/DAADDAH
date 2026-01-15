@@ -49,6 +49,14 @@ fn main() {
             builder::editors::rule_editor::handle_add_rule_button,
             builder::editors::rule_editor::handle_add_condition_button,
             builder::editors::rule_editor::handle_add_action_button,
+            // Visual condition builder
+            builder::editors::condition_builder::render_condition_builder,
+            builder::editors::condition_builder::handle_add_condition_builder_button,
+            builder::editors::condition_builder::handle_delete_condition_button,
+            // Condition type selector
+            builder::editors::condition_selector::render_condition_type_selector,
+            builder::editors::condition_selector::handle_condition_type_selection,
+            builder::editors::condition_selector::handle_close_condition_selector,
         ))
         .add_systems(Update, (
             // Flags and messages editor systems

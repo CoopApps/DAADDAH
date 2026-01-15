@@ -94,6 +94,8 @@ pub enum EditMode {
     Rule(usize),    // Editing rule ID
     Flag(u8),       // Editing flag ID
     Message(usize), // Editing message ID
+    ConditionTypeSelector { rule_id: usize, condition_idx: usize }, // Selecting condition type
+    ActionTypeSelector { rule_id: usize, action_idx: usize }, // Selecting action type
     None,           // Nothing being edited
 }
 
