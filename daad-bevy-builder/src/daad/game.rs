@@ -8,6 +8,7 @@ pub struct DaadGame {
     pub title: String,
     pub author: String,
     pub version: String,
+    pub starting_location: u8,
     pub locations: Vec<Location>,
     pub objects: Vec<Object>,
     pub rules: Vec<Rule>,
@@ -36,6 +37,7 @@ impl Default for DaadGame {
             title: "My Adventure".to_string(),
             author: "Anonymous".to_string(),
             version: "1.0".to_string(),
+            starting_location: 0,
             locations: vec![
                 Location {
                     id: 0,

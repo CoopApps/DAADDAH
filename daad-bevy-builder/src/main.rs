@@ -62,10 +62,12 @@ fn main() {
             builder::editors::condition_selector::handle_close_condition_selector,
         ))
         .add_systems(Update, (
-            // Flags and messages editor systems
+            // Game info, flags and messages editor systems
+            builder::editors::property_forms::render_game_info_editor,
             builder::editors::property_forms::render_flags_editor,
             builder::editors::property_forms::render_messages_editor,
             builder::editors::property_forms::render_property_editor,
+            builder::editors::property_forms::handle_save_game_info_button,
             builder::editors::property_forms::handle_flag_card_clicks,
             builder::editors::property_forms::handle_message_card_clicks,
             builder::editors::property_forms::handle_add_flag_button,
@@ -75,10 +77,17 @@ fn main() {
             builder::editors::property_forms::handle_save_object_button,
             builder::editors::property_forms::handle_save_location_button,
             builder::editors::property_forms::handle_close_editor_button,
-            // Object behavior preset handlers
+        ))
+        .add_systems(Update, (
+            // Object behavior preset and delete handlers
             builder::editors::property_forms::handle_apply_container_preset,
             builder::editors::property_forms::handle_apply_light_source_preset,
             builder::editors::property_forms::handle_apply_readable_preset,
+            builder::editors::property_forms::handle_delete_object_button,
+            builder::editors::property_forms::handle_delete_flag_button,
+            builder::editors::property_forms::handle_delete_message_button,
+            builder::editors::property_forms::handle_delete_rule_button,
+            builder::editors::property_forms::handle_delete_action_button,
         ))
         .add_systems(Update, (
             // Vocabulary/dictionary editor systems

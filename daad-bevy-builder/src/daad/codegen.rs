@@ -52,8 +52,8 @@ impl DaadCodeGenerator {
              ; Target: DRC Compiler\n\
              ; ========================================\n\n\
              ; Initial player location\n\
-             #define START_LOCATION 0\n\n",
-            game.title, game.author, game.version
+             #define START_LOCATION {}\n\n",
+            game.title, game.author, game.version, game.starting_location
         )
     }
 
