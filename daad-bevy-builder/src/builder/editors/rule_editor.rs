@@ -361,6 +361,33 @@ pub fn render_rule_detail_editor(
                             },
                         ));
                     });
+
+                // Flag Calculator button
+                parent
+                    .spawn((
+                        ButtonBundle {
+                            style: Style {
+                                padding: UiRect::all(Val::Px(8.0)),
+                                margin: UiRect::top(Val::Px(5.0)),
+                                border: UiRect::all(Val::Px(2.0)),
+                                ..default()
+                            },
+                            background_color: Color::rgb(0.4, 0.6, 0.5).into(),
+                            border_color: Color::rgb(0.5, 0.8, 0.6).into(),
+                            ..default()
+                        },
+                        OpenFlagCalculatorButton { rule_index: selected_rule_idx },
+                    ))
+                    .with_children(|parent| {
+                        parent.spawn(TextBundle::from_section(
+                            "🧮 Flag Calculator (No Math Required!)",
+                            TextStyle {
+                                font_size: 12.0,
+                                color: Color::WHITE,
+                                ..default()
+                            },
+                        ));
+                    });
             });
     }
 }
@@ -522,6 +549,26 @@ pub fn handle_add_action_button(
     }
 }
 
+/// Handle opening the Flag Calculator
+pub fn handle_open_flag_calculator_button(
+    mut state: ResMut<BuilderState>,
+    mut interaction_query: Query<
+        (&Interaction, &OpenFlagCalculatorButton),
+        Changed<Interaction>,
+    >,
+) {
+    for (interaction, button) in interaction_query.iter() {
+        if *interaction == Interaction::Pressed {
+            // Open Flag Calculator modal
+            state.editing = Some(crate::builder::state::EditMode::FlagCalculator {
+                rule_id: button.rule_index,
+                action_idx: 0, // Will add to end of actions list
+            });
+            info!("Opened Flag Calculator for rule {}", button.rule_index);
+        }
+    }
+}
+
 // Components
 #[derive(Component)]
 pub(crate) struct RuleSidebar;
@@ -544,5 +591,10 @@ pub(crate) struct AddConditionButton {
 
 #[derive(Component)]
 pub(crate) struct AddActionButton {
+    rule_index: usize,
+}
+
+#[derive(Component)]
+pub(crate) struct OpenFlagCalculatorButton {
     rule_index: usize,
 }

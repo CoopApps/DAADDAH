@@ -17,6 +17,8 @@ fn main() {
         }))
         .init_resource::<builder::state::BuilderState>()
         .init_resource::<builder::state::BuildStatus>()
+        .init_resource::<builder::editors::FlagCalculatorTutorial>()
+        .init_resource::<builder::editors::FormulaBuilder>()
         .add_systems(Startup, setup)
         .add_systems(Update, (
             builder::ui::main_menu::render_menu,
@@ -49,6 +51,7 @@ fn main() {
             builder::editors::rule_editor::handle_add_rule_button,
             builder::editors::rule_editor::handle_add_condition_button,
             builder::editors::rule_editor::handle_add_action_button,
+            builder::editors::rule_editor::handle_open_flag_calculator_button,
             // Visual condition builder
             builder::editors::condition_builder::render_condition_builder,
             builder::editors::condition_builder::handle_add_condition_builder_button,
@@ -82,6 +85,17 @@ fn main() {
             builder::editors::vocabulary_editor::render_vocabulary_editor,
             builder::editors::vocabulary_editor::handle_add_vocab_word_button,
             builder::editors::vocabulary_editor::handle_delete_vocab_group_button,
+        ))
+        .add_systems(Update, (
+            // Flag Calculator systems
+            builder::editors::flag_calculator::render_flag_calculator,
+            builder::editors::flag_calculator::handle_close_flag_calculator,
+            builder::editors::flag_calculator::handle_next_tutorial_step,
+            builder::editors::flag_calculator::handle_skip_tutorial,
+            builder::editors::flag_calculator::handle_select_variable,
+            builder::editors::flag_calculator::handle_select_operation,
+            builder::editors::flag_calculator::handle_select_value,
+            builder::editors::flag_calculator::handle_add_formula_to_rule,
         ))
         .add_systems(Update, (
             // Text input systems
