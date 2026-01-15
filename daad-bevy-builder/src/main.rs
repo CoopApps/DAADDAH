@@ -88,6 +88,9 @@ fn main() {
             builder::editors::property_forms::handle_delete_message_button,
             builder::editors::property_forms::handle_delete_rule_button,
             builder::editors::property_forms::handle_delete_action_button,
+            // Property toggle handlers
+            builder::editors::property_forms::handle_toggle_object_property,
+            builder::editors::property_forms::handle_toggle_location_dark,
         ))
         .add_systems(Update, (
             // Vocabulary/dictionary editor systems

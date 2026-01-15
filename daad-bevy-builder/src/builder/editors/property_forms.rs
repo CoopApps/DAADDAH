@@ -499,6 +499,39 @@ pub fn render_flags_editor(
                                 ..default()
                             },
                         ));
+
+                        // Spacer
+                        parent.spawn(NodeBundle {
+                            style: Style {
+                                flex_grow: 1.0,
+                                ..default()
+                            },
+                            ..default()
+                        });
+
+                        // Delete button
+                        parent
+                            .spawn((
+                                ButtonBundle {
+                                    style: Style {
+                                        padding: UiRect::all(Val::Px(5.0)),
+                                        ..default()
+                                    },
+                                    background_color: Color::rgb(0.6, 0.2, 0.2).into(),
+                                    ..default()
+                                },
+                                DeleteFlagButton { flag_id: flag.id },
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn(TextBundle::from_section(
+                                    "🗑️",
+                                    TextStyle {
+                                        font_size: 14.0,
+                                        color: Color::WHITE,
+                                        ..default()
+                                    },
+                                ));
+                            });
                     });
             }
         });
@@ -648,6 +681,39 @@ pub fn render_messages_editor(
                                 ..default()
                             },
                         ));
+
+                        // Spacer
+                        parent.spawn(NodeBundle {
+                            style: Style {
+                                flex_grow: 1.0,
+                                ..default()
+                            },
+                            ..default()
+                        });
+
+                        // Delete button
+                        parent
+                            .spawn((
+                                ButtonBundle {
+                                    style: Style {
+                                        padding: UiRect::all(Val::Px(5.0)),
+                                        ..default()
+                                    },
+                                    background_color: Color::rgb(0.6, 0.2, 0.2).into(),
+                                    ..default()
+                                },
+                                DeleteMessageButton { message_index: idx },
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn(TextBundle::from_section(
+                                    "🗑️",
+                                    TextStyle {
+                                        font_size: 14.0,
+                                        color: Color::WHITE,
+                                        ..default()
+                                    },
+                                ));
+                            });
                     });
             }
         });
@@ -1388,24 +1454,24 @@ fn render_object_property_editor(commands: &mut Commands, obj_id: &u8, obj: &cra
                 },
             ));
 
-            // Checkboxes for boolean properties
-            add_checkbox_display(parent, "Container", obj.is_container);
-            add_checkbox_display(parent, "Wearable", obj.is_wearable);
-            add_checkbox_display(parent, "Takeable", obj.is_takeable);
-            add_checkbox_display(parent, "Openable", obj.is_openable);
-            add_checkbox_display(parent, "Currently Open", obj.is_open);
-            add_checkbox_display(parent, "Lockable", obj.is_lockable);
-            add_checkbox_display(parent, "Currently Locked", obj.is_locked);
-            add_checkbox_display(parent, "Light Source", obj.is_light_source);
-            add_checkbox_display(parent, "Currently Lit", obj.is_lit);
-            add_checkbox_display(parent, "Vehicle", obj.is_vehicle);
-            add_checkbox_display(parent, "Can Contain Player", obj.can_contain_player);
+            // Clickable property toggles
+            add_property_toggle(parent, "Container", obj.is_container, ToggleObjectProperty::Container(*obj_id));
+            add_property_toggle(parent, "Wearable", obj.is_wearable, ToggleObjectProperty::Wearable(*obj_id));
+            add_property_toggle(parent, "Takeable", obj.is_takeable, ToggleObjectProperty::Takeable(*obj_id));
+            add_property_toggle(parent, "Openable", obj.is_openable, ToggleObjectProperty::Openable(*obj_id));
+            add_property_toggle(parent, "Currently Open", obj.is_open, ToggleObjectProperty::Open(*obj_id));
+            add_property_toggle(parent, "Lockable", obj.is_lockable, ToggleObjectProperty::Lockable(*obj_id));
+            add_property_toggle(parent, "Currently Locked", obj.is_locked, ToggleObjectProperty::Locked(*obj_id));
+            add_property_toggle(parent, "Light Source", obj.is_light_source, ToggleObjectProperty::LightSource(*obj_id));
+            add_property_toggle(parent, "Currently Lit", obj.is_lit, ToggleObjectProperty::Lit(*obj_id));
+            add_property_toggle(parent, "Vehicle", obj.is_vehicle, ToggleObjectProperty::Vehicle(*obj_id));
+            add_property_toggle(parent, "Can Contain Player", obj.can_contain_player, ToggleObjectProperty::CanContainPlayer(*obj_id));
 
             parent.spawn(TextBundle::from_section(
-                "\nNote: Property toggles coming soon! Use Object Behavior Presets below for now.",
+                "\nClick checkboxes to toggle properties",
                 TextStyle {
                     font_size: 11.0,
-                    color: Color::rgb(0.6, 0.6, 0.7),
+                    color: Color::rgb(0.6, 0.8, 0.6),
                     font: Default::default(),
                 },
             ));
@@ -1642,13 +1708,50 @@ fn render_location_property_editor(commands: &mut Commands, loc_id: &u8, loc: &c
                 },
             ));
 
-            add_checkbox_display(parent, "Dark (requires light source)", loc.is_dark);
+            // Clickable darkness toggle
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            padding: UiRect::all(Val::Px(5.0)),
+                            margin: UiRect::vertical(Val::Px(2.0)),
+                            border: UiRect::all(Val::Px(1.0)),
+                            ..default()
+                        },
+                        background_color: if loc.is_dark {
+                            Color::rgb(0.2, 0.2, 0.4)
+                        } else {
+                            Color::rgb(0.2, 0.2, 0.2)
+                        }.into(),
+                        border_color: if loc.is_dark {
+                            Color::rgb(0.4, 0.4, 0.8)
+                        } else {
+                            Color::rgb(0.4, 0.4, 0.4)
+                        }.into(),
+                        ..default()
+                    },
+                    ToggleLocationDark { location_id: *loc_id },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        format!("  {} Dark (requires light source)", if loc.is_dark { "✓" } else { "✗" }),
+                        TextStyle {
+                            font_size: 13.0,
+                            color: if loc.is_dark {
+                                Color::rgb(0.6, 0.6, 1.0)
+                            } else {
+                                Color::rgb(0.6, 0.6, 0.6)
+                            },
+                            ..default()
+                        },
+                    ));
+                });
 
             parent.spawn(TextBundle::from_section(
-                "Note: Toggle coming soon! Edit via JSON for now.",
+                "Click checkbox to toggle darkness",
                 TextStyle {
                     font_size: 11.0,
-                    color: Color::rgb(0.6, 0.6, 0.7),
+                    color: Color::rgb(0.6, 0.8, 0.6),
                     ..default()
                 },
             ));
@@ -1870,6 +1973,47 @@ fn add_checkbox_display(parent: &mut ChildBuilder, label: &str, checked: bool) {
     ));
 }
 
+// Helper function to create clickable property toggle
+fn add_property_toggle(parent: &mut ChildBuilder, label: &str, checked: bool, toggle_component: ToggleObjectProperty) {
+    parent
+        .spawn((
+            ButtonBundle {
+                style: Style {
+                    padding: UiRect::all(Val::Px(5.0)),
+                    margin: UiRect::vertical(Val::Px(2.0)),
+                    border: UiRect::all(Val::Px(1.0)),
+                    ..default()
+                },
+                background_color: if checked {
+                    Color::rgb(0.2, 0.4, 0.2)
+                } else {
+                    Color::rgb(0.2, 0.2, 0.2)
+                }.into(),
+                border_color: if checked {
+                    Color::rgb(0.4, 0.8, 0.4)
+                } else {
+                    Color::rgb(0.4, 0.4, 0.4)
+                }.into(),
+                ..default()
+            },
+            toggle_component,
+        ))
+        .with_children(|parent| {
+            parent.spawn(TextBundle::from_section(
+                format!("  {} {}", if checked { "✓" } else { "✗" }, label),
+                TextStyle {
+                    font_size: 13.0,
+                    color: if checked {
+                        Color::rgb(0.4, 0.9, 0.4)
+                    } else {
+                        Color::rgb(0.6, 0.6, 0.6)
+                    },
+                    ..default()
+                },
+            ));
+        });
+}
+
 // Helper function to create text input fields
 fn add_text_field(parent: &mut ChildBuilder, label: &str, field_id: &str, value: &str, max_length: usize) {
     parent.spawn(TextBundle::from_section(
@@ -2086,6 +2230,128 @@ pub(crate) struct DeleteRuleButton {
 pub(crate) struct DeleteActionButton {
     pub rule_index: usize,
     pub action_index: usize,
+}
+
+#[derive(Component, Clone, Copy)]
+pub(crate) enum ToggleObjectProperty {
+    Container(u8),
+    Wearable(u8),
+    Takeable(u8),
+    Openable(u8),
+    Open(u8),
+    Lockable(u8),
+    Locked(u8),
+    LightSource(u8),
+    Lit(u8),
+    Vehicle(u8),
+    CanContainPlayer(u8),
+}
+
+#[derive(Component)]
+pub(crate) struct ToggleLocationDark {
+    pub location_id: u8,
+}
+
+/// Handle property toggle buttons
+pub fn handle_toggle_object_property(
+    mut state: ResMut<BuilderState>,
+    mut interaction_query: Query<
+        (&Interaction, &ToggleObjectProperty),
+        Changed<Interaction>,
+    >,
+) {
+    for (interaction, toggle) in interaction_query.iter() {
+        if *interaction == Interaction::Pressed {
+            match toggle {
+                ToggleObjectProperty::Container(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.is_container = !obj.is_container;
+                        state.unsaved_changes = true;
+                        info!("Toggled is_container for object {}", id);
+                    }
+                }
+                ToggleObjectProperty::Wearable(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.is_wearable = !obj.is_wearable;
+                        state.unsaved_changes = true;
+                    }
+                }
+                ToggleObjectProperty::Takeable(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.is_takeable = !obj.is_takeable;
+                        state.unsaved_changes = true;
+                    }
+                }
+                ToggleObjectProperty::Openable(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.is_openable = !obj.is_openable;
+                        state.unsaved_changes = true;
+                    }
+                }
+                ToggleObjectProperty::Open(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.is_open = !obj.is_open;
+                        state.unsaved_changes = true;
+                    }
+                }
+                ToggleObjectProperty::Lockable(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.is_lockable = !obj.is_lockable;
+                        state.unsaved_changes = true;
+                    }
+                }
+                ToggleObjectProperty::Locked(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.is_locked = !obj.is_locked;
+                        state.unsaved_changes = true;
+                    }
+                }
+                ToggleObjectProperty::LightSource(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.is_light_source = !obj.is_light_source;
+                        state.unsaved_changes = true;
+                    }
+                }
+                ToggleObjectProperty::Lit(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.is_lit = !obj.is_lit;
+                        state.unsaved_changes = true;
+                    }
+                }
+                ToggleObjectProperty::Vehicle(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.is_vehicle = !obj.is_vehicle;
+                        state.unsaved_changes = true;
+                    }
+                }
+                ToggleObjectProperty::CanContainPlayer(id) => {
+                    if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == *id) {
+                        obj.can_contain_player = !obj.can_contain_player;
+                        state.unsaved_changes = true;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Handle location darkness toggle
+pub fn handle_toggle_location_dark(
+    mut state: ResMut<BuilderState>,
+    mut interaction_query: Query<
+        (&Interaction, &ToggleLocationDark),
+        Changed<Interaction>,
+    >,
+) {
+    for (interaction, toggle) in interaction_query.iter() {
+        if *interaction == Interaction::Pressed {
+            if let Some(loc) = state.current_game.locations.iter_mut().find(|l| l.id == toggle.location_id) {
+                loc.is_dark = !loc.is_dark;
+                state.unsaved_changes = true;
+                info!("Toggled is_dark for location {}", toggle.location_id);
+            }
+        }
+    }
 }
 
 /// Handle delete object button
