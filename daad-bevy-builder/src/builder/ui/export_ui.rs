@@ -488,7 +488,7 @@ pub fn handle_export_daad_button(
 
             // Generate filename from game title
             let filename = state.current_game.title.replace(' ', "_").to_lowercase();
-            let filepath = format!("./exports/{}.sce", filename);
+            let filepath = format!("./exports/{}.dsf", filename);
 
             // Generate DAAD source code
             let daad_code = DaadCodeGenerator::generate(&state.current_game);
