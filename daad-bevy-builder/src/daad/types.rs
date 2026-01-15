@@ -15,6 +15,15 @@ pub struct Location {
     pub picture_id: Option<u8>,         // DAAD PICTURE command number (0-255)
     pub auto_show_picture: bool,        // Auto-show image when entering location
 
+    // Sound support (Maluva extensions)
+    pub sound_file: Option<String>,     // Path to sound effect file (WAV, MP3)
+    pub sound_id: Option<u8>,           // DAAD SOUND command number (0-255)
+    pub auto_play_sound: bool,          // Auto-play sound when entering location
+
+    pub music_file: Option<String>,     // Path to music file (MP3, OGG)
+    pub music_id: Option<u8>,           // DAAD MUSIC command number (0-255)
+    pub auto_play_music: bool,          // Auto-play music when entering location
+
     // Visual editor metadata
     pub editor_position: Vec2,
     pub editor_color: Color,

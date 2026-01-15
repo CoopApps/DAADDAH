@@ -92,9 +92,43 @@ impl GraphicsDatabase {
                     format: ImageFormat::from_path(path),
                 });
             }
+
+            // Collect sound effects from locations
+            if let (Some(ref path), Some(sound_id)) = (&location.sound_file, location.sound_id) {
+                let file_exists = Path::new(path).exists();
+                let file_size = if file_exists {
+                    fs::metadata(path).ok().map(|m| m.len())
+                } else {
+                    None
+                };
+
+                db.sounds.insert(sound_id, SoundEntry {
+                    sound_id,
+                    file_path: path.clone(),
+                    file_exists,
+                    file_size,
+                });
+            }
+
+            // Collect music from locations
+            if let (Some(ref path), Some(music_id)) = (&location.music_file, location.music_id) {
+                let file_exists = Path::new(path).exists();
+                let file_size = if file_exists {
+                    fs::metadata(path).ok().map(|m| m.len())
+                } else {
+                    None
+                };
+
+                db.music.insert(music_id, MusicEntry {
+                    music_id,
+                    file_path: path.clone(),
+                    file_exists,
+                    file_size,
+                });
+            }
         }
 
-        // TODO: Collect sounds and music from rules/actions
+        // TODO: Also collect sounds and music from rules/actions when implemented
 
         db
     }

@@ -46,6 +46,12 @@ impl Default for DaadGame {
                     image_file: None,
                     picture_id: Some(0),
                     auto_show_picture: true,
+                    sound_file: None,
+                    sound_id: None,
+                    auto_play_sound: false,
+                    music_file: None,
+                    music_id: None,
+                    auto_play_music: false,
                     editor_position: Vec2::new(400.0, 300.0),
                     editor_color: Color::rgb(0.3, 0.5, 0.7),
                 }
@@ -107,6 +113,12 @@ impl DaadGame {
             image_file: None,
             picture_id: Some(id),  // Default to location ID as picture ID
             auto_show_picture: true,
+            sound_file: None,
+            sound_id: None,
+            auto_play_sound: false,
+            music_file: None,
+            music_id: None,
+            auto_play_music: false,
             editor_position: Vec2::new(400.0 + (id as f32 * 100.0), 300.0),
             editor_color: Color::rgb(0.3, 0.5, 0.7),
         });

@@ -1077,6 +1077,79 @@ fn render_location_property_editor(commands: &mut Commands, loc_id: &u8, loc: &c
                 },
             ));
 
+            // Sound section
+            parent.spawn(TextBundle::from_section(
+                "\n🔊 Sound Effects:",
+                TextStyle {
+                    font_size: 16.0,
+                    color: Color::rgb(0.9, 0.9, 1.0),
+                    ..default()
+                },
+            ));
+
+            // Sound File
+            add_text_field(parent, "Sound File (WAV/MP3):", &format!("location_{}_sound", loc_id),
+                &loc.sound_file.as_deref().unwrap_or(""), 100);
+
+            // Sound ID
+            add_text_field(parent, "Sound ID (0-255):", &format!("location_{}_soundid", loc_id),
+                &loc.sound_id.map(|id| id.to_string()).unwrap_or_default(), 3);
+
+            // Auto-play sound checkbox display
+            parent.spawn(TextBundle::from_section(
+                format!("Auto-play on entry: {}", if loc.auto_play_sound { "✓" } else { "✗" }),
+                TextStyle {
+                    font_size: 14.0,
+                    color: if loc.auto_play_sound {
+                        Color::rgb(0.3, 0.9, 0.3)
+                    } else {
+                        Color::rgb(0.6, 0.6, 0.6)
+                    },
+                    ..default()
+                },
+            ));
+
+            // Music section
+            parent.spawn(TextBundle::from_section(
+                "\n🎵 Background Music:",
+                TextStyle {
+                    font_size: 16.0,
+                    color: Color::rgb(0.9, 0.9, 1.0),
+                    ..default()
+                },
+            ));
+
+            // Music File
+            add_text_field(parent, "Music File (MP3/OGG):", &format!("location_{}_music", loc_id),
+                &loc.music_file.as_deref().unwrap_or(""), 100);
+
+            // Music ID
+            add_text_field(parent, "Music ID (0-255):", &format!("location_{}_musicid", loc_id),
+                &loc.music_id.map(|id| id.to_string()).unwrap_or_default(), 3);
+
+            // Auto-play music checkbox display
+            parent.spawn(TextBundle::from_section(
+                format!("Auto-play on entry: {}", if loc.auto_play_music { "✓" } else { "✗" }),
+                TextStyle {
+                    font_size: 14.0,
+                    color: if loc.auto_play_music {
+                        Color::rgb(0.3, 0.9, 0.3)
+                    } else {
+                        Color::rgb(0.6, 0.6, 0.6)
+                    },
+                    ..default()
+                },
+            ));
+
+            parent.spawn(TextBundle::from_section(
+                "ℹ️ Tip: Use relative paths like 'sounds/ambience.mp3'",
+                TextStyle {
+                    font_size: 11.0,
+                    color: Color::rgb(0.5, 0.6, 0.7),
+                    ..default()
+                },
+            ));
+
             parent
                 .spawn((
                     ButtonBundle {
@@ -1240,6 +1313,22 @@ pub fn handle_save_location_button(
                         };
                     } else if input.field_id == format!("location_{}_picid", button.location_id) {
                         loc.picture_id = input.value.parse::<u8>().ok();
+                    } else if input.field_id == format!("location_{}_sound", button.location_id) {
+                        loc.sound_file = if input.value.is_empty() {
+                            None
+                        } else {
+                            Some(input.value.clone())
+                        };
+                    } else if input.field_id == format!("location_{}_soundid", button.location_id) {
+                        loc.sound_id = input.value.parse::<u8>().ok();
+                    } else if input.field_id == format!("location_{}_music", button.location_id) {
+                        loc.music_file = if input.value.is_empty() {
+                            None
+                        } else {
+                            Some(input.value.clone())
+                        };
+                    } else if input.field_id == format!("location_{}_musicid", button.location_id) {
+                        loc.music_id = input.value.parse::<u8>().ok();
                     }
                 }
 
