@@ -888,6 +888,73 @@ pub fn handle_close_editor_button(
     }
 }
 
+/// Handle apply container preset button
+pub fn handle_apply_container_preset(
+    mut state: ResMut<BuilderState>,
+    mut interaction_query: Query<
+        (&Interaction, &ApplyContainerPresetButton),
+        Changed<Interaction>,
+    >,
+) {
+    for (interaction, button) in interaction_query.iter() {
+        if *interaction == Interaction::Pressed {
+            use crate::builder::presets::apply_container_preset;
+
+            let rule_ids = apply_container_preset(&mut state.current_game, button.object_id);
+            state.unsaved_changes = true;
+
+            info!("Applied container preset to object {}, created {} rules",
+                button.object_id, rule_ids.len());
+        }
+    }
+}
+
+/// Handle apply light source preset button
+pub fn handle_apply_light_source_preset(
+    mut state: ResMut<BuilderState>,
+    mut interaction_query: Query<
+        (&Interaction, &ApplyLightSourcePresetButton),
+        Changed<Interaction>,
+    >,
+) {
+    for (interaction, button) in interaction_query.iter() {
+        if *interaction == Interaction::Pressed {
+            use crate::builder::presets::apply_light_source_preset;
+
+            let rule_ids = apply_light_source_preset(&mut state.current_game, button.object_id, 20);
+            state.unsaved_changes = true;
+
+            info!("Applied light source preset to object {}, created {} rules",
+                button.object_id, rule_ids.len());
+        }
+    }
+}
+
+/// Handle apply readable preset button
+pub fn handle_apply_readable_preset(
+    mut state: ResMut<BuilderState>,
+    mut interaction_query: Query<
+        (&Interaction, &ApplyReadablePresetButton),
+        Changed<Interaction>,
+    >,
+) {
+    for (interaction, button) in interaction_query.iter() {
+        if *interaction == Interaction::Pressed {
+            use crate::builder::presets::apply_readable_preset;
+
+            let rule_ids = apply_readable_preset(
+                &mut state.current_game,
+                button.object_id,
+                "The text reads: (edit this in the rule editor)"
+            );
+            state.unsaved_changes = true;
+
+            info!("Applied readable preset to object {}, created {} rules",
+                button.object_id, rule_ids.len());
+        }
+    }
+}
+
 fn render_object_property_editor(commands: &mut Commands, obj_id: &u8, obj: &crate::daad::types::Object) {
     commands
         .spawn((
@@ -939,6 +1006,106 @@ fn render_object_property_editor(commands: &mut Commands, obj_id: &u8, obj: &cra
 
             // Weight
             add_text_field(parent, "Weight:", &format!("object_{}_weight", obj_id), &obj.weight.to_string(), 3);
+
+            // Behavior Presets Section
+            parent.spawn(TextBundle::from_section(
+                "🎭 Behavior Presets",
+                TextStyle {
+                    font_size: 16.0,
+                    color: Color::rgb(0.9, 0.9, 1.0),
+                    ..default()
+                },
+            ));
+
+            parent.spawn(TextBundle::from_section(
+                "Click to auto-generate rules for common behaviors:",
+                TextStyle {
+                    font_size: 11.0,
+                    color: Color::rgb(0.7, 0.7, 0.7),
+                    ..default()
+                },
+            ));
+
+            // Container preset button
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            padding: UiRect::all(Val::Px(8.0)),
+                            margin: UiRect::vertical(Val::Px(3.0)),
+                            border: UiRect::all(Val::Px(1.0)),
+                            ..default()
+                        },
+                        background_color: Color::rgb(0.4, 0.5, 0.7).into(),
+                        border_color: Color::rgb(0.5, 0.6, 0.8).into(),
+                        ..default()
+                    },
+                    ApplyContainerPresetButton { object_id: *obj_id },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "📦 Make Container (OPEN/CLOSE)",
+                        TextStyle {
+                            font_size: 12.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ));
+                });
+
+            // Light source preset button
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            padding: UiRect::all(Val::Px(8.0)),
+                            margin: UiRect::vertical(Val::Px(3.0)),
+                            border: UiRect::all(Val::Px(1.0)),
+                            ..default()
+                        },
+                        background_color: Color::rgb(0.7, 0.6, 0.3).into(),
+                        border_color: Color::rgb(0.8, 0.7, 0.4).into(),
+                        ..default()
+                    },
+                    ApplyLightSourcePresetButton { object_id: *obj_id },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "💡 Make Light Source (LIGHT/EXTINGUISH)",
+                        TextStyle {
+                            font_size: 12.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ));
+                });
+
+            // Readable preset button
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            padding: UiRect::all(Val::Px(8.0)),
+                            margin: UiRect::vertical(Val::Px(3.0)),
+                            border: UiRect::all(Val::Px(1.0)),
+                            ..default()
+                        },
+                        background_color: Color::rgb(0.5, 0.7, 0.5).into(),
+                        border_color: Color::rgb(0.6, 0.8, 0.6).into(),
+                        ..default()
+                    },
+                    ApplyReadablePresetButton { object_id: *obj_id },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "📄 Make Readable (READ)",
+                        TextStyle {
+                            font_size: 12.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ));
+                });
 
             parent
                 .spawn((
@@ -1365,3 +1532,18 @@ pub(crate) struct SaveLocationButton {
 
 #[derive(Component)]
 pub(crate) struct CloseEditorButton;
+
+#[derive(Component)]
+pub(crate) struct ApplyContainerPresetButton {
+    object_id: u8,
+}
+
+#[derive(Component)]
+pub(crate) struct ApplyLightSourcePresetButton {
+    object_id: u8,
+}
+
+#[derive(Component)]
+pub(crate) struct ApplyReadablePresetButton {
+    object_id: u8,
+}

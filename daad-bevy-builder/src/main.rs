@@ -72,6 +72,10 @@ fn main() {
             builder::editors::property_forms::handle_save_object_button,
             builder::editors::property_forms::handle_save_location_button,
             builder::editors::property_forms::handle_close_editor_button,
+            // Object behavior preset handlers
+            builder::editors::property_forms::handle_apply_container_preset,
+            builder::editors::property_forms::handle_apply_light_source_preset,
+            builder::editors::property_forms::handle_apply_readable_preset,
         ))
         .add_systems(Update, (
             // Vocabulary/dictionary editor systems
