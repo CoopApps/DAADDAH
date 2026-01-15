@@ -5,6 +5,7 @@ pub mod property_forms;
 pub mod condition_builder;
 pub mod condition_selector;
 pub mod vocabulary_editor;
+pub mod flag_calculator;
 
 pub use location_editor::*;
 pub use object_editor::*;
@@ -13,3 +14,4 @@ pub use property_forms::*;
 pub use condition_builder::*;
 pub use condition_selector::*;
 pub use vocabulary_editor::*;
+pub use flag_calculator::*;
