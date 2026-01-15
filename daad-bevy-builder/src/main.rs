@@ -174,22 +174,22 @@ fn handle_keyboard_shortcuts(
         }
     }
 
-    // Ctrl+E = Export to DAAD source code
+    // Ctrl+E = Export to DAAD source code (DSF format)
     if keys.pressed(KeyCode::ControlLeft) && keys.just_pressed(KeyCode::E) {
         // Create exports directory if it doesn't exist
         let _ = std::fs::create_dir_all("./exports");
 
         // Generate filename from game title
         let filename = state.current_game.title.replace(' ', "_").to_lowercase();
-        let filepath = format!("./exports/{}.sce", filename);
+        let filepath = format!("./exports/{}.dsf", filename);
 
-        // Generate DAAD source code
+        // Generate DAAD source code (DSF format for DRC compiler)
         let daad_code = daad::codegen::DaadCodeGenerator::generate(&state.current_game);
 
         // Write to file
         match std::fs::write(&filepath, daad_code) {
             Ok(_) => {
-                info!("✅ DAAD source exported to: {}", filepath);
+                info!("✅ DAAD source (DSF) exported to: {}", filepath);
             }
             Err(e) => {
                 error!("❌ Failed to write DAAD source file: {}", e);
