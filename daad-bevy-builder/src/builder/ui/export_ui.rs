@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::builder::state::{BuilderState, Panel, BuildStatus, BuildResult};
 use crate::daad::codegen::DaadCodeGenerator;
+use crate::daad::graphics::GraphicsDatabase;
 use std::fs;
 use std::process::{Command, Stdio};
 
@@ -351,6 +352,64 @@ pub fn render_export_panel(
                     ));
                 });
 
+            // Separator
+            parent.spawn(NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Px(2.0),
+                    margin: UiRect::vertical(Val::Px(15.0)),
+                    ..default()
+                },
+                background_color: Color::rgb(0.3, 0.3, 0.35).into(),
+                ..default()
+            });
+
+            // Export Graphics Section
+            parent.spawn(TextBundle::from_section(
+                "🎨 Export Graphics Database",
+                TextStyle {
+                    font_size: 18.0,
+                    color: Color::rgb(0.9, 0.9, 1.0),
+                    ..default()
+                },
+            ));
+
+            parent.spawn(TextBundle::from_section(
+                "Bundle all images, sounds, and music files for distribution",
+                TextStyle {
+                    font_size: 12.0,
+                    color: Color::rgb(0.6, 0.6, 0.6),
+                    ..default()
+                },
+            ));
+
+            // Export Graphics button
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            padding: UiRect::all(Val::Px(12.0)),
+                            margin: UiRect::vertical(Val::Px(8.0)),
+                            border: UiRect::all(Val::Px(2.0)),
+                            ..default()
+                        },
+                        background_color: Color::rgb(0.7, 0.4, 0.7).into(),
+                        border_color: Color::rgb(0.8, 0.5, 0.8).into(),
+                        ..default()
+                    },
+                    ExportGraphicsButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "🎨 EXPORT GRAPHICS DATABASE",
+                        TextStyle {
+                            font_size: 14.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ));
+                });
+
             // Help text
             parent.spawn(TextBundle::from_section(
                 "ℹ️ Files will be saved to: ./exports/",
@@ -551,6 +610,60 @@ pub fn check_build_completion(
     }
 }
 
+/// Handle export graphics database button
+pub fn handle_export_graphics_button(
+    state: Res<BuilderState>,
+    mut interaction_query: Query<
+        &Interaction,
+        (Changed<Interaction>, With<ExportGraphicsButton>),
+    >,
+) {
+    for interaction in interaction_query.iter_mut() {
+        if *interaction == Interaction::Pressed {
+            info!("🎨 Starting graphics database export...");
+
+            // Build graphics database from game
+            let db = GraphicsDatabase::from_game(&state.current_game);
+
+            // Validate before export
+            let validation_errors = db.validate();
+            if !validation_errors.is_empty() {
+                warn!("⚠️  Graphics validation warnings:");
+                for error in &validation_errors {
+                    warn!("  - {}", error);
+                }
+            }
+
+            // Create output directory
+            let filename = state.current_game.title.replace(' ', "_").to_lowercase();
+            let output_dir = format!("./exports/{}_graphics", filename);
+
+            // Export graphics database
+            match db.export(&output_dir) {
+                Ok(report) => {
+                    info!("✅ Graphics database exported successfully!");
+                    info!("📊 Export Summary:");
+                    info!("  Images: {} copied, {} missing", report.images_copied, report.images_missing);
+                    info!("  Sounds: {} copied, {} missing", report.sounds_copied, report.sounds_missing);
+                    info!("  Music: {} copied, {} missing", report.music_copied, report.music_missing);
+                    info!("  Total size: {:.2} MB", report.total_size as f64 / 1_048_576.0);
+                    info!("  Output directory: {}", output_dir);
+
+                    if !report.errors.is_empty() {
+                        warn!("⚠️  Some files could not be exported:");
+                        for error in &report.errors {
+                            warn!("  - {}", error);
+                        }
+                    }
+                }
+                Err(e) => {
+                    error!("❌ Failed to export graphics database: {}", e);
+                }
+            }
+        }
+    }
+}
+
 // Components
 #[derive(Component)]
 pub(crate) struct ExportPanel;
@@ -568,3 +681,6 @@ pub(crate) struct PreviewDaadButton;
 pub(crate) struct BuildPlayerButton {
     enabled: bool,
 }
+
+#[derive(Component)]
+pub(crate) struct ExportGraphicsButton;

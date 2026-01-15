@@ -84,6 +84,7 @@ fn main() {
             builder::ui::export_ui::handle_preview_daad_button,
             builder::ui::export_ui::handle_build_player_button,
             builder::ui::export_ui::check_build_completion,
+            builder::ui::export_ui::handle_export_graphics_button,
         ))
         .run();
 }
