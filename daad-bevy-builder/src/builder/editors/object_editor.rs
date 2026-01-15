@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::builder::state::{BuilderState, EditMode, Panel};
 use crate::daad::types::ObjectLocation;
+use super::location_editor::LocationNode;
 
 /// Render object sidebar when Objects panel is active
 pub fn render_object_sidebar(
@@ -215,14 +216,148 @@ pub fn handle_add_object_button(
     }
 }
 
-/// Handle object dragging to location nodes (simplified for now)
-/// TODO: Implement proper drag-and-drop with mouse position tracking
+/// Handle object dragging to location nodes with mouse tracking
 pub fn handle_object_to_location_drag(
-    _state: ResMut<BuilderState>,
-    _mouse_button: Res<Input<MouseButton>>,
+    mut state: ResMut<BuilderState>,
+    mouse_button: Res<Input<MouseButton>>,
+    windows: Query<&Window>,
+    mut drag_state: Local<Option<ObjectDragState>>,
+    object_card_query: Query<(&ObjectCard, &Node, &GlobalTransform)>,
+    location_query: Query<(&LocationNode, &Node, &GlobalTransform)>,
 ) {
-    // This will be implemented when we add proper drag-and-drop interaction
-    // For now, objects can be moved by editing their properties directly
+    let window = windows.single();
+
+    // Start drag on left-click
+    if mouse_button.just_pressed(MouseButton::Left) {
+        if let Some(cursor_pos) = window.cursor_position() {
+            // Check if clicking on an object card
+            for (card, ui_node, transform) in object_card_query.iter() {
+                let node_pos = transform.translation().truncate();
+                let size = ui_node.size();
+
+                // Check if cursor is over this card
+                let half_size = size / 2.0;
+                if cursor_pos.x >= node_pos.x - half_size.x && cursor_pos.x <= node_pos.x + half_size.x &&
+                   cursor_pos.y >= node_pos.y - half_size.y && cursor_pos.y <= node_pos.y + half_size.y {
+                    // Start dragging this object
+                    if let Some(object) = state.current_game.objects.iter().find(|o| o.id == card.object_id) {
+                        *drag_state = Some(ObjectDragState {
+                            object_id: card.object_id,
+                            start_pos: cursor_pos,
+                            object_name: object.name.clone(),
+                            object_icon: object.icon.clone(),
+                        });
+                        info!("Started dragging object: {}", object.name);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // Handle drop on release
+    if mouse_button.just_released(MouseButton::Left) {
+        if let Some(drag) = &*drag_state {
+            if let Some(cursor_pos) = window.cursor_position() {
+                // Check if dropping on a location node
+                let mut target_location_id: Option<u8> = None;
+                let mut target_location_name: Option<String> = None;
+
+                // First pass: find target location
+                for (loc_node, _ui_node, _transform) in location_query.iter() {
+                    if let Some(location) = state.current_game.locations.iter().find(|l| l.id == loc_node.location_id) {
+                        let node_pos = location.editor_position;
+                        let dx = cursor_pos.x - node_pos.x;
+                        let dy = cursor_pos.y - node_pos.y;
+
+                        // Check if cursor is over this location (hit box)
+                        if dx.abs() < 60.0 && dy.abs() < 40.0 {
+                            target_location_id = Some(loc_node.location_id);
+                            target_location_name = Some(location.name.clone());
+                            break;
+                        }
+                    }
+                }
+
+                // Second pass: update object if target found
+                if let Some(target_id) = target_location_id {
+                    let mut object_name = String::new();
+                    if let Some(object) = state.current_game.objects.iter_mut().find(|o| o.id == drag.object_id) {
+                        object.location = ObjectLocation::Location(target_id);
+                        object_name = object.name.clone();
+                    }
+
+                    state.unsaved_changes = true;
+                    if let Some(loc_name) = target_location_name {
+                        info!("Moved object '{}' to location '{}'", object_name, loc_name);
+                    }
+                }
+            }
+        }
+        *drag_state = None;
+    }
+
+    // Cancel drag on right-click or escape
+    if mouse_button.just_pressed(MouseButton::Right) {
+        *drag_state = None;
+    }
+}
+
+/// Render visual feedback while dragging an object
+pub fn render_object_drag_preview(
+    mut commands: Commands,
+    windows: Query<&Window>,
+    drag_state: Local<Option<ObjectDragState>>,
+    query: Query<Entity, With<ObjectDragPreview>>,
+) {
+    // Clean up old preview
+    for entity in query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+
+    // Only render if dragging
+    if let Some(drag) = &*drag_state {
+        let window = windows.single();
+        if let Some(cursor_pos) = window.cursor_position() {
+            // Create floating preview that follows cursor
+            commands
+                .spawn((
+                    NodeBundle {
+                        style: Style {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(cursor_pos.x + 10.0),
+                            top: Val::Px(cursor_pos.y + 10.0),
+                            padding: UiRect::all(Val::Px(8.0)),
+                            border: UiRect::all(Val::Px(2.0)),
+                            ..default()
+                        },
+                        background_color: Color::rgba(0.2, 0.4, 0.8, 0.9).into(),
+                        border_color: Color::rgb(0.5, 0.7, 1.0).into(),
+                        z_index: ZIndex::Global(1000),
+                        ..default()
+                    },
+                    ObjectDragPreview,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        format!("{} {}", drag.object_icon, drag.object_name),
+                        TextStyle {
+                            font_size: 14.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ));
+                    parent.spawn(TextBundle::from_section(
+                        "Drop on location to place",
+                        TextStyle {
+                            font_size: 10.0,
+                            color: Color::rgb(0.8, 0.9, 1.0),
+                            ..default()
+                        },
+                    ));
+                });
+        }
+    }
 }
 
 // Components
@@ -236,3 +371,13 @@ pub(crate) struct ObjectCard {
 
 #[derive(Component)]
 pub(crate) struct AddObjectButton;
+
+#[derive(Component)]
+pub(crate) struct ObjectDragPreview;
+
+pub(crate) struct ObjectDragState {
+    object_id: u8,
+    start_pos: Vec2,
+    object_name: String,
+    object_icon: String,
+}

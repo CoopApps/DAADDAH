@@ -40,6 +40,8 @@ fn main() {
             builder::editors::object_editor::render_object_sidebar,
             builder::editors::object_editor::handle_object_card_clicks,
             builder::editors::object_editor::handle_add_object_button,
+            builder::editors::object_editor::handle_object_to_location_drag,
+            builder::editors::object_editor::render_object_drag_preview,
             // Rule editor systems
             builder::editors::rule_editor::render_rule_sidebar,
             builder::editors::rule_editor::render_rule_detail_editor,

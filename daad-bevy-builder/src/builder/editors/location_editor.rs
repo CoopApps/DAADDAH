@@ -662,8 +662,8 @@ pub fn render_connection_preview(
 pub(crate) struct LocationEditorCanvas;
 
 #[derive(Component)]
-pub(crate) struct LocationNode {
-    location_id: u8,
+pub struct LocationNode {
+    pub location_id: u8,
 }
 
 #[derive(Component)]
