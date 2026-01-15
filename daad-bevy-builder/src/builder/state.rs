@@ -13,6 +13,20 @@ pub struct BuilderState {
     pub current_file_path: Option<String>,
 }
 
+/// Build status for player executable
+#[derive(Resource, Default)]
+pub struct BuildStatus {
+    pub is_building: bool,
+    pub last_status: Option<BuildResult>,
+    pub output: String,
+}
+
+#[derive(Clone)]
+pub enum BuildResult {
+    Success(String),
+    Failed(String),
+}
+
 impl Default for BuilderState {
     fn default() -> Self {
         Self {

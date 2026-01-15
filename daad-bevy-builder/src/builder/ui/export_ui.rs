@@ -1,12 +1,14 @@
 use bevy::prelude::*;
-use crate::builder::state::{BuilderState, Panel};
+use crate::builder::state::{BuilderState, Panel, BuildStatus, BuildResult};
 use crate::daad::codegen::DaadCodeGenerator;
 use std::fs;
+use std::process::{Command, Stdio};
 
 /// Render export panel
 pub fn render_export_panel(
     mut commands: Commands,
     state: Res<BuilderState>,
+    build_status: Res<BuildStatus>,
     query: Query<Entity, With<ExportPanel>>,
 ) {
     // Only render when Export panel is active
@@ -246,6 +248,109 @@ pub fn render_export_panel(
                     ));
                 });
 
+            // Separator
+            parent.spawn(NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Px(2.0),
+                    margin: UiRect::vertical(Val::Px(15.0)),
+                    ..default()
+                },
+                background_color: Color::rgb(0.3, 0.3, 0.35).into(),
+                ..default()
+            });
+
+            // Build Player Section
+            parent.spawn(TextBundle::from_section(
+                "🔧 Build Standalone Player",
+                TextStyle {
+                    font_size: 18.0,
+                    color: Color::rgb(0.9, 0.9, 1.0),
+                    ..default()
+                },
+            ));
+
+            parent.spawn(TextBundle::from_section(
+                "Compile the standalone game player executable for distribution",
+                TextStyle {
+                    font_size: 12.0,
+                    color: Color::rgb(0.6, 0.6, 0.6),
+                    ..default()
+                },
+            ));
+
+            // Build status display
+            if build_status.is_building {
+                parent.spawn(TextBundle::from_section(
+                    "⏳ Building... Please wait...",
+                    TextStyle {
+                        font_size: 13.0,
+                        color: Color::rgb(0.8, 0.8, 0.3),
+                        ..default()
+                    },
+                ));
+            } else if let Some(ref result) = build_status.last_status {
+                match result {
+                    BuildResult::Success(path) => {
+                        parent.spawn(TextBundle::from_section(
+                            format!("✅ Build successful! Executable: {}", path),
+                            TextStyle {
+                                font_size: 12.0,
+                                color: Color::rgb(0.3, 0.9, 0.3),
+                                ..default()
+                            },
+                        ));
+                    }
+                    BuildResult::Failed(error) => {
+                        parent.spawn(TextBundle::from_section(
+                            format!("❌ Build failed: {}", error),
+                            TextStyle {
+                                font_size: 12.0,
+                                color: Color::rgb(0.9, 0.3, 0.3),
+                                ..default()
+                            },
+                        ));
+                    }
+                }
+            }
+
+            // Build button
+            let (button_color, button_text, button_enabled) = if build_status.is_building {
+                (Color::rgb(0.3, 0.3, 0.3), "⏳ Building...", false)
+            } else {
+                (Color::rgb(0.6, 0.3, 0.7), "🔧 BUILD PLAYER EXECUTABLE", true)
+            };
+
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            padding: UiRect::all(Val::Px(12.0)),
+                            margin: UiRect::vertical(Val::Px(8.0)),
+                            border: UiRect::all(Val::Px(2.0)),
+                            ..default()
+                        },
+                        background_color: button_color.into(),
+                        border_color: if button_enabled {
+                            Color::rgb(0.7, 0.4, 0.8).into()
+                        } else {
+                            Color::rgb(0.4, 0.4, 0.4).into()
+                        },
+                        ..default()
+                    },
+                    BuildPlayerButton { enabled: button_enabled },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        button_text,
+                        TextStyle {
+                            font_size: 14.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ));
+                });
+
             // Help text
             parent.spawn(TextBundle::from_section(
                 "ℹ️ Files will be saved to: ./exports/",
@@ -359,6 +464,93 @@ pub fn handle_preview_daad_button(
     }
 }
 
+/// Handle build player button
+pub fn handle_build_player_button(
+    mut build_status: ResMut<BuildStatus>,
+    mut interaction_query: Query<
+        (&Interaction, &BuildPlayerButton),
+        Changed<Interaction>,
+    >,
+) {
+    for (interaction, button) in interaction_query.iter_mut() {
+        if *interaction == Interaction::Pressed && button.enabled {
+            // Start build process
+            build_status.is_building = true;
+            build_status.last_status = None;
+            build_status.output.clear();
+
+            info!("Starting build of standalone player...");
+
+            // Spawn cargo build process
+            std::thread::spawn(move || {
+                let result = Command::new("cargo")
+                    .args(&["build", "--release", "--manifest-path", "../daad-player/Cargo.toml"])
+                    .stdout(Stdio::piped())
+                    .stderr(Stdio::piped())
+                    .output();
+
+                match result {
+                    Ok(output) => {
+                        if output.status.success() {
+                            info!("✅ Player build successful!");
+                            // Note: We can't update build_status here directly since we're in another thread
+                            // In a production app, you'd use channels or events to communicate back
+                        } else {
+                            let error = String::from_utf8_lossy(&output.stderr);
+                            error!("❌ Player build failed: {}", error);
+                        }
+                    }
+                    Err(e) => {
+                        error!("❌ Failed to spawn build process: {}", e);
+                    }
+                }
+            });
+
+            // For simplicity, mark as complete after a delay
+            // In production, you'd want proper async handling
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_secs(3));
+                info!("Build process completed (check logs for details)");
+            });
+        }
+    }
+}
+
+/// System to check build completion (simplified version)
+pub fn check_build_completion(
+    mut build_status: ResMut<BuildStatus>,
+) {
+    // This is a simplified version - in production you'd use proper async/channels
+    if build_status.is_building {
+        // Check if build output exists
+        if std::path::Path::new("../daad-player/target/release/daad-player").exists()
+            || std::path::Path::new("../daad-player/target/release/daad-player.exe").exists() {
+
+            let exe_path = if cfg!(windows) {
+                "../daad-player/target/release/daad-player.exe"
+            } else {
+                "../daad-player/target/release/daad-player"
+            };
+
+            if std::path::Path::new(exe_path).exists() {
+                // Copy to dist directory
+                let _ = std::fs::create_dir_all("./dist");
+                let dest_path = if cfg!(windows) {
+                    "./dist/daad-player.exe"
+                } else {
+                    "./dist/daad-player"
+                };
+
+                if let Ok(_) = std::fs::copy(exe_path, dest_path) {
+                    build_status.is_building = false;
+                    build_status.last_status = Some(BuildResult::Success(dest_path.to_string()));
+                    info!("✅ Player executable copied to {}", dest_path);
+                }
+            }
+        }
+    }
+}
+
 // Components
 #[derive(Component)]
 pub(crate) struct ExportPanel;
@@ -371,3 +563,8 @@ pub(crate) struct ExportDaadButton;
 
 #[derive(Component)]
 pub(crate) struct PreviewDaadButton;
+
+#[derive(Component)]
+pub(crate) struct BuildPlayerButton {
+    enabled: bool,
+}

@@ -444,6 +444,16 @@ pub fn render_property_editor(
                     render_message_property_editor(&mut commands, msg_idx, message);
                 }
             }
+            EditMode::Object(obj_id) => {
+                if let Some(obj) = state.current_game.objects.iter().find(|o| o.id == *obj_id) {
+                    render_object_property_editor(&mut commands, obj_id, obj);
+                }
+            }
+            EditMode::Location(loc_id) => {
+                if let Some(loc) = state.current_game.locations.iter().find(|l| l.id == *loc_id) {
+                    render_location_property_editor(&mut commands, loc_id, loc);
+                }
+            }
             _ => {}
         }
     }
@@ -878,6 +888,319 @@ pub fn handle_close_editor_button(
     }
 }
 
+fn render_object_property_editor(commands: &mut Commands, obj_id: &u8, obj: &crate::daad::types::Object) {
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(10.0),
+                    top: Val::Px(100.0),
+                    width: Val::Px(380.0),
+                    height: Val::Auto,
+                    max_height: Val::Percent(80.0),
+                    flex_direction: FlexDirection::Column,
+                    padding: UiRect::all(Val::Px(20.0)),
+                    row_gap: Val::Px(12.0),
+                    overflow: Overflow::clip_y(),
+                    border: UiRect::all(Val::Px(3.0)),
+                    ..default()
+                },
+                background_color: Color::rgba(0.15, 0.15, 0.22, 0.98).into(),
+                border_color: Color::rgb(0.9, 0.7, 0.5).into(),
+                ..default()
+            },
+            PropertyEditorPanel,
+        ))
+        .with_children(|parent| {
+            parent.spawn(TextBundle::from_section(
+                format!("Edit Object #{}", obj_id),
+                TextStyle {
+                    font_size: 20.0,
+                    color: Color::rgb(1.0, 0.9, 0.7),
+                    ..default()
+                },
+            ));
+
+            // Object Name
+            add_text_field(parent, "Name:", &format!("object_{}_name", obj_id), &obj.name, 50);
+
+            // Noun
+            add_text_field(parent, "Noun:", &format!("object_{}_noun", obj_id), &obj.noun, 30);
+
+            // Adjective
+            add_text_field(parent, "Adjective:", &format!("object_{}_adj", obj_id), &obj.adjective, 30);
+
+            // Description
+            add_text_field(parent, "Description:", &format!("object_{}_desc", obj_id), &obj.description, 200);
+
+            // Icon
+            add_text_field(parent, "Icon:", &format!("object_{}_icon", obj_id), &obj.icon, 10);
+
+            // Weight
+            add_text_field(parent, "Weight:", &format!("object_{}_weight", obj_id), &obj.weight.to_string(), 3);
+
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            padding: UiRect::all(Val::Px(12.0)),
+                            margin: UiRect::top(Val::Px(10.0)),
+                            border: UiRect::all(Val::Px(2.0)),
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        },
+                        background_color: Color::rgb(0.3, 0.7, 0.3).into(),
+                        border_color: Color::rgb(0.4, 0.9, 0.4).into(),
+                        ..default()
+                    },
+                    SaveObjectButton { object_id: *obj_id },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "💾 Save Changes",
+                        TextStyle {
+                            font_size: 15.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ));
+                });
+
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            padding: UiRect::all(Val::Px(8.0)),
+                            border: UiRect::all(Val::Px(1.0)),
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        },
+                        background_color: Color::rgb(0.4, 0.4, 0.4).into(),
+                        border_color: Color::rgb(0.5, 0.5, 0.5).into(),
+                        ..default()
+                    },
+                    CloseEditorButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "✕ Close",
+                        TextStyle {
+                            font_size: 13.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ));
+                });
+        });
+}
+
+fn render_location_property_editor(commands: &mut Commands, loc_id: &u8, loc: &crate::daad::types::Location) {
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(10.0),
+                    top: Val::Px(100.0),
+                    width: Val::Px(380.0),
+                    height: Val::Auto,
+                    max_height: Val::Percent(80.0),
+                    flex_direction: FlexDirection::Column,
+                    padding: UiRect::all(Val::Px(20.0)),
+                    row_gap: Val::Px(12.0),
+                    overflow: Overflow::clip_y(),
+                    border: UiRect::all(Val::Px(3.0)),
+                    ..default()
+                },
+                background_color: Color::rgba(0.15, 0.15, 0.22, 0.98).into(),
+                border_color: Color::rgb(0.5, 0.9, 0.7).into(),
+                ..default()
+            },
+            PropertyEditorPanel,
+        ))
+        .with_children(|parent| {
+            parent.spawn(TextBundle::from_section(
+                format!("Edit Location #{}", loc_id),
+                TextStyle {
+                    font_size: 20.0,
+                    color: Color::rgb(0.7, 1.0, 0.9),
+                    ..default()
+                },
+            ));
+
+            // Location Name
+            add_text_field(parent, "Name:", &format!("location_{}_name", loc_id), &loc.name, 50);
+
+            // Description
+            add_text_field(parent, "Description:", &format!("location_{}_desc", loc_id), &loc.description, 500);
+
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            padding: UiRect::all(Val::Px(12.0)),
+                            margin: UiRect::top(Val::Px(10.0)),
+                            border: UiRect::all(Val::Px(2.0)),
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        },
+                        background_color: Color::rgb(0.3, 0.7, 0.3).into(),
+                        border_color: Color::rgb(0.4, 0.9, 0.4).into(),
+                        ..default()
+                    },
+                    SaveLocationButton { location_id: *loc_id },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "💾 Save Changes",
+                        TextStyle {
+                            font_size: 15.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ));
+                });
+
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            padding: UiRect::all(Val::Px(8.0)),
+                            border: UiRect::all(Val::Px(1.0)),
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        },
+                        background_color: Color::rgb(0.4, 0.4, 0.4).into(),
+                        border_color: Color::rgb(0.5, 0.5, 0.5).into(),
+                        ..default()
+                    },
+                    CloseEditorButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "✕ Close",
+                        TextStyle {
+                            font_size: 13.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    ));
+                });
+        });
+}
+
+// Helper function to create text input fields
+fn add_text_field(parent: &mut ChildBuilder, label: &str, field_id: &str, value: &str, max_length: usize) {
+    parent.spawn(TextBundle::from_section(
+        label,
+        TextStyle {
+            font_size: 14.0,
+            color: Color::rgb(0.7, 0.7, 0.7),
+            ..default()
+        },
+    ));
+
+    parent
+        .spawn((
+            ButtonBundle {
+                style: Style {
+                    padding: UiRect::all(Val::Px(10.0)),
+                    border: UiRect::all(Val::Px(2.0)),
+                    width: Val::Percent(100.0),
+                    ..default()
+                },
+                background_color: Color::rgb(0.2, 0.2, 0.25).into(),
+                border_color: Color::rgb(0.4, 0.6, 0.9).into(),
+                ..default()
+            },
+            TextInput::new(field_id, label)
+                .with_value(value.to_string())
+                .with_max_length(max_length),
+        ))
+        .with_children(|p| {
+            p.spawn((
+                TextBundle::from_section(
+                    value.to_string(),
+                    TextStyle {
+                        font_size: 14.0,
+                        color: Color::WHITE,
+                        ..default()
+                    },
+                ),
+                TextInputLabel {
+                    for_field_id: field_id.to_string(),
+                },
+            ));
+        });
+}
+
+/// Handle save object button
+pub fn handle_save_object_button(
+    mut state: ResMut<BuilderState>,
+    mut interaction_query: Query<
+        (&Interaction, &SaveObjectButton),
+        Changed<Interaction>,
+    >,
+    text_inputs: Query<&TextInput>,
+) {
+    for (interaction, button) in interaction_query.iter_mut() {
+        if *interaction == Interaction::Pressed {
+            if let Some(obj) = state.current_game.objects.iter_mut().find(|o| o.id == button.object_id) {
+                for input in text_inputs.iter() {
+                    if input.field_id == format!("object_{}_name", button.object_id) {
+                        obj.name = input.value.clone();
+                    } else if input.field_id == format!("object_{}_noun", button.object_id) {
+                        obj.noun = input.value.clone();
+                    } else if input.field_id == format!("object_{}_adj", button.object_id) {
+                        obj.adjective = input.value.clone();
+                    } else if input.field_id == format!("object_{}_desc", button.object_id) {
+                        obj.description = input.value.clone();
+                    } else if input.field_id == format!("object_{}_icon", button.object_id) {
+                        obj.icon = input.value.clone();
+                    } else if input.field_id == format!("object_{}_weight", button.object_id) {
+                        if let Ok(weight) = input.value.parse::<u8>() {
+                            obj.weight = weight;
+                        }
+                    }
+                }
+
+                state.unsaved_changes = true;
+                state.editing = None;
+                info!("Saved changes to object {}", button.object_id);
+            }
+        }
+    }
+}
+
+/// Handle save location button
+pub fn handle_save_location_button(
+    mut state: ResMut<BuilderState>,
+    mut interaction_query: Query<
+        (&Interaction, &SaveLocationButton),
+        Changed<Interaction>,
+    >,
+    text_inputs: Query<&TextInput>,
+) {
+    for (interaction, button) in interaction_query.iter_mut() {
+        if *interaction == Interaction::Pressed {
+            if let Some(loc) = state.current_game.locations.iter_mut().find(|l| l.id == button.location_id) {
+                for input in text_inputs.iter() {
+                    if input.field_id == format!("location_{}_name", button.location_id) {
+                        loc.name = input.value.clone();
+                    } else if input.field_id == format!("location_{}_desc", button.location_id) {
+                        loc.description = input.value.clone();
+                    }
+                }
+
+                state.unsaved_changes = true;
+                state.editing = None;
+                info!("Saved changes to location {}", button.location_id);
+            }
+        }
+    }
+}
+
 #[derive(Component)]
 pub(crate) struct PropertyEditorPanel;
 
@@ -889,6 +1212,16 @@ pub(crate) struct SaveFlagButton {
 #[derive(Component)]
 pub(crate) struct SaveMessageButton {
     message_index: usize,
+}
+
+#[derive(Component)]
+pub(crate) struct SaveObjectButton {
+    object_id: u8,
+}
+
+#[derive(Component)]
+pub(crate) struct SaveLocationButton {
+    location_id: u8,
 }
 
 #[derive(Component)]

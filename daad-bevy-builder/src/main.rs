@@ -16,6 +16,7 @@ fn main() {
             ..default()
         }))
         .init_resource::<builder::state::BuilderState>()
+        .init_resource::<builder::state::BuildStatus>()
         .add_systems(Startup, setup)
         .add_systems(Update, (
             builder::ui::main_menu::render_menu,
@@ -58,6 +59,8 @@ fn main() {
             builder::editors::property_forms::handle_add_message_button,
             builder::editors::property_forms::handle_save_flag_button,
             builder::editors::property_forms::handle_save_message_button,
+            builder::editors::property_forms::handle_save_object_button,
+            builder::editors::property_forms::handle_save_location_button,
             builder::editors::property_forms::handle_close_editor_button,
         ))
         .add_systems(Update, (
@@ -79,6 +82,8 @@ fn main() {
             builder::ui::export_ui::handle_save_json_button,
             builder::ui::export_ui::handle_export_daad_button,
             builder::ui::export_ui::handle_preview_daad_button,
+            builder::ui::export_ui::handle_build_player_button,
+            builder::ui::export_ui::check_build_completion,
         ))
         .run();
 }
