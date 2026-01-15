@@ -1035,6 +1035,48 @@ fn render_location_property_editor(commands: &mut Commands, loc_id: &u8, loc: &c
             // Description
             add_text_field(parent, "Description:", &format!("location_{}_desc", loc_id), &loc.description, 500);
 
+            // Graphics section
+            parent.spawn(TextBundle::from_section(
+                "\n🎨 Graphics:",
+                TextStyle {
+                    font_size: 16.0,
+                    color: Color::rgb(0.9, 0.9, 1.0),
+                    ..default()
+                },
+            ));
+
+            // Image File
+            add_text_field(parent, "Image File (path or filename):", &format!("location_{}_image", loc_id),
+                &loc.image_file.as_deref().unwrap_or(""), 100);
+
+            // Picture ID
+            add_text_field(parent, "Picture ID (0-255):", &format!("location_{}_picid", loc_id),
+                &loc.picture_id.map(|id| id.to_string()).unwrap_or_default(), 3);
+
+            // Auto-show checkbox display
+            parent.spawn(TextBundle::from_section(
+                format!("Auto-show on entry: {}", if loc.auto_show_picture { "✓" } else { "✗" }),
+                TextStyle {
+                    font_size: 14.0,
+                    color: if loc.auto_show_picture {
+                        Color::rgb(0.3, 0.9, 0.3)
+                    } else {
+                        Color::rgb(0.6, 0.6, 0.6)
+                    },
+                    ..default()
+                },
+            ));
+
+            parent.spawn(TextBundle::from_section(
+                "ℹ️ Tip: Use relative paths like 'images/forest.png'\n\
+                 Images will be bundled with your game export",
+                TextStyle {
+                    font_size: 11.0,
+                    color: Color::rgb(0.5, 0.6, 0.7),
+                    ..default()
+                },
+            ));
+
             parent
                 .spawn((
                     ButtonBundle {
@@ -1190,6 +1232,14 @@ pub fn handle_save_location_button(
                         loc.name = input.value.clone();
                     } else if input.field_id == format!("location_{}_desc", button.location_id) {
                         loc.description = input.value.clone();
+                    } else if input.field_id == format!("location_{}_image", button.location_id) {
+                        loc.image_file = if input.value.is_empty() {
+                            None
+                        } else {
+                            Some(input.value.clone())
+                        };
+                    } else if input.field_id == format!("location_{}_picid", button.location_id) {
+                        loc.picture_id = input.value.parse::<u8>().ok();
                     }
                 }
 

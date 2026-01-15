@@ -319,6 +319,21 @@ impl DaadCodeGenerator {
                     .unwrap_or("???");
                 format!("GOTO {} ; {}", location_id, loc_name)
             }
+            ActionType::ShowPicture { picture_id } => {
+                format!("PICTURE {}", picture_id)
+            }
+            ActionType::ClearPicture => {
+                "PICTURE 255".to_string() // DAAD convention: 255 clears picture
+            }
+            ActionType::PlaySound { sound_id } => {
+                format!("SOUND {}", sound_id) // Maluva extension
+            }
+            ActionType::PlayMusic { music_id } => {
+                format!("MUSIC {}", music_id) // Maluva extension
+            }
+            ActionType::StopSound => {
+                "SOUND 0".to_string() // DAAD convention: 0 stops sound
+            }
             ActionType::EndTurn => "DONE".to_string(),
             ActionType::ContinueProcessing => "NOTDONE".to_string(),
             ActionType::SkipRules { count } => {

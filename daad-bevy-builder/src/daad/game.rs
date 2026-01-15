@@ -43,6 +43,9 @@ impl Default for DaadGame {
                     description: "You are in a small room. There is a door to the north.".to_string(),
                     is_dark: false,
                     connections: vec![],
+                    image_file: None,
+                    picture_id: Some(0),
+                    auto_show_picture: true,
                     editor_position: Vec2::new(400.0, 300.0),
                     editor_color: Color::rgb(0.3, 0.5, 0.7),
                 }
@@ -101,6 +104,9 @@ impl DaadGame {
             description: description.to_string(),
             is_dark: false,
             connections: vec![],
+            image_file: None,
+            picture_id: Some(id),  // Default to location ID as picture ID
+            auto_show_picture: true,
             editor_position: Vec2::new(400.0 + (id as f32 * 100.0), 300.0),
             editor_color: Color::rgb(0.3, 0.5, 0.7),
         });

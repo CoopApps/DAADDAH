@@ -10,6 +10,11 @@ pub struct Location {
     pub is_dark: bool,
     pub connections: Vec<Connection>,
 
+    // Graphics support
+    pub image_file: Option<String>,     // Path to image file (PNG, JPG, GIF)
+    pub picture_id: Option<u8>,         // DAAD PICTURE command number (0-255)
+    pub auto_show_picture: bool,        // Auto-show image when entering location
+
     // Visual editor metadata
     pub editor_position: Vec2,
     pub editor_color: Color,
@@ -286,6 +291,21 @@ impl Action {
             ActionType::GoToLocation { location_id } => {
                 format!("Go to location {}", location_id)
             }
+            ActionType::ShowPicture { picture_id } => {
+                format!("Show picture {}", picture_id)
+            }
+            ActionType::ClearPicture => {
+                "Clear picture".to_string()
+            }
+            ActionType::PlaySound { sound_id } => {
+                format!("Play sound {}", sound_id)
+            }
+            ActionType::PlayMusic { music_id } => {
+                format!("Play music {}", music_id)
+            }
+            ActionType::StopSound => {
+                "Stop sound/music".to_string()
+            }
             ActionType::EndTurn => {
                 "End turn (DONE)".to_string()
             }
@@ -324,6 +344,13 @@ pub enum ActionType {
 
     // Movement actions
     GoToLocation { location_id: u8 },
+
+    // Graphics & Media
+    ShowPicture { picture_id: u8 },      // PICTURE command
+    ClearPicture,                         // Clear current image
+    PlaySound { sound_id: u8 },          // Maluva sound effect
+    PlayMusic { music_id: u8 },          // Maluva background music
+    StopSound,                            // Stop current sound/music
 
     // Flow control
     EndTurn,

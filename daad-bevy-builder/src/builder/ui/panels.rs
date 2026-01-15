@@ -41,6 +41,7 @@ pub fn render_active_panel(
                 Panel::Rules => render_rules_panel(parent, &state),
                 Panel::Flags => render_flags_panel(parent, &state),
                 Panel::Messages => render_messages_panel(parent, &state),
+                Panel::Graphics => render_graphics_panel(parent, &state),
                 Panel::Preview => render_preview_panel(parent, &state),
                 Panel::Export => render_export_panel(parent, &state),
             }
@@ -446,6 +447,89 @@ fn render_export_panel(parent: &mut ChildBuilder, _state: &BuilderState) {
         TextStyle {
             font_size: 14.0,
             color: Color::rgb(0.5, 0.5, 0.5),
+            ..default()
+        },
+    ));
+}
+
+fn render_graphics_panel(parent: &mut ChildBuilder, state: &BuilderState) {
+    parent.spawn(TextBundle::from_section(
+        "🎨 Graphics & Media",
+        TextStyle {
+            font_size: 24.0,
+            color: Color::WHITE,
+            ..default()
+        },
+    ));
+
+    parent.spawn(TextBundle::from_section(
+        "\nManage images, sounds, and multimedia for your game",
+        TextStyle {
+            font_size: 16.0,
+            color: Color::rgb(0.8, 0.8, 0.8),
+            ..default()
+        },
+    ));
+
+    parent.spawn(TextBundle::from_section(
+        "\n📁 Image Library",
+        TextStyle {
+            font_size: 20.0,
+            color: Color::rgb(0.7, 0.9, 1.0),
+            ..default()
+        },
+    ));
+
+    parent.spawn(TextBundle::from_section(
+        format!("Total images: {} | Used: 0 | Unused: 0",
+            state.current_game.locations.iter()
+                .filter(|l| l.image_file.is_some())
+                .count()),
+        TextStyle {
+            font_size: 14.0,
+            color: Color::rgb(0.7, 0.7, 0.7),
+            ..default()
+        },
+    ));
+
+    parent.spawn(TextBundle::from_section(
+        "\nℹ️ Graphics System Features:",
+        TextStyle {
+            font_size: 18.0,
+            color: Color::rgb(0.9, 0.9, 1.0),
+            ..default()
+        },
+    ));
+
+    parent.spawn(TextBundle::from_section(
+        "• Drag & drop images onto locations to assign them\n\
+         • Supports PNG, JPG, GIF formats\n\
+         • Auto-generates PICTURE commands in DAAD export\n\
+         • Each location can have one image\n\
+         • Images are numbered 0-255 (DAAD limit)\n\
+         • Click on locations to edit image properties",
+        TextStyle {
+            font_size: 14.0,
+            color: Color::rgb(0.8, 0.8, 0.8),
+            ..default()
+        },
+    ));
+
+    parent.spawn(TextBundle::from_section(
+        "\n🎵 Sound & Music (Maluva Extensions)",
+        TextStyle {
+            font_size: 18.0,
+            color: Color::rgb(0.9, 0.9, 1.0),
+            ..default()
+        },
+    ));
+
+    parent.spawn(TextBundle::from_section(
+        "Sound effects and music will be added in a future update.\n\
+         For now, you can manually add SOUND/MUSIC commands in exported code.",
+        TextStyle {
+            font_size: 14.0,
+            color: Color::rgb(0.6, 0.6, 0.6),
             ..default()
         },
     ));
