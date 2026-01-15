@@ -454,7 +454,7 @@ fn render_export_panel(parent: &mut ChildBuilder, _state: &BuilderState) {
 
 fn render_graphics_panel(parent: &mut ChildBuilder, state: &BuilderState) {
     parent.spawn(TextBundle::from_section(
-        "🎨 Graphics & Media",
+        "🎨 Graphics & Media Manager",
         TextStyle {
             font_size: 24.0,
             color: Color::WHITE,
@@ -463,7 +463,7 @@ fn render_graphics_panel(parent: &mut ChildBuilder, state: &BuilderState) {
     ));
 
     parent.spawn(TextBundle::from_section(
-        "\nManage images, sounds, and multimedia for your game",
+        "\nManage all images, sounds, and music for your adventure game",
         TextStyle {
             font_size: 16.0,
             color: Color::rgb(0.8, 0.8, 0.8),
@@ -471,8 +471,30 @@ fn render_graphics_panel(parent: &mut ChildBuilder, state: &BuilderState) {
         },
     ));
 
+    // Statistics
+    let images_count = state.current_game.locations.iter()
+        .filter(|l| l.image_file.is_some())
+        .count();
+    let sounds_count = state.current_game.locations.iter()
+        .filter(|l| l.sound_file.is_some())
+        .count();
+    let music_count = state.current_game.locations.iter()
+        .filter(|l| l.music_file.is_some())
+        .count();
+
     parent.spawn(TextBundle::from_section(
-        "\n📁 Image Library",
+        format!("\n📊 Asset Summary: {} images • {} sounds • {} music tracks",
+            images_count, sounds_count, music_count),
+        TextStyle {
+            font_size: 16.0,
+            color: Color::rgb(0.5, 0.9, 0.7),
+            ..default()
+        },
+    ));
+
+    // Image Library
+    parent.spawn(TextBundle::from_section(
+        "\n\n🖼️ Images by Location:",
         TextStyle {
             font_size: 20.0,
             color: Color::rgb(0.7, 0.9, 1.0),
@@ -480,20 +502,142 @@ fn render_graphics_panel(parent: &mut ChildBuilder, state: &BuilderState) {
         },
     ));
 
+    if images_count == 0 {
+        parent.spawn(TextBundle::from_section(
+            "No images assigned yet. Click on a location in the Locations panel\n\
+             to add an image file.",
+            TextStyle {
+                font_size: 13.0,
+                color: Color::rgb(0.6, 0.6, 0.6),
+                ..default()
+            },
+        ));
+    } else {
+        for location in state.current_game.locations.iter().filter(|l| l.image_file.is_some()) {
+            let image_path = location.image_file.as_ref().unwrap();
+            let file_exists = std::path::Path::new(image_path).exists();
+            let status_icon = if file_exists { "✅" } else { "❌" };
+            let status_color = if file_exists {
+                Color::rgb(0.3, 0.9, 0.3)
+            } else {
+                Color::rgb(0.9, 0.3, 0.3)
+            };
+
+            parent.spawn(TextBundle::from_section(
+                format!("{} Location {}: {} → {} (PIC #{})",
+                    status_icon,
+                    location.id,
+                    location.name,
+                    image_path,
+                    location.picture_id.unwrap_or(0)),
+                TextStyle {
+                    font_size: 13.0,
+                    color: status_color,
+                    ..default()
+                },
+            ));
+        }
+    }
+
+    // Sound Library
     parent.spawn(TextBundle::from_section(
-        format!("Total images: {} | Used: 0 | Unused: 0",
-            state.current_game.locations.iter()
-                .filter(|l| l.image_file.is_some())
-                .count()),
+        "\n🔊 Sound Effects by Location:",
         TextStyle {
-            font_size: 14.0,
-            color: Color::rgb(0.7, 0.7, 0.7),
+            font_size: 20.0,
+            color: Color::rgb(0.7, 0.9, 1.0),
             ..default()
         },
     ));
 
+    if sounds_count == 0 {
+        parent.spawn(TextBundle::from_section(
+            "No sound effects assigned yet. Edit a location to add sound files.",
+            TextStyle {
+                font_size: 13.0,
+                color: Color::rgb(0.6, 0.6, 0.6),
+                ..default()
+            },
+        ));
+    } else {
+        for location in state.current_game.locations.iter().filter(|l| l.sound_file.is_some()) {
+            let sound_path = location.sound_file.as_ref().unwrap();
+            let file_exists = std::path::Path::new(sound_path).exists();
+            let status_icon = if file_exists { "✅" } else { "❌" };
+            let status_color = if file_exists {
+                Color::rgb(0.3, 0.9, 0.3)
+            } else {
+                Color::rgb(0.9, 0.3, 0.3)
+            };
+            let auto_play = if location.auto_play_sound { " [AUTO]" } else { "" };
+
+            parent.spawn(TextBundle::from_section(
+                format!("{} Location {}: {} → {}{} (SND #{})",
+                    status_icon,
+                    location.id,
+                    location.name,
+                    sound_path,
+                    auto_play,
+                    location.sound_id.unwrap_or(0)),
+                TextStyle {
+                    font_size: 13.0,
+                    color: status_color,
+                    ..default()
+                },
+            ));
+        }
+    }
+
+    // Music Library
     parent.spawn(TextBundle::from_section(
-        "\nℹ️ Graphics System Features:",
+        "\n🎵 Background Music by Location:",
+        TextStyle {
+            font_size: 20.0,
+            color: Color::rgb(0.7, 0.9, 1.0),
+            ..default()
+        },
+    ));
+
+    if music_count == 0 {
+        parent.spawn(TextBundle::from_section(
+            "No music tracks assigned yet. Edit a location to add music files.",
+            TextStyle {
+                font_size: 13.0,
+                color: Color::rgb(0.6, 0.6, 0.6),
+                ..default()
+            },
+        ));
+    } else {
+        for location in state.current_game.locations.iter().filter(|l| l.music_file.is_some()) {
+            let music_path = location.music_file.as_ref().unwrap();
+            let file_exists = std::path::Path::new(music_path).exists();
+            let status_icon = if file_exists { "✅" } else { "❌" };
+            let status_color = if file_exists {
+                Color::rgb(0.3, 0.9, 0.3)
+            } else {
+                Color::rgb(0.9, 0.3, 0.3)
+            };
+            let auto_play = if location.auto_play_music { " [AUTO]" } else { "" };
+
+            parent.spawn(TextBundle::from_section(
+                format!("{} Location {}: {} → {}{} (MUS #{})",
+                    status_icon,
+                    location.id,
+                    location.name,
+                    music_path,
+                    auto_play,
+                    location.music_id.unwrap_or(0)),
+                TextStyle {
+                    font_size: 13.0,
+                    color: status_color,
+                    ..default()
+                },
+            ));
+        }
+    }
+
+    // Tips section
+    parent.spawn(TextBundle::from_section(
+        "\n\nℹ️ Tips:",
         TextStyle {
             font_size: 18.0,
             color: Color::rgb(0.9, 0.9, 1.0),
@@ -502,34 +646,15 @@ fn render_graphics_panel(parent: &mut ChildBuilder, state: &BuilderState) {
     ));
 
     parent.spawn(TextBundle::from_section(
-        "• Drag & drop images onto locations to assign them\n\
-         • Supports PNG, JPG, GIF formats\n\
-         • Auto-generates PICTURE commands in DAAD export\n\
-         • Each location can have one image\n\
-         • Images are numbered 0-255 (DAAD limit)\n\
-         • Click on locations to edit image properties",
+        "• Use relative paths like 'images/forest.png' or 'sounds/ambient.mp3'\n\
+         • Supported formats: PNG, JPG, GIF (images) | WAV, MP3 (audio)\n\
+         • Click locations in the Locations panel to edit media properties\n\
+         • Green ✅ = file found | Red ❌ = file missing\n\
+         • [AUTO] = plays automatically when entering location\n\
+         • Use Export → Graphics Database to bundle all media files",
         TextStyle {
-            font_size: 14.0,
-            color: Color::rgb(0.8, 0.8, 0.8),
-            ..default()
-        },
-    ));
-
-    parent.spawn(TextBundle::from_section(
-        "\n🎵 Sound & Music (Maluva Extensions)",
-        TextStyle {
-            font_size: 18.0,
-            color: Color::rgb(0.9, 0.9, 1.0),
-            ..default()
-        },
-    ));
-
-    parent.spawn(TextBundle::from_section(
-        "Sound effects and music will be added in a future update.\n\
-         For now, you can manually add SOUND/MUSIC commands in exported code.",
-        TextStyle {
-            font_size: 14.0,
-            color: Color::rgb(0.6, 0.6, 0.6),
+            font_size: 13.0,
+            color: Color::rgb(0.7, 0.7, 0.8),
             ..default()
         },
     ));
