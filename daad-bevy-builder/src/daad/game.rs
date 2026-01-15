@@ -139,6 +139,19 @@ impl DaadGame {
             is_container: false,
             is_wearable: false,
             is_takeable: true,
+
+            // Advanced object states (defaults for simple objects)
+            is_openable: false,
+            is_open: false,
+            is_lockable: false,
+            is_locked: false,
+            unlock_key_id: None,
+            is_light_source: false,
+            is_lit: false,
+            fuel_flag_id: None,
+            is_vehicle: false,
+            can_contain_player: false,
+
             icon: "📦".to_string(),
         });
         id

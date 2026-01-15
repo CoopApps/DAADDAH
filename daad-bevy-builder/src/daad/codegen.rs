@@ -221,12 +221,18 @@ impl DaadCodeGenerator {
                     .unwrap_or("???");
                 format!("PRESENT {} ; {}", object_id, obj_name)
             }
+            ConditionType::ObjectNotPresent { object_id } => {
+                format!("ABSENT {}", object_id)
+            }
             ConditionType::ObjectCarried { object_id } => {
                 let obj_name = game
                     .get_object(*object_id)
                     .map(|o| o.name.as_str())
                     .unwrap_or("???");
                 format!("CARRIED {} ; {}", object_id, obj_name)
+            }
+            ConditionType::ObjectNotCarried { object_id } => {
+                format!("NOTCARR {}", object_id)
             }
             ConditionType::ObjectWorn { object_id } => {
                 format!("WORN {}", object_id)
@@ -237,6 +243,24 @@ impl DaadCodeGenerator {
             } => {
                 format!("AT {} {}", object_id, location_id)
             }
+            ConditionType::ObjectIsOpen { object_id } => {
+                format!("; Check flag for object {} open state", object_id)
+            }
+            ConditionType::ObjectIsClosed { object_id } => {
+                format!("; Check flag for object {} closed state", object_id)
+            }
+            ConditionType::ObjectIsLocked { object_id } => {
+                format!("; Check flag for object {} locked state", object_id)
+            }
+            ConditionType::ObjectIsUnlocked { object_id } => {
+                format!("; Check flag for object {} unlocked state", object_id)
+            }
+            ConditionType::ObjectIsLit { object_id } => {
+                format!("; Check flag for object {} lit state", object_id)
+            }
+            ConditionType::PlayerInsideObject { object_id } => {
+                format!("; Check flag for player inside object {}", object_id)
+            }
             ConditionType::FlagEquals { flag_id, value } => {
                 let flag_name = game
                     .get_flag(*flag_id)
@@ -244,14 +268,32 @@ impl DaadCodeGenerator {
                     .unwrap_or("???");
                 format!("EQ {} {} ; {}", flag_id, value, flag_name)
             }
+            ConditionType::FlagNotEquals { flag_id, value } => {
+                format!("NOTEQ {} {}", flag_id, value)
+            }
             ConditionType::FlagGreaterThan { flag_id, value } => {
                 format!("GT {} {}", flag_id, value)
             }
             ConditionType::FlagLessThan { flag_id, value } => {
                 format!("LT {} {}", flag_id, value)
             }
+            ConditionType::FlagGreaterOrEqual { flag_id, value } => {
+                format!("GE {} {}", flag_id, value)
+            }
+            ConditionType::FlagLessOrEqual { flag_id, value } => {
+                format!("LE {} {}", flag_id, value)
+            }
             ConditionType::FlagZero { flag_id } => {
                 format!("ZERO {}", flag_id)
+            }
+            ConditionType::FlagNotZero { flag_id } => {
+                format!("NOTZERO {}", flag_id)
+            }
+            ConditionType::FlagsEqual { flag_id_a, flag_id_b } => {
+                format!("; Compare flags {} and {}", flag_id_a, flag_id_b)
+            }
+            ConditionType::FlagInRange { flag_id, min, max } => {
+                format!("; Check flag {} in range {}-{}", flag_id, min, max)
             }
             ConditionType::VerbIs { verb } => {
                 format!("VERB {}", verb)
@@ -259,12 +301,34 @@ impl DaadCodeGenerator {
             ConditionType::NounIs { noun } => {
                 format!("NOUN {}", noun)
             }
+            ConditionType::AdjectiveIs { adjective } => {
+                format!("ADJECT {}", adjective)
+            }
             ConditionType::IsFirstTurn => "TURNS 0".to_string(),
             ConditionType::TurnCountGreaterThan { turns } => {
                 format!("TURNSGT {}", turns)
             }
             ConditionType::ScoreGreaterThan { score } => {
                 format!("SCOREGT {}", score)
+            }
+            ConditionType::IsDark => "ISDARK".to_string(),
+            ConditionType::All { conditions } => {
+                let mut result = String::from("; ALL conditions:\n");
+                for cond in conditions {
+                    result.push_str(&Self::generate_condition(cond, game));
+                    result.push('\n');
+                }
+                result
+            }
+            ConditionType::Any { conditions } => {
+                let mut result = String::from("; ANY of these conditions (requires manual DAAD logic):\n");
+                for cond in conditions {
+                    result.push_str(&format!("; Option: {}\n", Self::generate_condition(cond, game)));
+                }
+                result
+            }
+            ConditionType::Not { condition } => {
+                format!("; NOT: {}", Self::generate_condition(condition, game))
             }
         }
     }
@@ -299,6 +363,36 @@ impl DaadCodeGenerator {
                 let loc_num = to_location.to_daad_location();
                 format!("PLACE {} {}", object_id, loc_num)
             }
+            ActionType::SwapObjects { object_a_id, object_b_id } => {
+                format!("SWAP {} {}", object_a_id, object_b_id)
+            }
+            ActionType::DestroyObject { object_id } => {
+                format!("DESTROY {}", object_id)
+            }
+            ActionType::OpenObject { object_id } => {
+                format!("; Set flag for object {} to open state", object_id)
+            }
+            ActionType::CloseObject { object_id } => {
+                format!("; Set flag for object {} to closed state", object_id)
+            }
+            ActionType::LockObject { object_id } => {
+                format!("; Set flag for object {} to locked state", object_id)
+            }
+            ActionType::UnlockObject { object_id } => {
+                format!("; Set flag for object {} to unlocked state", object_id)
+            }
+            ActionType::LightObject { object_id } => {
+                format!("; Set flag for object {} to lit state", object_id)
+            }
+            ActionType::ExtinguishObject { object_id } => {
+                format!("; Set flag for object {} to extinguished state", object_id)
+            }
+            ActionType::EnterObject { object_id } => {
+                format!("; Enter object {} (vehicle/container)", object_id)
+            }
+            ActionType::ExitObject { object_id } => {
+                format!("; Exit object {}", object_id)
+            }
             ActionType::SetFlag { flag_id, value } => {
                 let flag_name = game
                     .get_flag(*flag_id)
@@ -311,6 +405,27 @@ impl DaadCodeGenerator {
             }
             ActionType::DecrementFlag { flag_id } => {
                 format!("MINUS {} 1", flag_id)
+            }
+            ActionType::AddToFlag { flag_id, amount } => {
+                format!("PLUS {} {}", flag_id, amount)
+            }
+            ActionType::SubtractFromFlag { flag_id, amount } => {
+                format!("MINUS {} {}", flag_id, amount)
+            }
+            ActionType::ToggleFlag { flag_id } => {
+                format!("; Toggle flag {} (requires DAAD logic)", flag_id)
+            }
+            ActionType::CopyFlag { from_flag_id, to_flag_id } => {
+                format!("COPYFF {} {}", from_flag_id, to_flag_id)
+            }
+            ActionType::SetFlagToRandom { flag_id, max } => {
+                format!("RANDOM {} {}", flag_id, max)
+            }
+            ActionType::MinFlag { flag_id, min_value } => {
+                format!("; Clamp flag {} to minimum {}", flag_id, min_value)
+            }
+            ActionType::MaxFlag { flag_id, max_value } => {
+                format!("; Clamp flag {} to maximum {}", flag_id, max_value)
             }
             ActionType::GoToLocation { location_id } => {
                 let loc_name = game
@@ -341,6 +456,9 @@ impl DaadCodeGenerator {
             }
             ActionType::AddScore { points } => {
                 format!("SCORE {}", points)
+            }
+            ActionType::SubtractScore { points } => {
+                format!("MINUS SCORE {}", points)
             }
         }
     }
