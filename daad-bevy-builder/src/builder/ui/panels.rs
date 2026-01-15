@@ -41,6 +41,7 @@ pub fn render_active_panel(
                 Panel::Rules => render_rules_panel(parent, &state),
                 Panel::Flags => render_flags_panel(parent, &state),
                 Panel::Messages => render_messages_panel(parent, &state),
+                Panel::Vocabulary => {} // Handled by vocabulary_editor.rs
                 Panel::Graphics => render_graphics_panel(parent, &state),
                 Panel::Preview => render_preview_panel(parent, &state),
                 Panel::Export => render_export_panel(parent, &state),

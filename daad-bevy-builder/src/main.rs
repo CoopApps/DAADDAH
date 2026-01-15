@@ -74,6 +74,12 @@ fn main() {
             builder::editors::property_forms::handle_close_editor_button,
         ))
         .add_systems(Update, (
+            // Vocabulary/dictionary editor systems
+            builder::editors::vocabulary_editor::render_vocabulary_editor,
+            builder::editors::vocabulary_editor::handle_add_vocab_word_button,
+            builder::editors::vocabulary_editor::handle_delete_vocab_group_button,
+        ))
+        .add_systems(Update, (
             // Text input systems
             builder::ui::text_input::handle_text_input,
             builder::ui::text_input::handle_text_input_focus,
