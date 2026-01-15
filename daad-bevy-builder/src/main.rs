@@ -96,6 +96,8 @@ fn main() {
             builder::editors::flag_calculator::handle_select_operation,
             builder::editors::flag_calculator::handle_select_value,
             builder::editors::flag_calculator::handle_add_formula_to_rule,
+            builder::editors::flag_calculator::handle_use_pattern,
+            builder::editors::flag_calculator::clear_formula_on_close,
         ))
         .add_systems(Update, (
             // Text input systems

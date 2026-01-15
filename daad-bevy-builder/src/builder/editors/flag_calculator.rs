@@ -83,6 +83,7 @@ pub fn render_flag_calculator(
     mut commands: Commands,
     state: Res<BuilderState>,
     tutorial: Res<FlagCalculatorTutorial>,
+    formula: Res<FormulaBuilder>,
     query: Query<Entity, With<FlagCalculatorModal>>,
 ) {
     let show = matches!(state.editing, Some(EditMode::FlagCalculator { .. }));
@@ -206,19 +207,22 @@ pub fn render_flag_calculator(
                         },
                     ));
 
+                    // Current formula display
+                    render_formula_display(parent, &formula, &state);
+
                     // Step 1: Choose a variable
                     render_step_section(parent, "Step 1: What do you want to change?",
                         "Pick a variable (like health, score, keys). These are the numbers your game tracks.",
-                        &state);
+                        &state, &formula);
 
                     // Step 2: Choose operation
-                    render_operation_buttons(parent);
+                    render_operation_buttons(parent, &formula);
 
                     // Step 3: Choose value
-                    render_value_input(parent);
+                    render_value_input(parent, &formula);
 
                     // Preview section
-                    render_preview_section(parent);
+                    render_preview_section(parent, &formula, &state);
 
                     // Common patterns library
                     render_pattern_library(parent);
@@ -355,7 +359,96 @@ fn render_tutorial_banner(parent: &mut ChildBuilder, step: usize) {
         });
 }
 
-fn render_step_section(parent: &mut ChildBuilder, title: &str, explanation: &str, state: &BuilderState) {
+fn render_formula_display(parent: &mut ChildBuilder, formula: &FormulaBuilder, state: &BuilderState) {
+    // Build formula string
+    let mut formula_parts = Vec::new();
+
+    // Left variable
+    if let Some(var_id) = formula.left_var {
+        if let Some(flag) = state.current_game.flags.iter().find(|f| f.id == var_id) {
+            formula_parts.push(flag.name.clone());
+        } else {
+            formula_parts.push(format!("flag_{}", var_id));
+        }
+    } else {
+        formula_parts.push("???".to_string());
+    }
+
+    // Operation
+    if let Some(op) = formula.operation {
+        formula_parts.push(op.symbol().to_string());
+    } else {
+        formula_parts.push("?".to_string());
+    }
+
+    // Right value
+    if let Some(value) = formula.right_value {
+        formula_parts.push(value.to_string());
+    } else {
+        formula_parts.push("???".to_string());
+    }
+
+    let formula_text = formula_parts.join(" ");
+    let is_complete = formula.left_var.is_some() && formula.operation.is_some() && formula.right_value.is_some();
+
+    parent
+        .spawn(NodeBundle {
+            style: Style {
+                padding: UiRect::all(Val::Px(12.0)),
+                margin: UiRect::vertical(Val::Px(10.0)),
+                border: UiRect::all(Val::Px(2.0)),
+                justify_content: JustifyContent::Center,
+                ..default()
+            },
+            background_color: if is_complete {
+                Color::rgb(0.15, 0.25, 0.15)
+            } else {
+                Color::rgb(0.18, 0.18, 0.18)
+            }.into(),
+            border_color: if is_complete {
+                Color::rgb(0.3, 0.7, 0.3)
+            } else {
+                Color::rgb(0.3, 0.3, 0.3)
+            }.into(),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn(TextBundle::from_section(
+                format!("📝 Current Formula: {}", formula_text),
+                TextStyle {
+                    font_size: 18.0,
+                    color: if is_complete {
+                        Color::rgb(0.7, 1.0, 0.7)
+                    } else {
+                        Color::rgb(0.7, 0.7, 0.7)
+                    },
+                    ..default()
+                },
+            ));
+
+            if is_complete {
+                parent.spawn(TextBundle::from_section(
+                    "✓ Ready to add!",
+                    TextStyle {
+                        font_size: 12.0,
+                        color: Color::rgb(0.6, 0.9, 0.6),
+                        ..default()
+                    },
+                ));
+            } else {
+                parent.spawn(TextBundle::from_section(
+                    "Complete all 3 steps to continue",
+                    TextStyle {
+                        font_size: 11.0,
+                        color: Color::rgb(0.6, 0.6, 0.6),
+                        ..default()
+                    },
+                ));
+            }
+        });
+}
+
+fn render_step_section(parent: &mut ChildBuilder, title: &str, explanation: &str, state: &BuilderState, formula: &FormulaBuilder) {
     parent
         .spawn(NodeBundle {
             style: Style {
@@ -414,23 +507,36 @@ fn render_step_section(parent: &mut ChildBuilder, title: &str, explanation: &str
                         ));
                     } else {
                         for flag in state.current_game.flags.iter().take(10) {
+                            let is_selected = formula.left_var == Some(flag.id);
                             parent
                                 .spawn((
                                     ButtonBundle {
                                         style: Style {
                                             padding: UiRect::all(Val::Px(10.0)),
-                                            border: UiRect::all(Val::Px(1.0)),
+                                            border: UiRect::all(Val::Px(if is_selected { 3.0 } else { 1.0 })),
                                             ..default()
                                         },
-                                        background_color: Color::rgb(0.3, 0.5, 0.7).into(),
-                                        border_color: Color::rgb(0.4, 0.6, 0.8).into(),
+                                        background_color: if is_selected {
+                                            Color::rgb(0.4, 0.7, 0.9)
+                                        } else {
+                                            Color::rgb(0.3, 0.5, 0.7)
+                                        }.into(),
+                                        border_color: if is_selected {
+                                            Color::rgb(0.6, 0.9, 1.0)
+                                        } else {
+                                            Color::rgb(0.4, 0.6, 0.8)
+                                        }.into(),
                                         ..default()
                                     },
                                     SelectVariableButton { flag_id: flag.id },
                                 ))
                                 .with_children(|parent| {
                                     parent.spawn(TextBundle::from_section(
-                                        &flag.name,
+                                        if is_selected {
+                                            format!("✓ {}", &flag.name)
+                                        } else {
+                                            flag.name.clone()
+                                        },
                                         TextStyle {
                                             font_size: 12.0,
                                             color: Color::WHITE,
@@ -444,7 +550,7 @@ fn render_step_section(parent: &mut ChildBuilder, title: &str, explanation: &str
         });
 }
 
-fn render_operation_buttons(parent: &mut ChildBuilder) {
+fn render_operation_buttons(parent: &mut ChildBuilder, formula: &FormulaBuilder) {
     parent
         .spawn(NodeBundle {
             style: Style {
@@ -498,14 +604,15 @@ fn render_operation_buttons(parent: &mut ChildBuilder) {
                 })
                 .with_children(|parent| {
                     for op in operations {
-                        render_operation_card(parent, op);
+                        render_operation_card(parent, op, formula);
                     }
                 });
         });
 }
 
-fn render_operation_card(parent: &mut ChildBuilder, op: MathOperation) {
-    let (bg_color, border_color) = match op {
+fn render_operation_card(parent: &mut ChildBuilder, op: MathOperation, formula: &FormulaBuilder) {
+    let is_selected = formula.operation == Some(op);
+    let (base_bg, base_border) = match op {
         MathOperation::Set => (Color::rgb(0.5, 0.4, 0.6), Color::rgb(0.7, 0.5, 0.8)),
         MathOperation::Add => (Color::rgb(0.3, 0.6, 0.3), Color::rgb(0.4, 0.8, 0.4)),
         MathOperation::Subtract => (Color::rgb(0.7, 0.4, 0.3), Color::rgb(0.9, 0.5, 0.4)),
@@ -513,12 +620,19 @@ fn render_operation_card(parent: &mut ChildBuilder, op: MathOperation) {
         MathOperation::Divide => (Color::rgb(0.6, 0.5, 0.4), Color::rgb(0.8, 0.7, 0.5)),
     };
 
+    let (bg_color, border_color) = if is_selected {
+        (Color::rgb(base_bg.r() * 1.3, base_bg.g() * 1.3, base_bg.b() * 1.3),
+         Color::rgb(base_border.r() * 1.2, base_border.g() * 1.2, base_border.b() * 1.2))
+    } else {
+        (base_bg, base_border)
+    };
+
     parent
         .spawn((
             ButtonBundle {
                 style: Style {
                     padding: UiRect::all(Val::Px(12.0)),
-                    border: UiRect::all(Val::Px(2.0)),
+                    border: UiRect::all(Val::Px(if is_selected { 4.0 } else { 2.0 })),
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Px(4.0),
                     ..default()
@@ -531,7 +645,11 @@ fn render_operation_card(parent: &mut ChildBuilder, op: MathOperation) {
         ))
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
-                format!("{} {}", op.symbol(), op.description()),
+                if is_selected {
+                    format!("✓ {} {}", op.symbol(), op.description())
+                } else {
+                    format!("{} {}", op.symbol(), op.description())
+                },
                 TextStyle {
                     font_size: 13.0,
                     color: Color::WHITE,
@@ -550,7 +668,7 @@ fn render_operation_card(parent: &mut ChildBuilder, op: MathOperation) {
         });
 }
 
-fn render_value_input(parent: &mut ChildBuilder) {
+fn render_value_input(parent: &mut ChildBuilder, formula: &FormulaBuilder) {
     parent
         .spawn(NodeBundle {
             style: Style {
@@ -596,23 +714,36 @@ fn render_value_input(parent: &mut ChildBuilder) {
                 })
                 .with_children(|parent| {
                     for num in [1, 5, 10, 25, 50, 100] {
+                        let is_selected = formula.right_value == Some(num);
                         parent
                             .spawn((
                                 ButtonBundle {
                                     style: Style {
                                         padding: UiRect::all(Val::Px(10.0)),
-                                        border: UiRect::all(Val::Px(1.0)),
+                                        border: UiRect::all(Val::Px(if is_selected { 3.0 } else { 1.0 })),
                                         ..default()
                                     },
-                                    background_color: Color::rgb(0.4, 0.5, 0.6).into(),
-                                    border_color: Color::rgb(0.5, 0.6, 0.7).into(),
+                                    background_color: if is_selected {
+                                        Color::rgb(0.5, 0.7, 0.8)
+                                    } else {
+                                        Color::rgb(0.4, 0.5, 0.6)
+                                    }.into(),
+                                    border_color: if is_selected {
+                                        Color::rgb(0.7, 0.9, 1.0)
+                                    } else {
+                                        Color::rgb(0.5, 0.6, 0.7)
+                                    }.into(),
                                     ..default()
                                 },
                                 SelectValueButton { value: num },
                             ))
                             .with_children(|parent| {
                                 parent.spawn(TextBundle::from_section(
-                                    num.to_string(),
+                                    if is_selected {
+                                        format!("✓ {}", num)
+                                    } else {
+                                        num.to_string()
+                                    },
                                     TextStyle {
                                         font_size: 13.0,
                                         color: Color::WHITE,
@@ -625,7 +756,42 @@ fn render_value_input(parent: &mut ChildBuilder) {
         });
 }
 
-fn render_preview_section(parent: &mut ChildBuilder) {
+fn render_preview_section(parent: &mut ChildBuilder, formula: &FormulaBuilder, state: &BuilderState) {
+    // Calculate preview text based on current formula
+    let mut preview_text = String::from("Select all 3 steps to see preview");
+
+    if let (Some(var_id), Some(op), Some(value)) = (formula.left_var, formula.operation, formula.right_value) {
+        let var_name = state.current_game.flags
+            .iter()
+            .find(|f| f.id == var_id)
+            .map(|f| f.name.as_str())
+            .unwrap_or("variable");
+
+        let formula_str = format!("{} {} {}", var_name, op.symbol(), value);
+
+        // Calculate examples
+        let examples = vec![50, 100, 10];
+        let mut results = Vec::new();
+
+        for start_val in examples {
+            let result = match op {
+                MathOperation::Set => value,
+                MathOperation::Add => start_val + value,
+                MathOperation::Subtract => (start_val - value).max(0),
+                MathOperation::Multiply => start_val * value,
+                MathOperation::Divide => if value != 0 { start_val / value } else { start_val },
+            };
+
+            results.push(format!("If {} = {} → After: {}", var_name, start_val, result));
+        }
+
+        preview_text = format!(
+            "Formula: {}\n\n{}",
+            formula_str,
+            results.join("\n")
+        );
+    }
+
     parent
         .spawn(NodeBundle {
             style: Style {
@@ -650,7 +816,7 @@ fn render_preview_section(parent: &mut ChildBuilder) {
             ));
 
             parent.spawn(TextBundle::from_section(
-                "Formula: health = health - 10\nIf health starts at 50 → After: 40\nIf health starts at 100 → After: 90",
+                preview_text,
                 TextStyle {
                     font_size: 12.0,
                     color: Color::rgb(0.7, 0.9, 0.7),
@@ -863,84 +1029,187 @@ pub fn handle_add_formula_to_rule(
                 continue;
             }
 
-            // Create action based on formula
+            // Create action(s) based on formula
             if let Some(rule) = state.current_game.rules.iter_mut().find(|r| r.id == button.rule_id) {
-                let action_type = match formula.operation.unwrap() {
+                match formula.operation.unwrap() {
                     MathOperation::Set => {
                         if let Some(value) = formula.right_value {
-                            ActionType::SetFlag {
-                                flag_id: formula.left_var.unwrap(),
-                                value: value as u8,
-                            }
-                        } else {
-                            continue;
+                            let action = Action {
+                                id: rule.actions.len(),
+                                action_type: ActionType::SetFlag {
+                                    flag_id: formula.left_var.unwrap(),
+                                    value: value as u8,
+                                },
+                            };
+                            rule.actions.push(action);
+                            info!("Added SET formula to rule {}", button.rule_id);
                         }
                     }
                     MathOperation::Add => {
-                        ActionType::IncrementFlag {
-                            flag_id: formula.left_var.unwrap(),
+                        // Add multiple increment actions based on value
+                        if let Some(value) = formula.right_value {
+                            for _ in 0..value.max(1).min(255) {
+                                let action = Action {
+                                    id: rule.actions.len(),
+                                    action_type: ActionType::IncrementFlag {
+                                        flag_id: formula.left_var.unwrap(),
+                                    },
+                                };
+                                rule.actions.push(action);
+                            }
+                            info!("Added ADD formula ({} increments) to rule {}", value, button.rule_id);
                         }
                     }
                     MathOperation::Subtract => {
-                        ActionType::DecrementFlag {
-                            flag_id: formula.left_var.unwrap(),
+                        // Add multiple decrement actions based on value
+                        if let Some(value) = formula.right_value {
+                            for _ in 0..value.max(1).min(255) {
+                                let action = Action {
+                                    id: rule.actions.len(),
+                                    action_type: ActionType::DecrementFlag {
+                                        flag_id: formula.left_var.unwrap(),
+                                    },
+                                };
+                                rule.actions.push(action);
+                            }
+                            info!("Added SUBTRACT formula ({} decrements) to rule {}", value, button.rule_id);
                         }
                     }
-                    _ => {
-                        warn!("Operation {:?} not yet supported", formula.operation);
-                        continue;
+                    MathOperation::Multiply | MathOperation::Divide => {
+                        // For multiply/divide, add a comment action explaining complex flag math
+                        let op_name = if formula.operation.unwrap() == MathOperation::Multiply { "multiply" } else { "divide" };
+                        let message = format!(
+                            "⚠️ Complex operation: {} flag {} by {} (requires custom flag math implementation)",
+                            op_name,
+                            formula.left_var.unwrap(),
+                            formula.right_value.unwrap_or(1)
+                        );
+
+                        let action = Action {
+                            id: rule.actions.len(),
+                            action_type: ActionType::ShowMessage { text: message },
+                        };
+                        rule.actions.push(action);
+
+                        warn!("Multiply/Divide requires complex flag math - added comment action");
+                        info!("Added {op_name} placeholder to rule {}", button.rule_id);
                     }
-                };
+                }
 
-                let new_action = Action {
-                    id: rule.actions.len(),
-                    action_type,
-                };
-
-                rule.actions.push(new_action);
                 state.mark_dirty();
                 state.editing = None;
-                info!("Added formula to rule {}", button.rule_id);
             }
+        }
+    }
+}
+
+/// Handle pattern library button clicks
+pub fn handle_use_pattern(
+    mut formula: ResMut<FormulaBuilder>,
+    state: Res<BuilderState>,
+    mut interaction_query: Query<
+        (&Interaction, &UsePatternButton),
+        Changed<Interaction>,
+    >,
+) {
+    for (interaction, button) in interaction_query.iter() {
+        if *interaction == Interaction::Pressed {
+            // Parse pattern string to extract formula
+            // Patterns like "health = health - 1" or "score = score + 10"
+            let pattern = &button.pattern;
+
+            // Simple pattern parser
+            if let Some((var_part, rest)) = pattern.split_once('=') {
+                let var_name = var_part.trim();
+
+                // Find flag by name
+                if let Some(flag) = state.current_game.flags.iter().find(|f| f.name == var_name) {
+                    formula.left_var = Some(flag.id);
+
+                    // Parse operation and value
+                    if rest.contains('+') {
+                        formula.operation = Some(MathOperation::Add);
+                        if let Some(value_str) = rest.split('+').last() {
+                            if let Ok(value) = value_str.trim().parse::<i16>() {
+                                formula.right_value = Some(value);
+                            }
+                        }
+                    } else if rest.contains('-') {
+                        formula.operation = Some(MathOperation::Subtract);
+                        if let Some(value_str) = rest.split('-').last() {
+                            if let Ok(value) = value_str.trim().parse::<i16>() {
+                                formula.right_value = Some(value);
+                            }
+                        }
+                    } else if rest.contains('×') || rest.contains('*') {
+                        formula.operation = Some(MathOperation::Multiply);
+                        let value_str = rest.replace('×', "").replace('*', "").trim().to_string();
+                        if let Ok(value) = value_str.parse::<i16>() {
+                            formula.right_value = Some(value);
+                        }
+                    } else if !rest.contains(var_name) {
+                        // Simple set operation (no variable on right side)
+                        formula.operation = Some(MathOperation::Set);
+                        if let Ok(value) = rest.trim().parse::<i16>() {
+                            formula.right_value = Some(value);
+                        }
+                    }
+
+                    info!("Applied pattern: {}", pattern);
+                }
+            }
+        }
+    }
+}
+
+/// Clear formula builder when closing calculator
+pub fn clear_formula_on_close(
+    mut formula: ResMut<FormulaBuilder>,
+    state: Res<BuilderState>,
+) {
+    // Clear formula when calculator is not open
+    if !matches!(state.editing, Some(crate::builder::state::EditMode::FlagCalculator { .. })) {
+        if formula.left_var.is_some() || formula.operation.is_some() || formula.right_value.is_some() {
+            *formula = FormulaBuilder::default();
         }
     }
 }
 
 // Components
 #[derive(Component)]
-struct FlagCalculatorModal;
+pub(crate) struct FlagCalculatorModal;
 
 #[derive(Component)]
-struct CloseFlagCalculatorButton;
+pub(crate) struct CloseFlagCalculatorButton;
 
 #[derive(Component)]
-struct NextTutorialStepButton;
+pub(crate) struct NextTutorialStepButton;
 
 #[derive(Component)]
-struct SkipTutorialButton;
+pub(crate) struct SkipTutorialButton;
 
 #[derive(Component)]
-struct SelectVariableButton {
+pub(crate) struct SelectVariableButton {
     flag_id: u8,
 }
 
 #[derive(Component)]
-struct SelectOperationButton {
+pub(crate) struct SelectOperationButton {
     operation: MathOperation,
 }
 
 #[derive(Component)]
-struct SelectValueButton {
+pub(crate) struct SelectValueButton {
     value: i16,
 }
 
 #[derive(Component)]
-struct AddFormulaToRuleButton {
+pub(crate) struct AddFormulaToRuleButton {
     rule_id: usize,
     action_idx: usize,
 }
 
 #[derive(Component)]
-struct UsePatternButton {
+pub(crate) struct UsePatternButton {
     pattern: String,
 }
