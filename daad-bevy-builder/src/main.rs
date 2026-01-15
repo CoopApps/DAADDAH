@@ -62,6 +62,12 @@ fn main() {
             builder::editors::condition_selector::handle_close_condition_selector,
         ))
         .add_systems(Update, (
+            // Action type selector
+            builder::editors::action_selector::render_action_type_selector,
+            builder::editors::action_selector::handle_action_type_selection,
+            builder::editors::action_selector::handle_close_action_selector,
+        ))
+        .add_systems(Update, (
             // Game info, flags and messages editor systems
             builder::editors::property_forms::render_game_info_editor,
             builder::editors::property_forms::render_flags_editor,

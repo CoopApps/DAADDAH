@@ -99,6 +99,7 @@ pub enum EditMode {
     Message(usize), // Editing message ID
     ConditionTypeSelector { rule_id: usize, condition_idx: usize }, // Selecting condition type
     ActionTypeSelector { rule_id: usize, action_idx: usize }, // Selecting action type
+    ActionEditor { rule_id: usize, action_idx: usize, action_type: String }, // Editing action parameters
     FlagCalculator { rule_id: usize, action_idx: usize }, // Visual flag calculator
     None,           // Nothing being edited
 }

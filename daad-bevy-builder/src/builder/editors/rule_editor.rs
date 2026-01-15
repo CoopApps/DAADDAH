@@ -161,6 +161,39 @@ pub fn render_rule_sidebar(
                                 },
                             ));
                         }
+
+                        // Spacer
+                        parent.spawn(NodeBundle {
+                            style: Style {
+                                flex_grow: 1.0,
+                                ..default()
+                            },
+                            ..default()
+                        });
+
+                        // Delete button
+                        parent
+                            .spawn((
+                                ButtonBundle {
+                                    style: Style {
+                                        padding: UiRect::all(Val::Px(5.0)),
+                                        ..default()
+                                    },
+                                    background_color: Color::rgb(0.6, 0.2, 0.2).into(),
+                                    ..default()
+                                },
+                                crate::builder::editors::property_forms::DeleteRuleButton { rule_index: idx },
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn(TextBundle::from_section(
+                                    "🗑️",
+                                    TextStyle {
+                                        font_size: 14.0,
+                                        color: Color::WHITE,
+                                        ..default()
+                                    },
+                                ));
+                            });
                     });
             }
 
@@ -523,7 +556,7 @@ pub fn handle_add_condition_button(
     }
 }
 
-/// Handle add action button (adds a default action)
+/// Handle add action button (opens action selector)
 pub fn handle_add_action_button(
     mut state: ResMut<BuilderState>,
     mut interaction_query: Query<
@@ -533,18 +566,17 @@ pub fn handle_add_action_button(
 ) {
     for (interaction, button) in interaction_query.iter_mut() {
         if *interaction == Interaction::Pressed {
-            if let Some(rule) = state.current_game.rules.get_mut(button.rule_index) {
-                // Add a default action (show message)
-                let new_id = rule.actions.len();
-                rule.actions.push(Action {
-                    id: new_id,
-                    action_type: ActionType::ShowMessage {
-                        text: "Something happens.".to_string()
-                    },
-                });
-                state.unsaved_changes = true;
-                info!("Added action to rule {}", button.rule_index);
-            }
+            // Open action type selector
+            let action_idx = state.current_game.rules
+                .get(button.rule_index)
+                .map(|r| r.actions.len())
+                .unwrap_or(0);
+
+            state.editing = Some(EditMode::ActionTypeSelector {
+                rule_id: button.rule_index,
+                action_idx,
+            });
+            info!("Opening action selector for rule {}", button.rule_index);
         }
     }
 }
