@@ -505,7 +505,8 @@ async fn create_object(
     is_psi: req.is_psi,
     container_capacity: req.container_capacity,
     icon: req.icon,
-    otx_text: None,   
+    otx_text: None,
+    attributes: None,
 };
 
         game.objects.push(object);

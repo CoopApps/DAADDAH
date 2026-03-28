@@ -176,12 +176,12 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
     }));
   };
 
-  const updateCondition = (ruleId: number, index: number, params: Record<string, unknown>) => {
+  const updateCondition = (ruleId: number, index: number, updates: Record<string, unknown>) => {
     setGame(prev => ({
       ...prev,
       rules: (prev.rules || []).map(r =>
         r.id === ruleId
-          ? { ...r, conditions: r.conditions.map((c, i) => i === index ? { ...c, params } : c) }
+          ? { ...r, conditions: r.conditions.map((c, i) => i === index ? { ...c, ...updates } : c) }
           : r
       ),
     }));
@@ -221,12 +221,12 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
     }));
   };
 
-  const updateAction = (ruleId: number, index: number, params: Record<string, unknown>) => {
+  const updateAction = (ruleId: number, index: number, updates: Record<string, unknown>) => {
     setGame(prev => ({
       ...prev,
       rules: (prev.rules || []).map(r =>
         r.id === ruleId
-          ? { ...r, actions: r.actions.map((a, i) => i === index ? { ...a, params } : a) }
+          ? { ...r, actions: r.actions.map((a, i) => i === index ? { ...a, ...updates } : a) }
           : r
       ),
     }));
@@ -656,6 +656,46 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
                 </div>
               </div>
 
+              {/* Additional triggers (stacked verb/noun pairs) */}
+              <div style={{ marginTop: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <label className="form-label" style={{ fontSize: 10, margin: 0 }}>
+                    Additional Triggers
+                    <span style={{ color: "var(--text-dim)", fontWeight: "normal", marginLeft: 4 }}>
+                      — share same conditions/actions
+                    </span>
+                  </label>
+                  <button className="btn btn-secondary" style={{ fontSize: 9, padding: "2px 6px" }}
+                    onClick={() => {
+                      const triggers = [...(selectedRuleData.additionalTriggers || []), { verb: "_", noun: "_" }];
+                      updateRule(selectedRuleData.id, { additionalTriggers: triggers });
+                    }}>+ Add</button>
+                </div>
+                {(selectedRuleData.additionalTriggers || []).map((trigger, i) => (
+                  <div key={i} style={{ display: "flex", gap: 4, marginBottom: 2, alignItems: "center" }}>
+                    <input className="form-input" style={{ fontSize: 10, width: 80, fontFamily: "monospace" }}
+                      value={trigger.verb} placeholder="verb"
+                      onChange={e => {
+                        const triggers = [...(selectedRuleData.additionalTriggers || [])];
+                        triggers[i] = { ...triggers[i], verb: e.target.value };
+                        updateRule(selectedRuleData.id, { additionalTriggers: triggers });
+                      }} />
+                    <input className="form-input" style={{ fontSize: 10, width: 80, fontFamily: "monospace" }}
+                      value={trigger.noun} placeholder="noun"
+                      onChange={e => {
+                        const triggers = [...(selectedRuleData.additionalTriggers || [])];
+                        triggers[i] = { ...triggers[i], noun: e.target.value };
+                        updateRule(selectedRuleData.id, { additionalTriggers: triggers });
+                      }} />
+                    <button className="btn btn-danger" style={{ fontSize: 9, padding: "2px 5px" }}
+                      onClick={() => {
+                        const triggers = (selectedRuleData.additionalTriggers || []).filter((_, j) => j !== i);
+                        updateRule(selectedRuleData.id, { additionalTriggers: triggers.length > 0 ? triggers : undefined });
+                      }}>✕</button>
+                  </div>
+                ))}
+              </div>
+
               {/* Process help hint */}
               <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-dim)" }}>
                 {selectedRuleData.process === "PRO5" && (
@@ -716,7 +756,7 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
                         key={i}
                         condition={cond} index={i} total={selectedRuleData.conditions.length}
                         game={game}
-                        onUpdate={params => updateCondition(selectedRuleData.id, i, params)}
+                        onUpdate={updates => updateCondition(selectedRuleData.id, i, updates)}
                         onDelete={() => deleteCondition(selectedRuleData.id, i)}
                         onMoveUp={() => i > 0 && moveCondition(selectedRuleData.id, i, i - 1)}
                         onMoveDown={() => i < selectedRuleData.conditions.length - 1 && moveCondition(selectedRuleData.id, i, i + 1)}
@@ -772,7 +812,7 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
                         key={i}
                         action={action} index={i} total={selectedRuleData.actions.length}
                         game={game}
-                        onUpdate={params => updateAction(selectedRuleData.id, i, params)}
+                        onUpdate={updates => updateAction(selectedRuleData.id, i, updates)}
                         onDelete={() => deleteAction(selectedRuleData.id, i)}
                         onMoveUp={() => i > 0 && moveAction(selectedRuleData.id, i, i - 1)}
                         onMoveDown={() => i < selectedRuleData.actions.length - 1 && moveAction(selectedRuleData.id, i, i + 1)}
@@ -809,6 +849,8 @@ function ConditionEditor({ condition, index, total, game, onUpdate, onDelete, on
   onDelete: () => void; onMoveUp: () => void; onMoveDown: () => void;
 }) {
   const def = CONDITIONS[condition.type];
+  // Conditions with a flag parameter can use indirection
+  const hasFlag = def?.params.some(p => p.type === "flag");
 
   return (
     <div style={{
@@ -820,6 +862,7 @@ function ConditionEditor({ condition, index, total, game, onUpdate, onDelete, on
         <div style={{ fontSize: 11, color: "var(--cyan-bright)", fontWeight: 600, marginBottom: 6 }}
           title={def?.description}>
           {condition.type}
+          {condition.indirect && <span style={{ color: "var(--yellow-bright)", marginLeft: 4 }}>@</span>}
           {def?.description && (
             <span style={{ fontSize: 10, color: "var(--text-dim)", fontWeight: "normal", marginLeft: 6 }}>
               — {def.description.split(".")[0]}
@@ -827,12 +870,21 @@ function ConditionEditor({ condition, index, total, game, onUpdate, onDelete, on
           )}
         </div>
         {def ? (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
             {def.params.map(param => (
               <ParamInput key={param.name} param={param} value={condition.params[param.name]} game={game}
-                onChange={v => onUpdate({ ...condition.params, [param.name]: v })} />
+                onChange={v => onUpdate({ params: { ...condition.params, [param.name]: v } })} />
             ))}
-            {def.params.length === 0 && (
+            {hasFlag && (
+              <label style={{ display: "flex", gap: 4, alignItems: "center", fontSize: 10, color: "var(--yellow-bright)", cursor: "pointer" }}
+                title="Indirection (@): use the value stored in the flag as the actual flag number">
+                <input type="checkbox" checked={!!condition.indirect}
+                  onChange={e => onUpdate({ indirect: e.target.checked || undefined })}
+                  style={{ width: 12, height: 12 }} />
+                @indirect
+              </label>
+            )}
+            {def.params.length === 0 && !hasFlag && (
               <span style={{ fontSize: 10, color: "var(--text-dim)", fontStyle: "italic" }}>No parameters</span>
             )}
           </div>
@@ -853,6 +905,8 @@ function ActionEditor({ action, index, total, game, onUpdate, onDelete, onMoveUp
   onDelete: () => void; onMoveUp: () => void; onMoveDown: () => void;
 }) {
   const def = ACTIONS[action.type];
+  const hasFlag = def?.params.some(p => p.type === "flag");
+  const isMessage = action.type === "MESSAGE" || action.type === "MES";
 
   return (
     <div style={{
@@ -864,6 +918,8 @@ function ActionEditor({ action, index, total, game, onUpdate, onDelete, onMoveUp
         <div style={{ fontSize: 11, color: "var(--green-bright)", fontWeight: 600, marginBottom: 6 }}
           title={def?.description}>
           {action.type}
+          {action.indirect && <span style={{ color: "var(--yellow-bright)", marginLeft: 4 }}>@</span>}
+          {action.text && <span style={{ color: "var(--magenta-bright)", marginLeft: 4 }}>"..."</span>}
           {def?.description && (
             <span style={{ fontSize: 10, color: "var(--text-dim)", fontWeight: "normal", marginLeft: 6 }}>
               — {def.description.split(".")[0]}
@@ -871,13 +927,45 @@ function ActionEditor({ action, index, total, game, onUpdate, onDelete, onMoveUp
           )}
         </div>
         {def ? (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {def.params.map(param => (
-              <ParamInput key={param.name} param={param} value={action.params[param.name]} game={game}
-                onChange={v => onUpdate({ ...action.params, [param.name]: v })} />
-            ))}
-            {def.params.length === 0 && (
-              <span style={{ fontSize: 10, color: "var(--text-dim)", fontStyle: "italic" }}>No parameters</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              {/* For MESSAGE/MES: show inline text input OR param index, not both */}
+              {isMessage && action.text != null ? (
+                <span style={{ fontSize: 10, color: "var(--text-dim)", fontStyle: "italic" }}>Using inline text below</span>
+              ) : (
+                def.params.map(param => (
+                  <ParamInput key={param.name} param={param} value={action.params[param.name]} game={game}
+                    onChange={v => onUpdate({ params: { ...action.params, [param.name]: v } })} />
+                ))
+              )}
+              {hasFlag && (
+                <label style={{ display: "flex", gap: 4, alignItems: "center", fontSize: 10, color: "var(--yellow-bright)", cursor: "pointer" }}
+                  title="Indirection (@): use the value stored in the flag as the actual parameter">
+                  <input type="checkbox" checked={!!action.indirect}
+                    onChange={e => onUpdate({ indirect: e.target.checked || undefined })}
+                    style={{ width: 12, height: 12 }} />
+                  @indirect
+                </label>
+              )}
+              {isMessage && (
+                <label style={{ display: "flex", gap: 4, alignItems: "center", fontSize: 10, color: "var(--magenta-bright)", cursor: "pointer" }}
+                  title="Inline text: type the message directly instead of using a message index">
+                  <input type="checkbox" checked={action.text != null}
+                    onChange={e => onUpdate(e.target.checked ? { text: "" } : { text: undefined })}
+                    style={{ width: 12, height: 12 }} />
+                  inline text
+                </label>
+              )}
+            </div>
+            {/* Inline text textarea for MESSAGE/MES */}
+            {isMessage && action.text != null && (
+              <textarea
+                className="form-input"
+                value={action.text ?? ""}
+                onChange={e => onUpdate({ text: e.target.value })}
+                placeholder='Type your message text here...'
+                style={{ fontSize: 11, fontFamily: "monospace", minHeight: 48, resize: "vertical" }}
+              />
             )}
           </div>
         ) : (

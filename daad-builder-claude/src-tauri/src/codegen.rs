@@ -1820,8 +1820,20 @@ impl DaadCodeGenerator {
             "DPRINT" => format!("DPRINT {}", Self::get_u8_param(params, "flagno")),
             "LISTOBJ" => "LISTOBJ".to_string(),
             "LISTAT" => format!("LISTAT {}", Self::get_u8_param(params, "locno")),
-            "SAVE" => "SAVE".to_string(),
-            "LOAD" => "LOAD".to_string(),
+            "SAVE" => {
+                let slot = params.get("slot").and_then(|v| v.as_u64());
+                match slot {
+                    Some(s) => format!("SAVE {}", s),
+                    None => "SAVE 0".to_string(),
+                }
+            },
+            "LOAD" => {
+                let slot = params.get("slot").and_then(|v| v.as_u64());
+                match slot {
+                    Some(s) => format!("LOAD {}", s),
+                    None => "LOAD 0".to_string(),
+                }
+            },
             "RAMSAVE" => "RAMSAVE".to_string(),
             "RAMLOAD" => format!("RAMLOAD {}", Self::get_u8_param(params, "slot")),
             "INPUT" => format!("INPUT {} {}", Self::get_u8_param(params, "stream"), Self::get_u8_param(params, "option")),
@@ -1833,7 +1845,14 @@ impl DaadCodeGenerator {
             "SYNONYM" => format!("SYNONYM {} {}", Self::get_string_param(params, "verb"), Self::get_string_param(params, "noun")),
             "PROCESS" => format!("PROCESS {}", Self::get_u8_param(params, "prono")),
             "REDO" => "REDO".to_string(),
-            "DOALL" => format!("DOALL {}", Self::get_u8_param(params, "locno")),
+            "DOALL" => {
+                // DOALL accepts special keywords: HERE (current loc), CARRIED (254), WORN (253)
+                let loc_str = Self::get_string_param(params, "locno");
+                match loc_str.to_uppercase().as_str() {
+                    "HERE" | "CARRIED" | "WORN" | "NOTCREATED" => format!("DOALL {}", loc_str.to_uppercase()),
+                    _ => format!("DOALL {}", Self::get_u8_param(params, "locno")),
+                }
+            },
             "SKIP" => {
                 // SKIP uses signed offsets (e.g. SKIP -2 for backward jumps)
                 let count = params.get("count")

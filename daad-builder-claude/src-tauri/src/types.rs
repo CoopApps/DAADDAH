@@ -153,6 +153,11 @@ pub struct Object {
     /// If absent, codegen generates "a [adjective] [noun]" automatically.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub otx_text: Option<String>,
+    /// User-defined attribute bit indices (0-15) set for this object.
+    /// Maps to the 16 attribute flags in the DAAD OBJ section.
+    /// Tested with HASAT/HASNAT condacts.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attributes: Option<Vec<u8>>,
 }
 
 /// Where an object currently is

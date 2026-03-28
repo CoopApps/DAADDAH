@@ -64,6 +64,14 @@ export interface GameObject {
    * If absent, codegen generates "a [adjective] [noun]" automatically.
    */
   otxText?: string;
+  /**
+   * User-defined attribute bit indices (0-15) that are set for this object.
+   * These map to the 16 attribute flags in the DAAD OBJ section and are
+   * tested with HASAT/HASNAT condacts. Common conventions:
+   * - Bit positions are game-defined via #define in the CTL section
+   * - e.g. [3, 7] means bits 3 and 7 are set (Y in OBJ output)
+   */
+  attributes?: number[];
 }
 
 export interface Flag {
