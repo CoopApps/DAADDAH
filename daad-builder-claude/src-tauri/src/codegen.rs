@@ -26,6 +26,23 @@ struct MessageIndices {
 pub struct DaadCodeGenerator;
 
 impl DaadCodeGenerator {
+    /// Escape text for DSF output: handle quotes, newlines, and replace
+    /// Unicode characters that don't exist in Windows-1252 with safe alternatives.
+    /// DRB expects Windows-1252 encoding, so characters like em-dash (U+2014),
+    /// smart quotes, etc. must be replaced.
+    fn escape_text(text: &str) -> String {
+        text.replace('\u{2014}', "--")   // em-dash → --
+            .replace('\u{2013}', "-")    // en-dash → -
+            .replace('\u{2018}', "'")    // left single quote → '
+            .replace('\u{2019}', "'")    // right single quote → '
+            .replace('\u{201C}', "\"")   // left double quote → "
+            .replace('\u{201D}', "\"")   // right double quote → "
+            .replace('\u{2026}', "...")  // ellipsis → ...
+            .replace('"', "\\\"")
+            .replace('\n', "#n")
+            .replace('\r', "")
+    }
+
     /// Generate complete DAAD source code from visual game
     pub fn generate(game: &DaadGame) -> String {
         let mut code = String::new();
@@ -514,7 +531,7 @@ impl DaadCodeGenerator {
             // Check if there's a custom override for this message index
             if let Some(overrides) = overrides {
                 if let Some(custom_text) = overrides.get(&(idx as u8)) {
-                    let escaped = custom_text.replace('"', "\\\"").replace('\n', "#n").replace('\r', "");
+                    let escaped = Self::escape_text(custom_text);
                     code.push_str(&format!("/{} \"{}\"\n", idx, escaped));
                     continue;
                 }
@@ -534,10 +551,7 @@ impl DaadCodeGenerator {
             code.push_str("; No locations defined\n\n");
         } else {
             for loc in locations {
-                let escaped_desc = loc.description
-                    .replace('"', "\\\"")
-                    .replace('\n', "#n")
-                    .replace('\r', "");
+                let escaped_desc = Self::escape_text(&loc.description);
 
                 code.push_str(&format!(
                     "/{} \"{}\"{}\n",
@@ -683,7 +697,7 @@ impl DaadCodeGenerator {
 
         // Message 14: intro text
         let escaped_intro = if !intro_text.is_empty() {
-            intro_text.replace('"', "\\\"").replace('\n', "#n").replace('\r', "")
+            Self::escape_text(intro_text)
         } else {
             String::from("Welcome.")
         };
@@ -718,10 +732,7 @@ impl DaadCodeGenerator {
         for (i, msg) in messages.iter().enumerate() {
             let idx = game_start + i;
             if idx > 254 { break; }
-            let escaped = msg
-                .replace('"', "\\\"")
-                .replace('\n', "#n")
-                .replace('\r', "");
+            let escaped = Self::escape_text(msg);
             code.push_str(&format!("/{} \"{}\"
 ", idx, escaped));
         }
@@ -1850,7 +1861,7 @@ impl DaadCodeGenerator {
             // If action.text is set, emit inline MESSAGE "text" (DRC auto-assigns index).
             "MES" | "MESSAGE" => {
                 if let Some(ref text) = action.text {
-                    let escaped = text.replace('"', "\\\"").replace('\n', "#n").replace('\r', "");
+                    let escaped = Self::escape_text(text);
                     format!("MESSAGE \"{}\"", escaped)
                 } else {
                     let cmd = if action_type == "MES" { "MES" } else { "MESSAGE" };
