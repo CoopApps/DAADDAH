@@ -56,7 +56,12 @@ impl DaadCodeGenerator {
             })
         ) || game.locations.iter().any(|l| l.image.is_some());
         if uses_maluva {
-            code.push_str("#extern \"MALUVA\"\n\n");
+            code.push_str("#extern \"MALUVA\"\n");
+            // Enable split screen mode when game has pictures (CPC/C64 need XSPLITSCR)
+            if game.locations.iter().any(|l| l.image.is_some()) {
+                code.push_str("#define splitModeOn\n");
+            }
+            code.push_str("\n");
         }
 
         // 2. /VOC - Vocabulary (MUST be position 2, immediately after /CTL)
@@ -1042,6 +1047,14 @@ impl DaadCodeGenerator {
     fn generate_processes(game: &DaadGame, indices: &MessageIndices) -> String {
         let mut code = String::new();
 
+        // Check if game uses MALUVA features (needed for SAVE/LOAD and picture handling)
+        let uses_maluva = game.rules.iter().any(|r|
+            r.actions.iter().any(|a| {
+                let t = a.r#type.as_str();
+                t.starts_with("X") && t != "X" && t.len() > 1
+            })
+        ) || game.locations.iter().any(|l| l.image.is_some());
+
         // Find starting location (first non-zero location, or 1 if none)
         let start_loc = game.locations.iter()
             .find(|l| l.id > 0)
@@ -1079,20 +1092,47 @@ impl DaadCodeGenerator {
         code.push_str(">\n");
         code.push_str("_       _       PROCESS 11\n\n");
 
-        // Text window + darkness message
-        code.push_str("; Go to text window; if dark print darkness message.\n");
+        // Set up text window with split-screen support for platforms that need it
+        code.push_str("; Set text window position (with platform-specific split screen).\n");
         code.push_str(">\n");
-        code.push_str("_       _       WINDOW 1\n");
-        code.push_str("                NOTZERO DarkF\n");
+        code.push_str("_       _       WINAT 13 0\n");
+        code.push_str("                #ifdef \"splitModeOn\"\n");
+        code.push_str("                    XSPLITSCR 1\n");
+        code.push_str("                    #ifdef \"cpc\"\n");
+        code.push_str("                    WINAT 14 0\n");
+        code.push_str("                    #endif\n");
+        code.push_str("                #endif\n");
+        code.push_str("                WINDOW 1\n");
+        code.push_str("                WINSIZE 25 127\n\n");
+
+        // Dark flag → darkness message
+        code.push_str("; If dark, print darkness message.\n");
+        code.push_str(">\n");
+        code.push_str("_       _       NOTZERO DarkF\n");
         code.push_str("                SYSMESS 0\n\n");
 
         // PICTURE/DISPLAY: only emit if any location has an image defined
         let has_images = game.locations.iter().any(|l| l.image.is_some());
         if has_images {
-            code.push_str("; Load location picture and display (if light).\n");
+            code.push_str("; Load location picture (if light). DRC resolves to XPICTURE on 8-bit.\n");
             code.push_str(">\n");
-            code.push_str("_       _       PICTURE @Player\n");
-            code.push_str("                DISPLAY @DarkF\n\n");
+            code.push_str("_       _       ZERO DarkF\n");
+            code.push_str("                PICTURE @Player\n");
+            code.push_str("                DISPLAY 0\n");
+            code.push_str("                SKIP $pictureOK\n\n");
+
+            // No picture fallback — set text window to full screen
+            code.push_str("; No picture: set text window full screen.\n");
+            code.push_str(">\n");
+            code.push_str("_       _       #ifdef \"splitModeOn\"\n");
+            code.push_str("                    CLS\n");
+            code.push_str("                    XSPLITSCR 0\n");
+            code.push_str("                #endif\n");
+            code.push_str("                WINDOW 1\n");
+            code.push_str("                WINAT 0 0\n");
+            code.push_str("                WINSIZE 25 127\n");
+            code.push_str("                CLS\n");
+            code.push_str("$pictureOK\n\n");
         }
 
         // Location description if light
@@ -1285,12 +1325,23 @@ impl DaadCodeGenerator {
         code.push_str("                END\n\n");
         code.push_str(">\n");
         code.push_str("QUIT    _       DONE\n\n");
-        code.push_str(">\n");
-        code.push_str("SAVE    _       SAVE 0\n");
-        code.push_str("                RESTART\n\n");
-        code.push_str(">\n");
-        code.push_str("LOAD    _       LOAD 0\n");
-        code.push_str("                RESTART\n\n");
+        // SAVE/LOAD: use XSAVE/XLOAD (Maluva, disk-based) when available,
+        // fall back to built-in SAVE/LOAD (tape-based) otherwise
+        if uses_maluva {
+            code.push_str(">\n");
+            code.push_str("SAVE    _       XSAVE 0\n");
+            code.push_str("                RESTART\n\n");
+            code.push_str(">\n");
+            code.push_str("LOAD    _       XLOAD 0\n");
+            code.push_str("                RESTART\n\n");
+        } else {
+            code.push_str(">\n");
+            code.push_str("SAVE    _       SAVE 0\n");
+            code.push_str("                RESTART\n\n");
+            code.push_str(">\n");
+            code.push_str("LOAD    _       LOAD 0\n");
+            code.push_str("                RESTART\n\n");
+        }
         code.push_str(">\n");
         code.push_str("RAMSA   _       RAMSAVE\n");
         code.push_str("                RESTART\n\n");
