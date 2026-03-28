@@ -475,28 +475,28 @@ impl DaadCodeGenerator {
         let system_messages = vec![
             "/0 \"It's too dark to see anything.\"",
             "/1 \"I can also see: \"",
-            "/2 \"What now?\"",
-            "/3 \"What next?\"",
-            "/4 \"What should I do now?\"",
-            "/5 \"What should I do next?\"",
-            "/6 \"I was not able to understand any of that.  Please try again.\"",
-            "/7 \"I can't go in that direction.\"",
-            "/8 \"I can't do that.\"",
-            "/9 \"I have with me:\"",
-            "/10 \"I am wearing:\"",
+            "/2 \">\"",
+            "/3 \">\"",
+            "/4 \">\"",
+            "/5 \">\"",
+            "/6 \"#nI was not able to understand any of that.  Please try again.\"",
+            "/7 \"#nI can't go in that direction.\"",
+            "/8 \"I can't do that.#n\"",
+            "/9 \"I have with me:#n\"",
+            "/10 \"I am wearing:#n\"",
             "/11 \"\";*Spare\"",
             "/12 \"Are you sure? \"",
             "/13 \"Would you like another go? \"",
             "/14 \"\";*Spare\"",
-            "/15 \"OK.\"",
-            "/16 \"Press any key to continue.\"",
+            "/15 \"OK.#n\"",
+            "/16 \"Press any key to continue.#n\"",
             "/17 \"\";*You have taken\"",
             "/18 \"\";*#sturn\"",
             "/19 \"\";*s\"",
             "/20 \"\";*.[CR]\"",
             "/21 \"\";*You have scored\"",
             "/22 \"\";*%[CR]\"",
-            "/23 \"I'm not wearing one of those.\"",
+            "/23 \"I'm not wearing one of those.#n\"",
             "/24 \"I can't.  I'm wearing the _.\"",
             "/25 \"I already have the _.\"",
             "/26 \"There isn't one of those here.\"",
@@ -506,24 +506,24 @@ impl DaadCodeGenerator {
             "/30 \"Y\"    ;One upper case character only",
             "/31 \"N\"    ;One upper case character only",
             "/32 \"More...\"",
-            "/33 \">\"",
+            "/33 \"#n>\"",
             "/34 \"\";*Spare\"",
-            "/35 \"Time passes...\"",
-            "/36 \"I now have the _.\"",
-            "/37 \"I'm now wearing the _.\"",
-            "/38 \"I've removed the _.\"",
-            "/39 \"I've dropped the _.\"",
-            "/40 \"I can't wear the _.\"",
-            "/41 \"I can't remove the _.\"",
-            "/42 \"I can't remove the _.  My hands are full.\"",
-            "/43 \"The _ weighs too much for me.\"",
-            "/44 \"The _ is in the \"",
-            "/45 \"The _ isn't in the \"",
+            "/35 \"#nTime passes...#n\"",
+            "/36 \"I now have _.#n\"",
+            "/37 \"I'm now wearing _.#n\"",
+            "/38 \"I've removed _.#n\"",
+            "/39 \"I've dropped _.#n\"",
+            "/40 \"I can't wear _.\"",
+            "/41 \"I can't remove _.\"",
+            "/42 \"I can't remove _.  My hands are full.\"",
+            "/43 \"_ weighs too much for me.\"",
+            "/44 \"_ is in the \"",
+            "/45 \"_ isn't in the \"",
             "/46 \", \"",
             "/47 \" and \"",
             "/48 \".\"",
-            "/49 \"I don't have the _.\"",
-            "/50 \"I'm not wearing the _.\"",
+            "/49 \"I don't have _.\"",
+            "/50 \"I'm not wearing _.\"",
             "/51 \".\"",
             "/52 \"There isn't one of those in the \"",
             "/53 \"Nothing.\"",
@@ -1109,42 +1109,36 @@ impl DaadCodeGenerator {
         code.push_str("_       _       AT 0\n");
         code.push_str("                PROCESS 6\n\n");
 
-        // Dark flag calculation
-        code.push_str("; Sets DarkF according to Dark flag and light sources.\n");
+        // Status line update — must run before text window reset
         code.push_str(">\n");
-        code.push_str("_       _       CLEAR DarkF\n");
+        code.push_str("_       _       PROCESS 11\n\n");
+
+        // Text window position reset — runs every turn (critical for stable layout)
+        let has_images = game.locations.iter().any(|l| l.image.is_some());
+        if has_images {
+            code.push_str("; Set text window below picture area.\n");
+            code.push_str(">\n");
+            code.push_str("_       _       WINAT 13 0\n");
+            code.push_str("                WINDOW 1\n");
+            code.push_str("                WINSIZE 12 128\n\n");
+        } else {
+            code.push_str("; Set text window below status bar (line 1).\n");
+            code.push_str(">\n");
+            code.push_str("_       _       WINDOW 1\n");
+            code.push_str("                WINAT 1 0\n");
+            code.push_str("                WINSIZE 24 128\n\n");
+        }
+
+        // Dark flag calculation
+        code.push_str(">\n");
+        code.push_str("_       _       WINDOW 0\n");
+        code.push_str("                CLEAR DarkF\n");
         code.push_str("                NOTZERO Dark\n");
         code.push_str("                ABSENT 0\n");
         code.push_str("                SET DarkF\n\n");
 
-        // Status line update
-        code.push_str("; Updates status line.\n");
-        code.push_str(">\n");
-        code.push_str("_       _       PROCESS 11\n\n");
-
-        // Set up text window with split-screen support for platforms that need it
-        code.push_str("; Set text window position (with platform-specific split screen).\n");
-        code.push_str(">\n");
-        code.push_str("_       _       WINAT 13 0\n");
-        code.push_str("                #ifdef \"splitModeOn\"\n");
-        code.push_str("                    XSPLITSCR 1\n");
-        code.push_str("                    #ifdef \"cpc\"\n");
-        code.push_str("                    WINAT 14 0\n");
-        code.push_str("                    #endif\n");
-        code.push_str("                #endif\n");
-        code.push_str("                WINDOW 1\n");
-        code.push_str("                WINSIZE 25 127\n\n");
-
-        // Dark flag → darkness message
-        code.push_str("; If dark, print darkness message.\n");
-        code.push_str(">\n");
-        code.push_str("_       _       NOTZERO DarkF\n");
-        code.push_str("                SYSMESS 0\n\n");
-
-        // PICTURE/DISPLAY: only emit if any location has an image defined
-        let has_images = game.locations.iter().any(|l| l.image.is_some());
         if has_images {
-            code.push_str("; Load location picture (if light). DRC resolves to XPICTURE on 8-bit.\n");
+            // Load location picture (if light)
             code.push_str(">\n");
             code.push_str("_       _       ZERO DarkF\n");
             code.push_str("                PICTURE @Player\n");
@@ -1152,21 +1146,20 @@ impl DaadCodeGenerator {
             code.push_str("                SKIP $pictureOK\n\n");
 
             // No picture fallback — set text window to full screen
-            code.push_str("; No picture: set text window full screen.\n");
             code.push_str(">\n");
-            code.push_str("_       _       #ifdef \"splitModeOn\"\n");
-            code.push_str("                    CLS\n");
-            code.push_str("                    XSPLITSCR 0\n");
-            code.push_str("                #endif\n");
-            code.push_str("                WINDOW 1\n");
+            code.push_str("_       _       WINDOW 1\n");
             code.push_str("                WINAT 0 0\n");
             code.push_str("                WINSIZE 25 127\n");
             code.push_str("                CLS\n");
             code.push_str("$pictureOK\n\n");
         }
 
-        // Location description if light
-        code.push_str("; If light, print current location description.\n");
+        // Text window: darkness message or location description
+        code.push_str(">\n");
+        code.push_str("_       _       WINDOW 1\n");
+        code.push_str("                NOTZERO DarkF\n");
+        code.push_str("                SYSMESS 0\n\n");
+
         code.push_str(">\n");
         code.push_str("_       _       ZERO DarkF\n");
         code.push_str("                DESC @Player\n\n");
@@ -1222,15 +1215,13 @@ impl DaadCodeGenerator {
         code.push_str("_       _       PLUS Turns 1\n\n");
 
         code.push_str(">\n");
-        code.push_str("_       _       PROCESS 11\n\n");
-
-        code.push_str(">\n");
         code.push_str("_       _       PROCESS 5\n");
         code.push_str("                ISDONE\n");
         code.push_str("                REDO\n\n");
 
         code.push_str(">\n");
         code.push_str("_       _       MOVE Player\n");
+        code.push_str("                CLS\n");
         code.push_str("                RESTART\n\n");
 
         code.push_str(">\n");
@@ -1345,84 +1336,90 @@ impl DaadCodeGenerator {
         code.push_str("WEAR    _       AUTOW\n");
         code.push_str("                DONE\n\n");
         code.push_str(">\n");
-        code.push_str("R       _       EQ 34 255\n");
+        code.push_str("R       _       CLS\n");
         code.push_str("                RESTART\n\n");
-        code.push_str(">\n");
-        code.push_str("R       _       LET 33 30\n");
-        code.push_str("                REDO\n\n");
+
         code.push_str(">\n");
         code.push_str("QUIT    _       QUIT\n");
         code.push_str("                END\n\n");
         code.push_str(">\n");
         code.push_str("QUIT    _       DONE\n\n");
+
         // SAVE/LOAD: use XSAVE/XLOAD (Maluva, disk-based) when available,
         // fall back to built-in SAVE/LOAD (tape-based) otherwise
         if uses_maluva {
             code.push_str(">\n");
             code.push_str("SAVE    _       XSAVE 0\n");
+            code.push_str("                CLS\n");
             code.push_str("                RESTART\n\n");
             code.push_str(">\n");
             code.push_str("LOAD    _       XLOAD 0\n");
+            code.push_str("                CLS\n");
             code.push_str("                RESTART\n\n");
         } else {
             code.push_str(">\n");
             code.push_str("SAVE    _       SAVE 0\n");
+            code.push_str("                CLS\n");
             code.push_str("                RESTART\n\n");
             code.push_str(">\n");
             code.push_str("LOAD    _       LOAD 0\n");
+            code.push_str("                CLS\n");
             code.push_str("                RESTART\n\n");
         }
         code.push_str(">\n");
         code.push_str("RAMSA   _       RAMSAVE\n");
+        code.push_str("                CLS\n");
         code.push_str("                RESTART\n\n");
         code.push_str(">\n");
         code.push_str("RAMLO   _       RAMLOAD 255\n");
+        code.push_str("                CLS\n");
         code.push_str("                RESTART\n\n");
         // LOOK catch-all at end
         code.push_str(">\n");
-        code.push_str("L       _       RESTART\n\n");
+        code.push_str("L       _       CLS\n");
+        code.push_str("                RESTART\n\n");
 
-        // ── PRO 6: Initialization ──────────────────────────────────────────
+        // ── PRO 6: Initialization (matching blank_en.dsf) ─────────────────
         code.push_str("/PRO 6\n\n");
         code.push_str("; Initialization process. Called from PRO 0 at location 0.\n\n");
 
-        // Status line window
+        // Window 0 = full screen for title/graphics
         code.push_str(">\n");
-        code.push_str("_       _       WINDOW 2\n");
-        code.push_str("                WINAT 6 0\n");
-        code.push_str("                WINSIZE 1 COLS\n\n");
-
-        // 80-col fallback
-        code.push_str(">\n");
-        code.push_str("_       _       LT GFlags 128\n");
-        code.push_str("                WINSIZE 1 80\n\n");
-
-        // Colours + window setup
-        code.push_str(">\n");
-        code.push_str("_       _       PAPER 0\n");
-        code.push_str("                INK 1\n");
+        code.push_str("_       _       WINDOW 0\n");
+        code.push_str("                WINAT 0 0\n");
+        code.push_str("                WINSIZE 25 128\n");
         code.push_str("                CLS\n");
-        code.push_str("                PROCESS 9\n\n");
-
-        // Title screen + intro
-        code.push_str(">\n");
-        code.push_str("_       _       DESC 0\n");
+        // Window 2 = status bar (line 0, 1 row, full width)
+        code.push_str("                WINDOW 2\n");
+        code.push_str("                WINAT 0 0\n");
+        code.push_str("                WINSIZE 1 128\n");
+        // Window 1 = text window (starts at line 1, below status bar)
+        code.push_str("                WINDOW 1\n");
+        code.push_str("                WINAT 1 0\n");
+        code.push_str("                WINSIZE 24 128\n");
+        // Show title screen (location 0 description)
+        code.push_str("                WINDOW 1\n");
+        code.push_str("                DESC 0\n");
         code.push_str("                ANYKEY\n");
         code.push_str("                CLS\n");
+        // Show intro text
         code.push_str(&format!("                MESSAGE {}\n", intro_msg));
         code.push_str("                ANYKEY\n");
-        code.push_str("                CLEAR 255\n\n");
+        code.push_str("                CLS\n");
+        // Begin flag clear
+        code.push_str("                SET 255\n\n");
 
-        // Flag clear loop (matching Rabenstein exactly)
+        // Flag clear loop (matching blank_en.dsf exactly)
+        code.push_str("$initLoop\n");
         code.push_str(">\n");
-        code.push_str("_       _       NOTEQ 255 GFlags\n");
+        code.push_str("_       _       MINUS 255 1\n");
+        code.push_str("                NOTEQ 255 GFlags\n");
         code.push_str("                CLEAR @255\n\n");
         code.push_str(">\n");
-        code.push_str("_       _       PLUS 255 1\n");
-        code.push_str("                LT 255 255\n");
-        code.push_str("                SKIP -2\n\n");
+        code.push_str("_       _       NOTZERO 255\n");
+        code.push_str("                SKIP $initLoop\n\n");
 
-        // Reset and start
+        // Reset objects and start
         code.push_str(">\n");
         code.push_str("_       _       RESET\n");
         code.push_str("                LET Strength 10\n");
@@ -1497,38 +1494,35 @@ impl DaadCodeGenerator {
 
         // ── PRO 11: Status line ────────────────────────────────────────────
         code.push_str("/PRO 11\n\n");
-        code.push_str("; Update status line.\n\n");
+        code.push_str("; Update status bar (WINDOW 2, defined in PRO 6 init).\n\n");
         code.push_str(">\n");
         code.push_str("_       _       WINDOW 2\n");
-        code.push_str("                PAPER 0\n");
-        code.push_str("                INK 1\n");
+        code.push_str("                PAPER 4\n");  // Red background (matching Rabenstein)
+        code.push_str("                INK 15\n");   // White text
         code.push_str("                CLS\n\n");
-        code.push_str("; If dark, print darkness label and turns.\n");
+        code.push_str("; If dark, print darkness label + turns.\n");
         code.push_str(">\n");
         code.push_str("_       _       NOTZERO DarkF\n");
         code.push_str(&format!("                MES {}\n", dark_msg));
         code.push_str("                PROCESS 12\n");
         code.push_str("                DONE\n\n");
-        code.push_str("; Print location name for each location.\n");
+        code.push_str("; Print location name + turns for current location.\n");
         for loc in &game.locations {
             if loc.id == 0 { continue; }
             let msg_idx = loc_name_msg_offset + (loc.id as usize - 1);
             code.push_str(">\n");
             code.push_str(&format!("_       _       AT {}\n", loc.id));
-            code.push_str(&format!("                MES {}\n\n", msg_idx));
+            code.push_str(&format!("                MES {}\n", msg_idx));
+            code.push_str("                PROCESS 12\n");
+            code.push_str("                DONE\n\n");
         }
-        code.push_str(">\n");
-        code.push_str("_       _       PROCESS 12\n\n");
 
-        // ── PRO 12: Print turns counter ────────────────────────────────────
+        // ── PRO 12: Print turns counter on right side of status bar ──────
         code.push_str("/PRO 12\n\n");
-        code.push_str("; Print turns at status line.\n\n");
+        code.push_str("; Print turns counter right-justified in status bar.\n\n");
         code.push_str(">\n");
-        code.push_str("_       _       TAB Turns_TAB\n");
-        code.push_str("                LT 29 128\n");
-        code.push_str("                TAB 67\n\n");
-        code.push_str(">\n");
-        code.push_str(&format!("_       _       MES {}\n", turns_msg));
+        code.push_str("_       _       TAB 67\n");
+        code.push_str(&format!("                MES {}\n", turns_msg));
         code.push_str("                DPRINT Turns\n");
         code.push_str("                WINDOW 1\n\n");
 
