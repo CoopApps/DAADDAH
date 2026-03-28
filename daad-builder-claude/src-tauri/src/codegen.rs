@@ -48,6 +48,17 @@ impl DaadCodeGenerator {
         // 1. /CTL section (required by DRC)
         code.push_str(&Self::generate_ctl_section());
 
+        // Auto-detect MALUVA: if any rule uses X-prefixed condacts or locations have images
+        let uses_maluva = game.rules.iter().any(|r|
+            r.actions.iter().any(|a| {
+                let t = a.r#type.as_str();
+                t.starts_with("X") && t != "X" && t.len() > 1
+            })
+        ) || game.locations.iter().any(|l| l.image.is_some());
+        if uses_maluva {
+            code.push_str("#extern \"MALUVA\"\n\n");
+        }
+
         // 2. /VOC - Vocabulary (MUST be position 2, immediately after /CTL)
         code.push_str(&Self::generate_vocabulary(&game.vocabulary, &game.objects));
 
@@ -136,7 +147,7 @@ impl DaadCodeGenerator {
         // 3. STX Section
         logs.push("[STX] System text messages...".to_string());
         code.push_str(&Self::generate_system_messages());
-        logs.push("  ✓ 63 standard DAAD system messages (0-62)".to_string());
+        logs.push("  ✓ 65 standard DAAD system messages (0-64)".to_string());
         logs.push(String::new());
 
         // 4. MTX Section
@@ -490,6 +501,8 @@ impl DaadCodeGenerator {
             "/60 \"Type in name of file:\"",
             "/61 \"Start tape.\"",
             "/62 \"Tape or Disc?\"",
+            "/63 \"You see nothing special about the _.\"",
+            "/64 \"You are carrying too much already.\"",
         ];
 
         for msg in system_messages {
@@ -510,7 +523,7 @@ impl DaadCodeGenerator {
             for loc in locations {
                 let escaped_desc = loc.description
                     .replace('"', "\\\"")
-                    .replace('\n', "^")
+                    .replace('\n', "#n")
                     .replace('\r', "");
 
                 code.push_str(&format!(
@@ -584,7 +597,7 @@ impl DaadCodeGenerator {
                 let loc_str = match &obj.location {
                     ObjectLocation::Carried => "CARRIED".to_string(),
                     ObjectLocation::Worn => "WORN".to_string(),
-                    ObjectLocation::Limbo => "_".to_string(),
+                    ObjectLocation::Limbo => "NOTCREATED".to_string(),
                     ObjectLocation::At { location_id } => location_id.to_string(),
                     ObjectLocation::Inside { .. } => "_".to_string(),
                 };
@@ -593,11 +606,10 @@ impl DaadCodeGenerator {
                 code.push_str(&format!("{:<3}", obj.weight.min(63)));
                 code.push_str(if obj.is_container { " Y" } else { " _" });
                 code.push_str(if obj.is_wearable { " Y" } else { " _" });
-                code.push_str(if obj.is_light_source { "  Y" } else { "  _" });
-                code.push_str(if obj.is_psi { " Y" } else { " _" });
-                code.push_str(if !obj.is_takeable { " Y" } else { " _" });
 
-                for _ in 0..13 {
+                // 16 user-defined attribute flags (DAAD OBJ spec)
+                // All blank for now; Phase 2 will add per-object attribute support
+                for _ in 0..16 {
                     code.push_str(" _");
                 }
 
@@ -668,21 +680,16 @@ impl DaadCodeGenerator {
         // Message 15: turns label
         code.push_str("/15 \"Turns: \"\n\n");
 
-        // Messages 16-31: location names (location ids 1-16)
-        for i in 0..16usize {
-            let loc_id = (i + 1) as u8;
-            let name = locations.iter()
-                .find(|l| l.id == loc_id)
-                .map(|l| l.name.as_str())
-                .unwrap_or("");
-            let escaped = name.replace('"', "\\\"");
-            code.push_str(&format!("/{} \"{}\"
-", 16 + i, escaped));
+        // Location names: one per location with id > 0 (dynamic count, not capped at 16)
+        let locs_with_names: Vec<_> = locations.iter().filter(|l| l.id > 0).collect();
+        let n_locs = locs_with_names.len();
+        for (i, loc) in locs_with_names.iter().enumerate() {
+            let escaped = loc.name.replace('"', "\\\"");
+            code.push_str(&format!("/{} \"{}\"\n", 16 + i, escaped));
         }
         code.push('\n');
 
         // Next available index after location names
-        let n_locs = locations.iter().filter(|l| l.id > 0).count();
         let help_idx       = 16 + n_locs;       // help text
         let darkness_idx   = 16 + n_locs + 1;   // "Darkness"
         let game_start     = 16 + n_locs + 2;   // game messages begin here
@@ -858,6 +865,30 @@ impl DaadCodeGenerator {
         code.push_str("
 ");
 
+        // ── BLOCK 3b: Extended system verbs (referenced by hardcoded process tables) ──
+        code.push_str("; Extended system verbs\n");
+        code.push_str("EXITS   40  verb\n");
+        code.push_str("HELP    41  verb\n");
+        code.push_str("USE     42  verb\n");
+        code.push_str("OPEN    43  verb\n");
+        code.push_str("CLOSE   44  verb\n");
+        code.push_str("SEARCH  45  verb\n");
+        code.push_str("PUSH    46  verb\n");
+        code.push_str("PULL    47  verb\n");
+        code.push_str("GIVE    48  verb\n");
+        code.push_str("ENTER   49  verb\n");
+        code.push_str("EAT     50  verb\n");
+        code.push_str("DRINK   51  verb\n");
+        code.push_str("LOCK    52  verb\n");
+        code.push_str("UNLOCK  53  verb\n");
+        code.push_str("FEEL    54  verb\n");
+        code.push_str("TOUCH   54  verb\n");
+        code.push_str("SMELL   55  verb\n");
+        code.push_str("LISTEN  56  verb\n");
+        code.push_str("DRIVE   57  verb\n");
+        code.push_str("ACCUSE  58  verb\n");
+        code.push_str("\n");
+
         // ── BLOCK 4: Standard prepositions (hardcoded, matching blank_en.dsf) ──
         code.push_str("; Prepositions
 ");
@@ -914,6 +945,9 @@ impl DaadCodeGenerator {
             "GET","TAKE","GRAB","DROP","PUT","REMOVE","WEAR","R","REDES",
             "QUIT","STOP","SAVE","LOAD","RAMSA","RAMLO","L","LOOK","X","EX",
             "EXAMI","READ","SAY","ASK","TALK","SPEAK",
+            "EXITS","HELP","USE","OPEN","CLOSE","SEARCH","PUSH","PULL",
+            "GIVE","ENTER","EAT","DRINK","LOCK","UNLOCK",
+            "FEEL","TOUCH","SMELL","LISTEN","DRIVE","ACCUSE",
             "TO","FROM","THROUGH","OVER","UNDER","BY","ON","OFF","AT","ABOUT",
             "IT","THEM","AND","THEN",
         ].iter().copied().collect();
@@ -1204,6 +1238,13 @@ impl DaadCodeGenerator {
             code.push('\n');
         }
 
+        // EXAMINE catch-all: if no game rule matched, describe the object generically
+        code.push_str("; EXAMINE catch-all: WHATO resolves noun to object, SYSMESS 63 prints default\n");
+        code.push_str(">\n");
+        code.push_str("L       _       WHATO\n");
+        code.push_str("                SYSMESS 63\n");
+        code.push_str("                DONE\n\n");
+
         // Standard commands at end (from Rabenstein)
         code.push_str(">\n");
         code.push_str("GET     ALL     DOALL HERE\n");
@@ -1301,6 +1342,22 @@ impl DaadCodeGenerator {
         code.push_str("                SET CPAdject\n");
         code.push_str("                LET OFlags 64\n");
         code.push_str(&format!("                GOTO {}\n\n", start_loc));
+
+        // Initialize user flags (64+) with non-zero initial values
+        let init_flags: Vec<_> = game.flags.iter()
+            .filter(|f| f.id >= 64 && f.initial_value != 0)
+            .collect();
+        if !init_flags.is_empty() {
+            code.push_str("; User flag initialization\n");
+            for flag in &init_flags {
+                code.push_str(">\n");
+                if flag.initial_value == 255 {
+                    code.push_str(&format!("_       _       SET {}\n\n", flag.id));
+                } else {
+                    code.push_str(&format!("_       _       LET {} {}\n\n", flag.id, flag.initial_value));
+                }
+            }
+        }
 
         // ── PRO 7: Text window "up" ────────────────────────────────────────
         code.push_str("/PRO 7\n\n");
@@ -1690,7 +1747,13 @@ impl DaadCodeGenerator {
             "MES" => format!("MES {}", Self::get_u8_param(params, "mesno") + game_msg_start),
             "MESSAGE" => format!("MESSAGE {}", Self::get_u8_param(params, "mesno") + game_msg_start),
             "SYSMESS" => format!("SYSMESS {}", Self::get_u8_param(params, "sysno")),
-            "DESC" => "DESC @Player".to_string(),
+            "DESC" => {
+                let locno = params.get("locno").and_then(|v| v.as_u64());
+                match locno {
+                    Some(l) => format!("DESC {}", l),
+                    None => "DESC @Player".to_string(),
+                }
+            },
             "SPACE" => "SPACE".to_string(),
             "NEWLINE" => "NEWLINE".to_string(),
             "PRINT" => format!("PRINT {}", Self::get_u8_param(params, "flagno")),
@@ -1711,7 +1774,13 @@ impl DaadCodeGenerator {
             "PROCESS" => format!("PROCESS {}", Self::get_u8_param(params, "prono")),
             "REDO" => "REDO".to_string(),
             "DOALL" => format!("DOALL {}", Self::get_u8_param(params, "locno")),
-            "SKIP" => format!("SKIP {}", Self::get_u8_param(params, "count")),
+            "SKIP" => {
+                // SKIP uses signed offsets (e.g. SKIP -2 for backward jumps)
+                let count = params.get("count")
+                    .and_then(|v| v.as_i64())
+                    .unwrap_or(0);
+                format!("SKIP {}", count)
+            },
             "RESTART" => "RESTART".to_string(),
             "END" => "END".to_string(),
             "EXIT" => format!("EXIT {}", Self::get_u8_param(params, "code")),
@@ -1731,12 +1800,12 @@ impl DaadCodeGenerator {
             "BEEP" => format!("BEEP {} {}", Self::get_u8_param(params, "duration"), Self::get_u8_param(params, "pitch")),
             "EXTERN" => format!("EXTERN {}", Self::get_u8_param(params, "value")),
             "CALL" => format!("CALL {}", Self::get_u8_param(params, "address")),
-            // DAAD Ready / Maluva extensions (passthrough)
-            "XMES" | "XMESSAGE" => format!("XMES {} {}", Self::get_u8_param(params, "bank"), Self::get_u8_param(params, "mesno")),
-            "XPLAY" => format!("XPLAY {}", Self::get_u8_param(params, "trackno")),
+            // Additional Maluva extensions (non-duplicate)
             "XBEEP" => format!("XBEEP {} {}", Self::get_u8_param(params, "duration"), Self::get_u8_param(params, "pitch")),
-            "XSPLITSCR" => format!("XSPLITSCR {}", Self::get_u8_param(params, "lines")),
-            "XSAVE" | "XLOAD" | "XPART" | "XUNDONE" => action_type.to_string(),
+            "XSAVE" | "XLOAD" | "XPART" => action_type.to_string(),
+            "XPICTURE" => format!("XPICTURE {}", Self::get_u8_param(params, "picno")),
+            "XNEXTCLS" => "XNEXTCLS".to_string(),
+            "XNEXTRST" => "XNEXTRST".to_string(),
             "MOUSE" => "MOUSE".to_string(),
             _ => format!("{} {}", action_type, params.iter().map(|(k,v)| format!("{:?}", v)).collect::<Vec<_>>().join(" ")),
         }
