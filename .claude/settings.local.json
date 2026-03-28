@@ -19,7 +19,8 @@
       "Bash(/d/projects/daadah/daad-builder-claude/daadready/ASSETS/MSDOS/dosbox.exe -c \"mount c D:/daadah\" -c \"mount d D:/projects/daadah/daad-builder-claude/daadready/ASSETS/MSDOS/GAME\" -c \"d:\" -c \"copy c:\\the_eyes_of_max_carrados.ddb PART1.DDB\" -c \"PCDAAD.EXE\")",
       "Bash(cargo build:*)",
       "Bash(/d/projects/daadah/daad-builder-claude/src-tauri/target/release/test_verbose.exe:*)",
-      "Bash(cargo check:*)"
+      "Bash(cargo check:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []
