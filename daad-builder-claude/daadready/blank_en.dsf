@@ -1,0 +1,199 @@
+; ========================================
+; BLANK ENGLISH TEMPLATE
+; Standard DAAD game structure
+; ========================================
+
+/CTL
+_
+; System flag definitions
+#define Dark      0
+#define DarkF    28
+#define Score    30
+#define Turns    31
+#define Verb     33
+#define Noun1    34
+#define MaxCarr  37
+#define Player   38
+#define Prompt   42
+#define Strength 52
+
+/VOC
+
+; Movement verbs (ID 1-14)
+NORTH        1     verb
+N            1     verb
+SOUTH        2     verb
+S            2     verb
+EAST         3     verb
+E            3     verb
+WEST         4     verb
+W            4     verb
+UP           5     verb
+U            5     verb
+DOWN         6     verb
+D            6     verb
+ENTER        7     verb
+IN           7     verb
+EXIT         8     verb
+OUT          8     verb
+NE           9     verb
+NW           10    verb
+SE           11    verb
+SW           12    verb
+
+; Standard verbs
+GET          14    verb
+TAKE         14    verb
+DROP         15    verb
+LEAVE        15    verb
+EXAMI        18    verb
+LOOK         18    verb
+L            18    verb
+INVEN        19    verb
+I            19    verb
+QUIT         20    verb
+SAVE         21    verb
+LOAD         22    verb
+
+; Standard nouns
+ALL          1     noun
+_            255   noun
+
+/STX
+
+/0 "Welcome to this adventure."
+
+/MTX
+
+/0 "OK."
+/1 "I can't do that."
+/2 "Nothing happens."
+
+/OTX
+
+; Object texts defined here
+
+/LTX
+
+/0 "You are at the starting location."
+
+/CON
+
+/0   ; Starting location - no exits
+
+/OBJ
+
+; Object definitions here
+
+/PRO 0
+
+; PRO 0 - Main game loop
+; Runs once at start, calls initialization
+
+>
+_       _       AT 0
+                PROCESS 6
+
+; Display location description every turn
+
+>
+_       _       DESC @Player
+                PROCESS 3
+                PROCESS 1
+
+/PRO 1
+
+; PRO 1 - Input loop
+; PARSE gets input, PROCESS 2 handles errors, REDO loops
+
+>
+_       _       PROCESS 4
+                PARSE 0
+                PROCESS 2
+                REDO
+
+; After valid command, call response table and movement
+
+>
+_       _       PLUS Turns 1
+                PROCESS 5
+                ISDONE
+                REDO
+
+>
+_       _       MOVE @Player
+
+/PRO 2
+
+; PRO 2 - "I don't understand" handler
+
+>
+_       _       SYSMESS 6
+                DONE
+
+/PRO 3
+
+; PRO 3 - Post-description
+; Lists objects at current location
+
+>
+_       _       NEWLINE
+                LISTOBJ
+                DONE
+
+/PRO 4
+
+; PRO 4 - Status table (before input)
+; Place timed events here
+
+/PRO 5
+
+; PRO 5 - Response table
+; Handle player commands with VERB NOUN matching
+
+; Automatic GET handling
+>
+GET     _       AUTOG
+                DONE
+
+; Automatic DROP handling
+>
+DROP    _       AUTOD
+                DONE
+
+; Inventory
+>
+INVEN   _       LISTAT 254
+                DONE
+
+; Look/Examine
+>
+LOOK    _       DESC @Player
+                DONE
+
+; Quit game
+>
+QUIT    _       END
+
+; Save game
+>
+SAVE    _       SAVE
+                DONE
+
+; Load game
+>
+LOAD    _       LOAD
+                DONE
+
+/PRO 6
+
+; PRO 6 - Initialization
+; Called once at game start from PRO 0
+
+>
+_       _       CLEAR 255
+                RESET
+                LET MaxCarr 10
+                DONE
+
+/END

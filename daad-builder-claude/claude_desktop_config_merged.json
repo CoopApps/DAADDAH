@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "discworld": {
+      "command": "D:\\Python312\\python.exe",
+      "args": [
+        "-m",
+        "discworld_mcp.server"
+      ],
+      "env": {
+        "DATABASE_URL": "postgresql+asyncpg://postgres@localhost:5432/discworld",
+        "PYTHONPATH": "D:\\projects\\discworld-mcp\\src"
+      }
+    },
+    "daad-builder": {
+      "command": "node",
+      "args": [
+        "D:/projects/daadah/daad-builder-claude/mcp-server/index.js"
+      ],
+      "env": {
+        "DAAD_PROJECT_PATH": "D:/projects/daadah/daad-builder-claude/current_project.json"
+      }
+    }
+  },
+  "preferences": {
+    "coworkScheduledTasksEnabled": false,
+    "ccdScheduledTasksEnabled": true,
+    "coworkWebSearchEnabled": true,
+    "sidebarMode": "chat"
+  }
+}

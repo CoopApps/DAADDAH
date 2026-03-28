@@ -1,0 +1,366 @@
+{
+  "objects_to_add": [
+    {
+      "id": 6,
+      "noun": "carlyle",
+      "adjective": "louis",
+      "description": "Louis Carlyle, your trusted friend and investigative partner. A former solicitor turned private inquiry agent, he watches you with fascination as you navigate the world without sight.",
+      "icon": "👤",
+      "location": {
+        "type": "at",
+        "locationId": 0
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": true
+    },
+    {
+      "id": 7,
+      "noun": "hutchins",
+      "adjective": "engine-driver",
+      "description": "The railway engine-driver accused of running past the danger signal. His honest face shows deep worry and fatigue. He insists he saw a green light.",
+      "icon": "👤",
+      "location": {
+        "type": "at",
+        "locationId": 5
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": true
+    },
+    {
+      "id": 8,
+      "noun": "mead",
+      "adjective": "signalman",
+      "description": "Iver Mead, the railway signalman on duty that fateful night. He appears nervous, reluctant to speak freely about what happened.",
+      "icon": "👤",
+      "location": {
+        "type": "at",
+        "locationId": 8
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": true
+    },
+    {
+      "id": 9,
+      "noun": "pendleton",
+      "adjective": "harold",
+      "description": "Harold Pendleton, a stockbroker whose office shows signs of financial strain. His hands tremble slightly as he shuffles papers on his desk.",
+      "icon": "👤",
+      "location": {
+        "type": "at",
+        "locationId": 14
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": true
+    },
+    {
+      "id": 10,
+      "noun": "parkinson",
+      "adjective": "chauffeur",
+      "description": "Your loyal chauffeur and manservant. Parkinson has an uncanny ability to anticipate your needs and serves with quiet efficiency.",
+      "icon": "👤",
+      "location": {
+        "type": "at",
+        "locationId": 2
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": true
+    }
+  ],
+  "rules_to_add": [
+    {
+      "id": 33,
+      "name": "EXAMINE CARLYLE",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 15
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 6
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 16
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "name": "EXAMINE HUTCHINS",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 12
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 7
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 17
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "name": "EXAMINE MEAD",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 13
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 8
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 18
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "name": "EXAMINE PENDLETON",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 14
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 9
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 19
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "name": "EXAMINE PARKINSON",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 16
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 10
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 20
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "name": "ASK CARLYLE to describe surroundings",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 6,
+            "noun": 15
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 6
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 21
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "name": "LOOK without Carlyle - Blindness message",
+      "process": "PRO1",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 14,
+            "noun": 255
+          }
+        },
+        {
+          "type": "ABSENT",
+          "params": {
+            "objno": 6
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 22
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    }
+  ],
+  "vocabulary_to_add": [
+    {
+      "word": "carlyle",
+      "wordType": "noun",
+      "id": 15
+    },
+    {
+      "word": "parkinson",
+      "wordType": "noun",
+      "id": 16
+    },
+    {
+      "word": "louis",
+      "wordType": "adjective",
+      "id": 7
+    },
+    {
+      "word": "harold",
+      "wordType": "adjective",
+      "id": 8
+    }
+  ],
+  "messages_to_add": [
+    "Louis Carlyle, your trusted friend and investigative partner. A former solicitor turned private inquiry agent, he watches you with fascination as you navigate the world without sight.",
+    "The railway engine-driver accused of running past the danger signal. His honest face shows deep worry and fatigue. He insists he saw a green light.",
+    "Iver Mead, the railway signalman on duty that fateful night. He appears nervous, reluctant to speak freely about what happened.",
+    "Harold Pendleton, a stockbroker whose office shows signs of financial strain. His hands tremble slightly as he shuffles papers on his desk.",
+    "Your loyal chauffeur and manservant. Parkinson has an uncanny ability to anticipate your needs and serves with quiet efficiency.",
+    "Carlyle clears his throat and describes what he sees around you in precise detail.",
+    "Your fingers trace familiar textures and your heightened hearing maps the space, but visual details elude you. 'Carlyle,' you say quietly, 'what do you see?'"
+  ],
+  "notes": [
+    "Messages 16-22 (indices in messages array)",
+    "Objects 6-10 are the PSI characters",
+    "Rules 33-39 handle character interactions and blindness mechanics",
+    "Carlyle (object 6) starts at location 0 (Study)",
+    "Rule 39 (PRO1) intercepts LOOK commands when Carlyle is absent",
+    "Players must ASK CARLYLE to get full visual descriptions when he's present",
+    "Hutchins, Mead, Pendleton, Parkinson are now examinable NPCs"
+  ]
+}

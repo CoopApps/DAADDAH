@@ -1,0 +1,511 @@
+#!/usr/bin/env node
+
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Default project path - can be overridden
+const DEFAULT_PROJECT_PATH = path.join(__dirname, '..', 'current_project.json');
+
+class DAADBuilderServer {
+  constructor() {
+    this.server = new Server(
+      {
+        name: 'daad-builder-mcp-server',
+        version: '1.0.0',
+      },
+      {
+        capabilities: {
+          tools: {},
+          resources: {},
+        },
+      }
+    );
+
+    this.projectPath = process.env.DAAD_PROJECT_PATH || DEFAULT_PROJECT_PATH;
+    this.setupToolHandlers();
+    this.setupResourceHandlers();
+
+    // Error handling
+    this.server.onerror = (error) => console.error('[MCP Error]', error);
+    process.on('SIGINT', async () => {
+      await this.server.close();
+      process.exit(0);
+    });
+  }
+
+  async loadProject() {
+    try {
+      const data = await fs.readFile(this.projectPath, 'utf-8');
+      return JSON.parse(data);
+    } catch (error) {
+      // Return empty project structure if file doesn't exist
+      return {
+        gameInfo: {
+          title: 'New DAAD Game',
+          author: '',
+          version: '1.0',
+          maxCarried: 4,
+          lightSourceId: null,
+          startLocation: 0,
+          startFlags: [],
+          vocabulary: [],
+          systemMessages: []
+        },
+        locations: [],
+        objects: [],
+        connections: [],
+        rules: [],
+        characters: []
+      };
+    }
+  }
+
+  async saveProject(project) {
+    await fs.writeFile(this.projectPath, JSON.stringify(project, null, 2), 'utf-8');
+  }
+
+  setupToolHandlers() {
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
+      tools: [
+        {
+          name: 'create_location',
+          description: 'Create a new location in the DAAD game. Locations are rooms or areas the player can visit.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'Name of the location (e.g., "Dark Forest", "Castle Gate")',
+              },
+              description: {
+                type: 'string',
+                description: 'Description shown when the player enters this location',
+              },
+              x: {
+                type: 'number',
+                description: 'X coordinate for visual map (optional)',
+                default: 0,
+              },
+              y: {
+                type: 'number',
+                description: 'Y coordinate for visual map (optional)',
+                default: 0,
+              },
+            },
+            required: ['name', 'description'],
+          },
+        },
+        {
+          name: 'create_object',
+          description: 'Create a new object in the DAAD game. Objects can be items, furniture, or anything the player can interact with.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'Name of the object (e.g., "rusty key", "wooden sword")',
+              },
+              description: {
+                type: 'string',
+                description: 'Description shown when examining the object',
+              },
+              location: {
+                type: 'number',
+                description: 'Initial location ID (252 = carried by player, 253 = worn, 254 = not created)',
+                default: 254,
+              },
+              noun: {
+                type: 'string',
+                description: 'Noun word for vocabulary (e.g., "key", "sword")',
+              },
+              adjective: {
+                type: 'string',
+                description: 'Adjective word for vocabulary (e.g., "rusty", "wooden", leave empty if none)',
+                default: '',
+              },
+              weight: {
+                type: 'number',
+                description: 'Object weight (affects carrying capacity)',
+                default: 1,
+              },
+            },
+            required: ['name', 'description', 'noun'],
+          },
+        },
+        {
+          name: 'create_connection',
+          description: 'Create a connection between two locations (e.g., a door, path, or exit).',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              from_location: {
+                type: 'number',
+                description: 'ID of the source location',
+              },
+              to_location: {
+                type: 'number',
+                description: 'ID of the destination location',
+              },
+              direction: {
+                type: 'string',
+                description: 'Direction of travel (n, s, e, w, ne, nw, se, sw, u, d, in, out)',
+                enum: ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw', 'u', 'd', 'in', 'out'],
+              },
+            },
+            required: ['from_location', 'to_location', 'direction'],
+          },
+        },
+        {
+          name: 'add_rule',
+          description: 'Add a game rule (response to player actions). Rules define how the game responds to commands.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              verb: {
+                type: 'string',
+                description: 'Verb that triggers this rule (e.g., "EXAMINE", "TAKE", "USE")',
+              },
+              noun: {
+                type: 'string',
+                description: 'Noun that triggers this rule (leave empty for any noun)',
+                default: '',
+              },
+              conditions: {
+                type: 'array',
+                description: 'Conditions that must be met (JSON array of condition objects)',
+                items: {
+                  type: 'object',
+                },
+                default: [],
+              },
+              actions: {
+                type: 'array',
+                description: 'Actions to perform when rule triggers (JSON array of action objects)',
+                items: {
+                  type: 'object',
+                },
+              },
+            },
+            required: ['verb', 'actions'],
+          },
+        },
+        {
+          name: 'list_locations',
+          description: 'List all locations in the current DAAD game project.',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+          },
+        },
+        {
+          name: 'list_objects',
+          description: 'List all objects in the current DAAD game project.',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+          },
+        },
+        {
+          name: 'get_game_info',
+          description: 'Get general information about the current DAAD game (title, author, settings).',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+          },
+        },
+        {
+          name: 'update_game_info',
+          description: 'Update general game information (title, author, settings).',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              title: {
+                type: 'string',
+                description: 'Game title',
+              },
+              author: {
+                type: 'string',
+                description: 'Author name',
+              },
+              version: {
+                type: 'string',
+                description: 'Game version',
+              },
+              maxCarried: {
+                type: 'number',
+                description: 'Maximum number of items player can carry',
+              },
+            },
+          },
+        },
+        {
+          name: 'set_project_path',
+          description: 'Set the path to the DAAD project file to work with.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              path: {
+                type: 'string',
+                description: 'Absolute path to the .json project file',
+              },
+            },
+            required: ['path'],
+          },
+        },
+      ],
+    }));
+
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const { name, arguments: args } = request.params;
+
+      try {
+        switch (name) {
+          case 'create_location': {
+            const project = await this.loadProject();
+            const newLocation = {
+              id: project.locations.length,
+              name: args.name,
+              description: args.description,
+              x: args.x || 0,
+              y: args.y || 0,
+            };
+            project.locations.push(newLocation);
+            await this.saveProject(project);
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Created location "${args.name}" with ID ${newLocation.id}`,
+                },
+              ],
+            };
+          }
+
+          case 'create_object': {
+            const project = await this.loadProject();
+            const newObject = {
+              id: project.objects.length,
+              name: args.name,
+              description: args.description,
+              location: args.location ?? 254,
+              noun: args.noun,
+              adjective: args.adjective || '',
+              weight: args.weight || 1,
+              attributes: {
+                isContainer: false,
+                isWearable: false,
+                isLightSource: false,
+              },
+            };
+            project.objects.push(newObject);
+
+            // Add to vocabulary if not already present
+            const vocabEntry = {
+              word: args.noun,
+              type: 'noun',
+              id: newObject.id,
+            };
+            if (!project.gameInfo.vocabulary.some(v => v.word === args.noun && v.type === 'noun')) {
+              project.gameInfo.vocabulary.push(vocabEntry);
+            }
+            if (args.adjective && !project.gameInfo.vocabulary.some(v => v.word === args.adjective && v.type === 'adjective')) {
+              project.gameInfo.vocabulary.push({
+                word: args.adjective,
+                type: 'adjective',
+                id: newObject.id,
+              });
+            }
+
+            await this.saveProject(project);
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Created object "${args.name}" with ID ${newObject.id}`,
+                },
+              ],
+            };
+          }
+
+          case 'create_connection': {
+            const project = await this.loadProject();
+            const newConnection = {
+              id: project.connections.length,
+              from: args.from_location,
+              to: args.to_location,
+              direction: args.direction,
+            };
+            project.connections.push(newConnection);
+            await this.saveProject(project);
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Created connection from location ${args.from_location} to ${args.to_location} (direction: ${args.direction})`,
+                },
+              ],
+            };
+          }
+
+          case 'add_rule': {
+            const project = await this.loadProject();
+            const newRule = {
+              id: project.rules.length,
+              verb: args.verb,
+              noun: args.noun || '',
+              conditions: args.conditions || [],
+              actions: args.actions,
+            };
+            project.rules.push(newRule);
+            await this.saveProject(project);
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Created rule for "${args.verb}${args.noun ? ' ' + args.noun : ''}" with ID ${newRule.id}`,
+                },
+              ],
+            };
+          }
+
+          case 'list_locations': {
+            const project = await this.loadProject();
+            const locationList = project.locations
+              .map((loc) => `ID ${loc.id}: ${loc.name} - ${loc.description}`)
+              .join('\n');
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Locations (${project.locations.length}):\n${locationList || 'No locations yet'}`,
+                },
+              ],
+            };
+          }
+
+          case 'list_objects': {
+            const project = await this.loadProject();
+            const objectList = project.objects
+              .map((obj) => `ID ${obj.id}: ${obj.name} - ${obj.description} (location: ${obj.location})`)
+              .join('\n');
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Objects (${project.objects.length}):\n${objectList || 'No objects yet'}`,
+                },
+              ],
+            };
+          }
+
+          case 'get_game_info': {
+            const project = await this.loadProject();
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(project.gameInfo, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'update_game_info': {
+            const project = await this.loadProject();
+            if (args.title) project.gameInfo.title = args.title;
+            if (args.author) project.gameInfo.author = args.author;
+            if (args.version) project.gameInfo.version = args.version;
+            if (args.maxCarried !== undefined) project.gameInfo.maxCarried = args.maxCarried;
+            await this.saveProject(project);
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'Game info updated successfully',
+                },
+              ],
+            };
+          }
+
+          case 'set_project_path': {
+            this.projectPath = args.path;
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Project path set to: ${this.projectPath}`,
+                },
+              ],
+            };
+          }
+
+          default:
+            throw new Error(`Unknown tool: ${name}`);
+        }
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    });
+  }
+
+  setupResourceHandlers() {
+    this.server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+      resources: [
+        {
+          uri: `daad://current-project`,
+          mimeType: 'application/json',
+          name: 'Current DAAD Project',
+          description: 'The currently loaded DAAD game project',
+        },
+      ],
+    }));
+
+    this.server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+      const uri = request.params.uri;
+
+      if (uri === 'daad://current-project') {
+        const project = await this.loadProject();
+        return {
+          contents: [
+            {
+              uri,
+              mimeType: 'application/json',
+              text: JSON.stringify(project, null, 2),
+            },
+          ],
+        };
+      }
+
+      throw new Error(`Unknown resource: ${uri}`);
+    });
+  }
+
+  async run() {
+    const transport = new StdioServerTransport();
+    await this.server.connect(transport);
+    console.error('DAAD Builder MCP server running on stdio');
+  }
+}
+
+const server = new DAADBuilderServer();
+server.run().catch(console.error);

@@ -1,0 +1,1538 @@
+import { useState, useEffect, useMemo } from "react";
+import { DaadGame, Rule, Condition, Action, ProcessTable, ConditionType, ActionType } from "../../types/daad";
+import { CONDITIONS, ACTIONS, getConditionsByCategory, getActionsByCategory } from "../../data/condacts";
+import Tooltip from "../Tooltip";
+import { getConditionHelp, getActionHelp, HELP_TEXT } from "../../data/helpText";
+import { isValidConditionType, isValidActionType } from "../../utils/condactTypes";
+import { useDebounce } from "../../hooks/useDebounce";
+import TemplateBrowser from "../rules/TemplateBrowser";
+import { RuleTemplate } from "../../data/ruleTemplates";
+
+interface RulesPanelProps {
+  game: DaadGame;
+  setGame: React.Dispatch<React.SetStateAction<DaadGame>>;
+  selectItemId?: number;
+}
+
+interface DeleteConfirmDialog {
+  show: boolean;
+  rule: Rule | null;
+}
+
+export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelProps) {
+  const [selectedRule, setSelectedRule] = useState<number | null>(null);
+  const [processFilter, setProcessFilter] = useState<ProcessTable | "all">("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [showConditions, setShowConditions] = useState(true);
+  const [showActions, setShowActions] = useState(true);
+  const [deleteDialog, setDeleteDialog] = useState<DeleteConfirmDialog>({
+    show: false,
+    rule: null,
+  });
+  const [draggedRuleId, setDraggedRuleId] = useState<number | null>(null);
+  const [dragOverRuleId, setDragOverRuleId] = useState<number | null>(null);
+  const [showTemplateBrowser, setShowTemplateBrowser] = useState(false);
+
+  // Auto-select item when selectItemId changes
+  useEffect(() => {
+    if (selectItemId !== undefined) {
+      setSelectedRule(selectItemId);
+    }
+  }, [selectItemId]);
+
+  // Keyboard shortcuts for moving rules
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedRule || processFilter !== "all" || debouncedSearchTerm) return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key === "ArrowUp") {
+        e.preventDefault();
+        moveRuleUp(selectedRule);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "ArrowDown") {
+        e.preventDefault();
+        moveRuleDown(selectedRule);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedRule, processFilter, debouncedSearchTerm]);
+
+  const getNextRuleId = (): number => {
+    if (!game.rules || (game.rules || []).length === 0) return 1;
+    return Math.max(...(game.rules || []).map(r => r.id)) + 1;
+  };
+
+  const addNewRule = () => {
+    const newId = getNextRuleId();
+    const newRule: Rule = {
+      id: newId,
+      name: `Rule ${newId}`,
+      process: "PRO0",
+      enabled: true,
+      conditions: [],
+      actions: [],
+    };
+
+    setGame(prev => ({
+      ...prev,
+      rules: [...(prev.rules || []), newRule],
+    }));
+
+    setSelectedRule(newRule.id);
+  };
+
+  const addRuleFromTemplate = (template: RuleTemplate) => {
+    const newId = getNextRuleId();
+    // Convert template string conditions/actions to proper Condition/Action objects
+    const parseCondition = (str: string): Condition => {
+      const parts = str.split(' ');
+      const type = parts[0] as ConditionType;
+      const params: Record<string, unknown> = {};
+      // Simple numeric parameter parsing
+      if (parts.length > 1) params.value = parseInt(parts[1], 10) || 0;
+      if (parts.length > 2) params.value2 = parseInt(parts[2], 10) || 0;
+      return { type, params };
+    };
+    const parseAction = (str: string): Action => {
+      const parts = str.split(' ');
+      const type = parts[0] as ActionType;
+      const params: Record<string, unknown> = {};
+      if (parts.length > 1) params.value = parseInt(parts[1], 10) || 0;
+      if (parts.length > 2) params.value2 = parseInt(parts[2], 10) || 0;
+      return { type, params };
+    };
+
+    const newRule: Rule = {
+      id: newId,
+      name: template.rule.name,
+      process: template.rule.process,
+      enabled: template.rule.enabled,
+      conditions: template.rule.conditions.map(parseCondition),
+      actions: template.rule.actions.map(parseAction),
+    };
+
+    setGame(prev => ({
+      ...prev,
+      rules: [...(prev.rules || []), newRule],
+    }));
+
+    setSelectedRule(newRule.id);
+  };
+
+  const duplicateRule = (rule: Rule) => {
+    const newId = getNextRuleId();
+    const duplicatedRule: Rule = {
+      ...rule,
+      id: newId,
+      name: `${rule.name} (Copy)`,
+    };
+
+    setGame(prev => ({
+      ...prev,
+      rules: [...(prev.rules || []), duplicatedRule],
+    }));
+
+    setSelectedRule(newId);
+  };
+
+  const handleDeleteRule = (rule: Rule) => {
+    setDeleteDialog({ show: true, rule });
+  };
+
+  const confirmDeleteRule = () => {
+    if (!deleteDialog.rule) return;
+
+    const ruleId = deleteDialog.rule.id;
+    setGame(prev => ({
+      ...prev,
+      rules: (prev.rules || []).filter(r => r.id !== ruleId),
+    }));
+
+    if (selectedRule === ruleId) {
+      setSelectedRule(null);
+    }
+
+    setDeleteDialog({ show: false, rule: null });
+  };
+
+  const updateRule = (ruleId: number, updates: Partial<Rule>) => {
+    setGame(prev => ({
+      ...prev,
+      rules: (prev.rules || []).map(r => r.id === ruleId ? { ...r, ...updates } : r),
+    }));
+  };
+
+  const reorderRules = (draggedId: number, targetId: number) => {
+    setGame(prev => {
+      const rules = [...(prev.rules || [])];
+      const draggedIndex = rules.findIndex(r => r.id === draggedId);
+      const targetIndex = rules.findIndex(r => r.id === targetId);
+
+      if (draggedIndex === -1 || targetIndex === -1) return prev;
+
+      const [draggedRule] = rules.splice(draggedIndex, 1);
+      rules.splice(targetIndex, 0, draggedRule);
+
+      return { ...prev, rules };
+    });
+  };
+
+  const moveRuleUp = (ruleId: number) => {
+    setGame(prev => {
+      const rules = [...(prev.rules || [])];
+      const index = rules.findIndex(r => r.id === ruleId);
+
+      if (index <= 0) return prev;
+
+      [rules[index - 1], rules[index]] = [rules[index], rules[index - 1]];
+
+      return { ...prev, rules };
+    });
+  };
+
+  const moveRuleDown = (ruleId: number) => {
+    setGame(prev => {
+      const rules = [...(prev.rules || [])];
+      const index = rules.findIndex(r => r.id === ruleId);
+
+      if (index === -1 || index >= rules.length - 1) return prev;
+
+      [rules[index], rules[index + 1]] = [rules[index + 1], rules[index]];
+
+      return { ...prev, rules };
+    });
+  };
+
+  const addCondition = (ruleId: number, conditionType: string) => {
+    // Validate that conditionType is a valid ConditionType
+    if (!isValidConditionType(conditionType)) {
+      console.error(`Invalid condition type: ${conditionType}`);
+      return;
+    }
+
+    const newCondition: Condition = {
+      type: conditionType as ConditionType,
+      params: getDefaultParams(conditionType),
+    };
+
+    setGame(prev => ({
+      ...prev,
+      rules: (prev.rules || []).map(r =>
+        r.id === ruleId ? { ...r, conditions: [...r.conditions, newCondition] } : r
+      ),
+    }));
+  };
+
+  const updateCondition = (ruleId: number, index: number, params: Record<string, unknown>) => {
+    setGame(prev => ({
+      ...prev,
+      rules: (prev.rules || []).map(r =>
+        r.id === ruleId
+          ? {
+              ...r,
+              conditions: r.conditions.map((c, i) =>
+                i === index ? { ...c, params } : c
+              ),
+            }
+          : r
+      ),
+    }));
+  };
+
+  const deleteCondition = (ruleId: number, index: number) => {
+    setGame(prev => ({
+      ...prev,
+      rules: (prev.rules || []).map(r =>
+        r.id === ruleId
+          ? { ...r, conditions: r.conditions.filter((_, i) => i !== index) }
+          : r
+      ),
+    }));
+  };
+
+  const moveCondition = (ruleId: number, fromIndex: number, toIndex: number) => {
+    setGame(prev => ({
+      ...prev,
+      rules: (prev.rules || []).map(r => {
+        if (r.id !== ruleId) return r;
+        const newConditions = [...r.conditions];
+        const [moved] = newConditions.splice(fromIndex, 1);
+        newConditions.splice(toIndex, 0, moved);
+        return { ...r, conditions: newConditions };
+      }),
+    }));
+  };
+
+  const addAction = (ruleId: number, actionType: string) => {
+    // Validate that actionType is a valid ActionType
+    if (!isValidActionType(actionType)) {
+      console.error(`Invalid action type: ${actionType}`);
+      return;
+    }
+
+    const newAction: Action = {
+      type: actionType as ActionType,
+      params: getDefaultParams(actionType),
+    };
+
+    setGame(prev => ({
+      ...prev,
+      rules: (prev.rules || []).map(r =>
+        r.id === ruleId ? { ...r, actions: [...r.actions, newAction] } : r
+      ),
+    }));
+  };
+
+  const updateAction = (ruleId: number, index: number, params: Record<string, unknown>) => {
+    setGame(prev => ({
+      ...prev,
+      rules: (prev.rules || []).map(r =>
+        r.id === ruleId
+          ? {
+              ...r,
+              actions: r.actions.map((a, i) => (i === index ? { ...a, params } : a)),
+            }
+          : r
+      ),
+    }));
+  };
+
+  const deleteAction = (ruleId: number, index: number) => {
+    setGame(prev => ({
+      ...prev,
+      rules: (prev.rules || []).map(r =>
+        r.id === ruleId ? { ...r, actions: r.actions.filter((_, i) => i !== index) } : r
+      ),
+    }));
+  };
+
+  const moveAction = (ruleId: number, fromIndex: number, toIndex: number) => {
+    setGame(prev => ({
+      ...prev,
+      rules: (prev.rules || []).map(r => {
+        if (r.id !== ruleId) return r;
+        const newActions = [...r.actions];
+        const [moved] = newActions.splice(fromIndex, 1);
+        newActions.splice(toIndex, 0, moved);
+        return { ...r, actions: newActions };
+      }),
+    }));
+  };
+
+  const applyTemplate = (templateType: string) => {
+    const ruleId = getNextRuleId();
+    let newRule: Rule;
+
+    switch (templateType) {
+      case "takeObject":
+        newRule = {
+          id: ruleId,
+          name: "Take Object",
+          process: "PRO0",
+          enabled: true,
+          conditions: [
+            { type: "PRESENT", params: { objno: 0 } },
+          ],
+          actions: [
+            { type: "GET", params: { objno: 0 } },
+            { type: "DONE", params: {} },
+          ],
+        };
+        break;
+
+      case "dropObject":
+        newRule = {
+          id: ruleId,
+          name: "Drop Object",
+          process: "PRO0",
+          enabled: true,
+          conditions: [
+            { type: "CARRIED", params: { objno: 0 } },
+          ],
+          actions: [
+            { type: "DROP", params: { objno: 0 } },
+            { type: "DONE", params: {} },
+          ],
+        };
+        break;
+
+      case "examineObject":
+        newRule = {
+          id: ruleId,
+          name: "Examine Object",
+          process: "PRO0",
+          enabled: true,
+          conditions: [
+            { type: "PRESENT", params: { objno: 0 } },
+          ],
+          actions: [
+            { type: "MESSAGE", params: { mesno: 0 } },
+            { type: "DONE", params: {} },
+          ],
+        };
+        break;
+
+      case "useItemOn":
+        newRule = {
+          id: ruleId,
+          name: "Use Item On Target",
+          process: "PRO0",
+          enabled: true,
+          conditions: [
+            { type: "CARRIED", params: { objno: 0 } },
+            { type: "PRESENT", params: { objno: 1 } },
+          ],
+          actions: [
+            { type: "MESSAGE", params: { mesno: 0 } },
+            { type: "DONE", params: {} },
+          ],
+        };
+        break;
+
+      case "unlockDoor":
+        newRule = {
+          id: ruleId,
+          name: "Unlock Door",
+          process: "PRO0",
+          enabled: true,
+          conditions: [
+            { type: "CARRIED", params: { objno: 0 } },
+            { type: "AT", params: { locno: 0 } },
+          ],
+          actions: [
+            { type: "SET", params: { flagno: 1 } },
+            { type: "MESSAGE", params: { mesno: 0 } },
+            { type: "DONE", params: {} },
+          ],
+        };
+        break;
+
+      default:
+        return;
+    }
+
+    setGame(prev => ({
+      ...prev,
+      rules: [...prev.rules, newRule],
+    }));
+
+    setSelectedRule(newRule.id);
+  };
+
+  const getDefaultParams = (type: string): Record<string, unknown> => {
+    const condDef = CONDITIONS[type as ConditionType];
+    const actionDef = ACTIONS[type as ActionType];
+    const def = condDef || actionDef;
+
+    if (!def) return {};
+
+    const params: Record<string, unknown> = {};
+    def.params.forEach(param => {
+      switch (param.type) {
+        case "location":
+        case "object":
+        case "flag":
+        case "value":
+        case "percent":
+        case "window":
+        case "color":
+        case "option":
+        case "message":
+          params[param.name] = 0;
+          break;
+        case "word":
+        case "string":
+          params[param.name] = "";
+          break;
+        default:
+          params[param.name] = 0;
+      }
+    });
+
+    return params;
+  };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedRule) return;
+
+      if ((e.key === "Delete" || e.key === "Backspace") &&
+          document.activeElement?.tagName !== "INPUT" &&
+          document.activeElement?.tagName !== "TEXTAREA" &&
+          document.activeElement?.tagName !== "SELECT") {
+        const rule = game.rules?.find(r => r.id === selectedRule);
+        if (rule) {
+          e.preventDefault();
+          handleDeleteRule(rule);
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "d") {
+        e.preventDefault();
+        const rule = game.rules?.find(r => r.id === selectedRule);
+        if (rule) duplicateRule(rule);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedRule, game.rules]);
+
+  const filteredRules = useMemo(() => {
+    return (game.rules || []).filter(r => {
+      const matchesProcess = processFilter === "all" || r.process === processFilter;
+      const matchesSearch = debouncedSearchTerm === "" ||
+        r.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      return matchesProcess && matchesSearch;
+    });
+  }, [game.rules, processFilter, debouncedSearchTerm]);
+
+  const selectedRuleData = useMemo(
+    () => game.rules?.find(r => r.id === selectedRule),
+    [game.rules, selectedRule]
+  );
+
+  return (
+    <div className="panel-content" style={{ display: "flex", gap: 20, height: "calc(100vh - 180px)" }}>
+      {/* Delete Confirmation Dialog */}
+      {deleteDialog.show && deleteDialog.rule && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div className="card" style={{ maxWidth: 500, padding: 24 }}>
+            <h3 style={{ marginBottom: 16, color: "var(--red-bright)" }}>⚠️ Delete Rule?</h3>
+            <p style={{ marginBottom: 16 }}>
+              Are you sure you want to delete <strong>{deleteDialog.rule.name}</strong>?
+            </p>
+            <div style={{ backgroundColor: "rgba(255, 0, 0, 0.1)", padding: 12, borderRadius: 4, marginBottom: 16 }}>
+              <p style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>
+                <strong>This will permanently delete:</strong>
+              </p>
+              <ul style={{ fontSize: 12, color: "var(--text-dim)", marginLeft: 20 }}>
+                <li>{deleteDialog.rule.conditions.length} condition(s)</li>
+                <li>{deleteDialog.rule.actions.length} action(s)</li>
+                <li>Process: {deleteDialog.rule.process}</li>
+                <li>This action cannot be undone (use Ctrl+Z after closing this dialog)</li>
+              </ul>
+            </div>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button className="btn btn-danger" onClick={confirmDeleteRule}>
+                Yes, Delete Rule
+              </button>
+              <button className="btn btn-secondary" onClick={() => setDeleteDialog({ show: false, rule: null })}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rules List */}
+      <div style={{ width: 280, display: "flex", flexDirection: "column" }}>
+        <div style={{ marginBottom: 12, display: "flex", gap: 8, flexDirection: "column" }}>
+          <button className="btn btn-primary" onClick={addNewRule}>
+            + New Rule
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setShowTemplateBrowser(true)}
+            style={{
+              background: "rgba(0, 255, 65, 0.1)",
+              borderColor: "var(--green-bright)",
+              color: "var(--green-bright)"
+            }}
+          >
+            📚 Browse Templates
+          </button>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
+            Quick Templates:
+          </div>
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+            <button
+              className="btn btn-secondary"
+              onClick={() => applyTemplate("takeObject")}
+              style={{ fontSize: 10, padding: "4px 8px" }}
+              title="Create Take Object rule"
+            >
+              Take
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => applyTemplate("dropObject")}
+              style={{ fontSize: 10, padding: "4px 8px" }}
+              title="Create Drop Object rule"
+            >
+              Drop
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => applyTemplate("examineObject")}
+              style={{ fontSize: 10, padding: "4px 8px" }}
+              title="Create Examine Object rule"
+            >
+              Examine
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => applyTemplate("useItemOn")}
+              style={{ fontSize: 10, padding: "4px 8px" }}
+              title="Create Use Item On rule"
+            >
+              Use On
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => applyTemplate("unlockDoor")}
+              style={{ fontSize: 10, padding: "4px 8px" }}
+              title="Create Unlock Door rule"
+            >
+              Unlock
+            </button>
+          </div>
+        </div>
+
+        {/* Search */}
+        <input
+          type="text"
+          className="form-input"
+          placeholder="Search rules..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ fontSize: 12, marginBottom: 8 }}
+        />
+
+        {/* Process Filter */}
+        <Tooltip content="Process tables control when rules run. PRO0=main commands, PRO1=intercept, PRO2=automatic after actions">
+          <select
+            className="form-input form-select"
+            value={processFilter}
+            onChange={(e) => setProcessFilter(e.target.value as ProcessTable | "all")}
+            style={{ fontSize: 11, marginBottom: 12 }}
+          >
+            <option value="all">All Processes</option>
+            <option value="PRO0">PRO 0 (Main Commands)</option>
+            <option value="PRO1">PRO 1 (Intercept)</option>
+            <option value="PRO2">PRO 2 (Automatic)</option>
+            <option value="PRO3">PRO 3 (System)</option>
+          </select>
+        </Tooltip>
+
+        <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8, color: "var(--green-bright)" }}>
+          RULES ({filteredRules.length}/{(game.rules || []).length})
+        </div>
+
+        {processFilter === "all" && !debouncedSearchTerm && (game.rules || []).length > 1 && (
+          <div style={{
+            fontSize: 10,
+            color: "var(--text-dim)",
+            marginBottom: 8,
+            padding: 8,
+            background: "rgba(0, 255, 65, 0.05)",
+            border: "1px solid rgba(0, 255, 65, 0.2)",
+            borderRadius: 4
+          }}>
+            💡 Reorder rules: Drag ⋮⋮ handle • Click ▲▼ buttons • Ctrl+↑↓ keys
+          </div>
+        )}
+
+        {(processFilter !== "all" || debouncedSearchTerm) && (
+          <div style={{
+            fontSize: 10,
+            color: "var(--amber)",
+            marginBottom: 8,
+            padding: 8,
+            background: "rgba(255, 193, 7, 0.05)",
+            border: "1px solid rgba(255, 193, 7, 0.2)",
+            borderRadius: 4
+          }}>
+            ⚠ Clear filters to enable drag-and-drop reordering
+          </div>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1, overflowY: "auto" }}>
+          {filteredRules.map(rule => (
+            <div
+              key={rule.id}
+              className="card"
+              draggable={processFilter === "all" && !debouncedSearchTerm}
+              onDragStart={(e) => {
+                if (processFilter === "all" && !debouncedSearchTerm) {
+                  setDraggedRuleId(rule.id);
+                  e.dataTransfer.effectAllowed = "move";
+                }
+              }}
+              onDragOver={(e) => {
+                if (draggedRuleId !== null && draggedRuleId !== rule.id && processFilter === "all" && !debouncedSearchTerm) {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  setDragOverRuleId(rule.id);
+                }
+              }}
+              onDragLeave={() => {
+                setDragOverRuleId(null);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (draggedRuleId !== null && draggedRuleId !== rule.id && processFilter === "all" && !debouncedSearchTerm) {
+                  reorderRules(draggedRuleId, rule.id);
+                }
+                setDraggedRuleId(null);
+                setDragOverRuleId(null);
+              }}
+              onDragEnd={() => {
+                setDraggedRuleId(null);
+                setDragOverRuleId(null);
+              }}
+              onClick={() => setSelectedRule(rule.id)}
+              style={{
+                cursor: processFilter === "all" && !debouncedSearchTerm ? "grab" : "pointer",
+                borderColor:
+                  selectedRule === rule.id ? "var(--green-bright)" :
+                  dragOverRuleId === rule.id ? "var(--amber)" :
+                  undefined,
+                opacity: rule.enabled ? (draggedRuleId === rule.id ? 0.5 : 1) : 0.5,
+                backgroundColor: dragOverRuleId === rule.id ? "rgba(255, 193, 7, 0.1)" : undefined,
+                transition: "all 0.2s",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {processFilter === "all" && !debouncedSearchTerm && (
+                  <span style={{ color: "var(--text-dim)", cursor: "grab", fontSize: 16 }} title="Drag to reorder">
+                    ⋮⋮
+                  </span>
+                )}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, marginBottom: 4 }}>
+                    {rule.enabled ? "✓" : "✗"} {rule.name}
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--text-dim)" }}>
+                    {rule.process} • {rule.conditions.length}C • {rule.actions.length}A
+                  </div>
+                </div>
+                {processFilter === "all" && !debouncedSearchTerm && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveRuleUp(rule.id);
+                      }}
+                      disabled={(game.rules || []).findIndex(r => r.id === rule.id) === 0}
+                      style={{
+                        background: "none",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: 3,
+                        color: "var(--text-dim)",
+                        cursor: "pointer",
+                        padding: "2px 6px",
+                        fontSize: 10,
+                        opacity: (game.rules || []).findIndex(r => r.id === rule.id) === 0 ? 0.3 : 1,
+                      }}
+                      title="Move up (Ctrl+↑)"
+                    >
+                      ▲
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveRuleDown(rule.id);
+                      }}
+                      disabled={(game.rules || []).findIndex(r => r.id === rule.id) === (game.rules || []).length - 1}
+                      style={{
+                        background: "none",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: 3,
+                        color: "var(--text-dim)",
+                        cursor: "pointer",
+                        padding: "2px 6px",
+                        fontSize: 10,
+                        opacity: (game.rules || []).findIndex(r => r.id === rule.id) === (game.rules || []).length - 1 ? 0.3 : 1,
+                      }}
+                      title="Move down (Ctrl+↓)"
+                    >
+                      ▼
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {filteredRules.length === 0 && (
+            <div style={{ textAlign: "center", color: "var(--text-dim)", padding: 40 }}>
+              {debouncedSearchTerm ? "No rules match your search" : "No rules found. Click 'Add Rule' to create one."}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Rule Editor */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto" }}>
+        {selectedRuleData ? (
+          <div>
+            {/* Sticky Header */}
+            <div className="card" style={{ marginBottom: 16, position: "sticky", top: 0, zIndex: 10 }}>
+              <div className="form-group">
+                <label className="form-label">Rule Name</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={selectedRuleData.name}
+                  onChange={(e) => updateRule(selectedRuleData.id, { name: e.target.value.slice(0, 50) })}
+                  maxLength={50}
+                  aria-label="Rule name"
+                />
+                {selectedRuleData.name.length >= 45 && (
+                  <span style={{ fontSize: 10, color: selectedRuleData.name.length >= 50 ? "var(--red-bright)" : "var(--amber-bright)" }}>
+                    {selectedRuleData.name.length}/50 characters
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto auto", gap: 12 }}>
+                <div className="form-group">
+                  <label className="form-label">Process Table</label>
+                  <select
+                    className="form-input form-select"
+                    value={selectedRuleData.process}
+                    onChange={(e) => updateRule(selectedRuleData.id, { process: e.target.value as ProcessTable })}
+                    style={{ fontSize: 12 }}
+                  >
+                    <option value="PRO0">PRO 0</option>
+                    <option value="PRO1">PRO 1</option>
+                    <option value="PRO2">PRO 2</option>
+                    <option value="PRO3">PRO 3</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Status</label>
+                  <label style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedRuleData.enabled}
+                      onChange={(e) => updateRule(selectedRuleData.id, { enabled: e.target.checked })}
+                      style={{ width: 16, height: 16 }}
+                    />
+                    <span style={{ fontSize: 12, color: selectedRuleData.enabled ? "var(--green-bright)" : "var(--text-dim)" }}>
+                      {selectedRuleData.enabled ? "Enabled" : "Disabled"}
+                    </span>
+                  </label>
+                </div>
+
+                <button
+                  className="btn btn-secondary"
+                  style={{ marginTop: 24, fontSize: 11, padding: "6px 12px" }}
+                  onClick={() => duplicateRule(selectedRuleData)}
+                  title="Duplicate this rule (Ctrl+D)"
+                >
+                  Duplicate
+                </button>
+
+                <button
+                  className="btn btn-danger"
+                  style={{ marginTop: 24, fontSize: 11, padding: "6px 12px" }}
+                  onClick={() => handleDeleteRule(selectedRuleData)}
+                  title="Delete this rule (Delete key)"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            {/* Conditions Section */}
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <h3 style={{ fontSize: 16, color: "var(--cyan-bright)", margin: 0 }}>
+                  Conditions ({selectedRuleData.conditions.length})
+                </h3>
+                <button
+                  className="btn btn-secondary"
+                  style={{ fontSize: 10, padding: "4px 8px" }}
+                  onClick={() => setShowConditions(!showConditions)}
+                >
+                  {showConditions ? "▼ Hide" : "▶ Show"}
+                </button>
+              </div>
+
+              {showConditions && (
+                <>
+                  <select
+                    className="form-input form-select"
+                    style={{ marginBottom: 12, fontSize: 11 }}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        addCondition(selectedRuleData.id, e.target.value);
+                        e.target.value = "";
+                      }
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="">+ Add Condition...</option>
+                    {Object.entries(getConditionsByCategory()).map(([category, conds]) => (
+                      <optgroup key={category} label={category}>
+                        {conds.map(cond => (
+                          <option key={cond.type} value={cond.type} title={cond.description}>
+                            {cond.type}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {selectedRuleData.conditions.map((cond, index) => (
+                      <ConditionEditor
+                        key={index}
+                        condition={cond}
+                        index={index}
+                        total={selectedRuleData.conditions.length}
+                        game={game}
+                        onUpdate={(params) => updateCondition(selectedRuleData.id, index, params)}
+                        onDelete={() => deleteCondition(selectedRuleData.id, index)}
+                        onMoveUp={() => index > 0 && moveCondition(selectedRuleData.id, index, index - 1)}
+                        onMoveDown={() => index < selectedRuleData.conditions.length - 1 && moveCondition(selectedRuleData.id, index, index + 1)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Actions Section */}
+            <div className="card">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <h3 style={{ fontSize: 16, color: "var(--green-bright)", margin: 0 }}>
+                  Actions ({selectedRuleData.actions.length})
+                </h3>
+                <button
+                  className="btn btn-secondary"
+                  style={{ fontSize: 10, padding: "4px 8px" }}
+                  onClick={() => setShowActions(!showActions)}
+                >
+                  {showActions ? "▼ Hide" : "▶ Show"}
+                </button>
+              </div>
+
+              {showActions && (
+                <>
+                  <select
+                    className="form-input form-select"
+                    style={{ marginBottom: 12, fontSize: 11 }}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        addAction(selectedRuleData.id, e.target.value);
+                        e.target.value = "";
+                      }
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="">+ Add Action...</option>
+                    {Object.entries(getActionsByCategory()).map(([category, actions]) => (
+                      <optgroup key={category} label={category}>
+                        {actions.map(action => (
+                          <option key={action.type} value={action.type} title={action.description}>
+                            {action.type}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {selectedRuleData.actions.map((action, index) => (
+                      <ActionEditor
+                        key={index}
+                        action={action}
+                        index={index}
+                        total={selectedRuleData.actions.length}
+                        game={game}
+                        onUpdate={(params) => updateAction(selectedRuleData.id, index, params)}
+                        onDelete={() => deleteAction(selectedRuleData.id, index)}
+                        onMoveUp={() => index > 0 && moveAction(selectedRuleData.id, index, index - 1)}
+                        onMoveDown={() => index < selectedRuleData.actions.length - 1 && moveAction(selectedRuleData.id, index, index + 1)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="card" style={{ textAlign: "center", padding: 40 }}>
+            <p style={{ color: "var(--text-dim)", fontSize: 16 }}>Select a rule to edit</p>
+            <p style={{ color: "var(--text-dim)", fontSize: 12, marginTop: 8 }}>
+              or create a new one to get started
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Template Browser */}
+      {showTemplateBrowser && (
+        <TemplateBrowser
+          onSelectTemplate={addRuleFromTemplate}
+          onClose={() => setShowTemplateBrowser(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Condition Editor Component
+function ConditionEditor({
+  condition,
+  index,
+  total,
+  game,
+  onUpdate,
+  onDelete,
+  onMoveUp,
+  onMoveDown,
+}: {
+  condition: Condition;
+  index: number;
+  total: number;
+  game: DaadGame;
+  onUpdate: (params: Record<string, unknown>) => void;
+  onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+}) {
+  const condDef = CONDITIONS[condition.type];
+  const label = condDef ? `${condDef.type}` : condition.type;
+  const description = condDef?.description || "";
+
+  const renderParamInput = (param: { name: string; type: string; description: string; optional?: boolean }) => {
+    const paramValue = condition.params[param.name];
+
+    switch (param.type) {
+      case "location":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <select
+              className="form-input form-select"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? (param.optional ? 255 : 0))}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val === 255) {
+                  // Remove the parameter entirely when "Ignore" is selected
+                  const newParams = { ...condition.params };
+                  delete newParams[param.name];
+                  onUpdate(newParams);
+                } else {
+                  onUpdate({ ...condition.params, [param.name]: val });
+                }
+              }}
+            >
+              {param.optional && <option value="255">— Ignore —</option>}
+              {(game.locations || []).length === 0 ? (
+                <option value="0">No locations</option>
+              ) : (
+                (game.locations || []).map(loc => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.id}: {loc.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+        );
+
+      case "object":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <select
+              className="form-input form-select"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? 0)}
+              onChange={(e) => onUpdate({ ...condition.params, [param.name]: Number(e.target.value) })}
+            >
+              {(game.objects || []).length === 0 ? (
+                <option value="0">No objects</option>
+              ) : (
+                (game.objects || []).map(obj => (
+                  <option key={obj.id} value={obj.id}>
+                    {obj.id}: {obj.adjective} {obj.noun}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+        );
+
+      case "flag":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <select
+              className="form-input form-select"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? 1)}
+              onChange={(e) => onUpdate({ ...condition.params, [param.name]: Number(e.target.value) })}
+            >
+              {(game.flags || []).map(flag => (
+                <option key={flag.id} value={flag.id}>
+                  {flag.id}: {flag.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+
+      case "word":
+        // Filter vocabulary by word type based on parameter name
+        const filteredVocab = (() => {
+          if (param.name === "verb") {
+            const verbs = (game.vocabulary || []).filter(v => v.wordType === "verb");
+            console.log("[RulesPanel] Filtering verbs:", verbs);
+            return verbs;
+          } else if (param.name === "noun") {
+            const nouns = (game.vocabulary || []).filter(v => v.wordType === "noun");
+            console.log("[RulesPanel] Filtering nouns:", nouns);
+            return nouns;
+          } else if (param.name === "adjective") {
+            return (game.vocabulary || []).filter(v => v.wordType === "adjective");
+          } else if (param.name === "adverb") {
+            return (game.vocabulary || []).filter(v => v.wordType === "adverb");
+          }
+          console.log("[RulesPanel] No filter, showing all vocabulary:", game.vocabulary);
+          return game.vocabulary; // Show all if parameter name doesn't match
+        })();
+
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <select
+              className="form-input form-select"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? (param.optional ? 255 : ""))}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "255") {
+                  // Remove the parameter entirely when "Ignore" is selected
+                  const newParams = { ...condition.params };
+                  delete newParams[param.name];
+                  onUpdate(newParams);
+                } else {
+                  onUpdate({ ...condition.params, [param.name]: Number(val) });
+                }
+              }}
+            >
+              {param.optional && <option value="255">— Ignore —</option>}
+              {filteredVocab.length === 0 ? (
+                <option value="">No {param.name}s in vocabulary</option>
+              ) : (
+                <>
+                  <option value="">Select {param.name}...</option>
+                  {filteredVocab.map(vocab => (
+                    <option key={vocab.id} value={vocab.id}>
+                      {vocab.id}: {vocab.word}
+                    </option>
+                  ))}
+                </>
+              )}
+            </select>
+          </div>
+        );
+
+      case "value":
+      case "percent":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 80 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <input
+              type="number"
+              className="form-input"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? 0)}
+              onChange={(e) => onUpdate({ ...condition.params, [param.name]: Number(e.target.value) })}
+              placeholder={param.type === "percent" ? "0-100" : "value"}
+              min={param.type === "percent" ? 0 : 0}
+              max={param.type === "percent" ? 100 : 255}
+            />
+          </div>
+        );
+
+      case "string":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? "")}
+              onChange={(e) => onUpdate({ ...condition.params, [param.name]: e.target.value })}
+              placeholder={param.description}
+            />
+          </div>
+        );
+
+      default:
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 80 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <input
+              type="number"
+              className="form-input"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? 0)}
+              onChange={(e) => onUpdate({ ...condition.params, [param.name]: Number(e.target.value) })}
+              min={0}
+              max={255}
+            />
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div
+      style={{
+        padding: 8,
+        backgroundColor: "rgba(0, 255, 255, 0.1)",
+        borderRadius: 4,
+        display: "flex",
+        gap: 8,
+        alignItems: "flex-start",
+        border: "1px solid rgba(0, 255, 255, 0.3)",
+      }}
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <button
+          className="btn btn-secondary"
+          style={{ fontSize: 10, padding: "2px 6px", minWidth: 24 }}
+          onClick={onMoveUp}
+          disabled={index === 0}
+          title="Move up"
+        >
+          ▲
+        </button>
+        <button
+          className="btn btn-secondary"
+          style={{ fontSize: 10, padding: "2px 6px", minWidth: 24 }}
+          onClick={onMoveDown}
+          disabled={index === total - 1}
+          title="Move down"
+        >
+          ▼
+        </button>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 11, color: "var(--cyan-bright)", marginBottom: 6, fontWeight: 500 }} title={description}>
+          {label}
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {condDef && condDef.params.map(param => renderParamInput(param))}
+          {!condDef && (
+            <div style={{ fontSize: 10, color: "var(--text-dim)" }}>
+              Unknown condition type: {condition.type}
+            </div>
+          )}
+        </div>
+      </div>
+      <button
+        className="btn btn-danger"
+        style={{ fontSize: 10, padding: "4px 8px" }}
+        onClick={onDelete}
+        title="Delete condition"
+      >
+        ✕
+      </button>
+    </div>
+  );
+}
+
+// Action Editor Component (similar structure, continuing in next message due to length)
+function ActionEditor({
+  action,
+  index,
+  total,
+  game,
+  onUpdate,
+  onDelete,
+  onMoveUp,
+  onMoveDown,
+}: {
+  action: Action;
+  index: number;
+  total: number;
+  game: DaadGame;
+  onUpdate: (params: Record<string, unknown>) => void;
+  onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+}) {
+  const actionDef = ACTIONS[action.type];
+  const label = actionDef ? `${actionDef.type}` : action.type;
+  const description = actionDef?.description || "";
+
+  const renderParamInput = (param: { name: string; type: string; description: string }) => {
+    const paramValue = action.params[param.name];
+
+    switch (param.type) {
+      case "location":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <select
+              className="form-input form-select"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? 0)}
+              onChange={(e) => onUpdate({ ...action.params, [param.name]: Number(e.target.value) })}
+            >
+              {(game.locations || []).length === 0 ? (
+                <option value="0">No locations</option>
+              ) : (
+                (game.locations || []).map(loc => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.id}: {loc.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+        );
+
+      case "object":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <select
+              className="form-input form-select"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? 0)}
+              onChange={(e) => onUpdate({ ...action.params, [param.name]: Number(e.target.value) })}
+            >
+              {(game.objects || []).length === 0 ? (
+                <option value="0">No objects</option>
+              ) : (
+                (game.objects || []).map(obj => (
+                  <option key={obj.id} value={obj.id}>
+                    {obj.id}: {obj.adjective} {obj.noun}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+        );
+
+      case "flag":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <select
+              className="form-input form-select"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? 1)}
+              onChange={(e) => onUpdate({ ...action.params, [param.name]: Number(e.target.value) })}
+            >
+              {(game.flags || []).map(flag => (
+                <option key={flag.id} value={flag.id}>
+                  {flag.id}: {flag.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+
+      case "message":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <select
+              className="form-input form-select"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? 0)}
+              onChange={(e) => onUpdate({ ...action.params, [param.name]: Number(e.target.value) })}
+            >
+              {(game.messages || []).length === 0 ? (
+                <option value="0">No messages</option>
+              ) : (
+                (game.messages || []).map((msg, idx) => (
+                  <option key={idx} value={idx}>
+                    {idx}: {msg.substring(0, 30)}{msg.length > 30 ? "..." : ""}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+        );
+
+      case "word":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <select
+              className="form-input form-select"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? "")}
+              onChange={(e) => onUpdate({ ...action.params, [param.name]: e.target.value })}
+            >
+              <option value="">Select word...</option>
+              {(game.vocabulary || []).map(vocab => (
+                <option key={vocab.id} value={vocab.word}>
+                  {vocab.word} ({vocab.wordType})
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+
+      case "value":
+      case "percent":
+      case "color":
+      case "window":
+      case "option":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 80 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <input
+              type="number"
+              className="form-input"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? 0)}
+              onChange={(e) => onUpdate({ ...action.params, [param.name]: Number(e.target.value) })}
+              placeholder={param.type === "percent" ? "0-100" : param.type === "color" ? "0-7" : "value"}
+              min={param.type === "percent" ? 0 : param.type === "color" ? 0 : 0}
+              max={param.type === "percent" ? 100 : param.type === "color" ? 7 : 255}
+            />
+          </div>
+        );
+
+      case "string":
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 120 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? "")}
+              onChange={(e) => onUpdate({ ...action.params, [param.name]: e.target.value })}
+              placeholder={param.description}
+            />
+          </div>
+        );
+
+      default:
+        return (
+          <div key={param.name} style={{ flex: 1, minWidth: 80 }}>
+            <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 2 }}>
+              {param.description}
+            </label>
+            <input
+              type="number"
+              className="form-input"
+              style={{ fontSize: 11 }}
+              value={String(paramValue ?? 0)}
+              onChange={(e) => onUpdate({ ...action.params, [param.name]: Number(e.target.value) })}
+              min={0}
+              max={255}
+            />
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div
+      style={{
+        padding: 8,
+        backgroundColor: "rgba(0, 255, 0, 0.1)",
+        borderRadius: 4,
+        display: "flex",
+        gap: 8,
+        alignItems: "flex-start",
+        border: "1px solid rgba(0, 255, 0, 0.3)",
+      }}
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <button
+          className="btn btn-secondary"
+          style={{ fontSize: 10, padding: "2px 6px", minWidth: 24 }}
+          onClick={onMoveUp}
+          disabled={index === 0}
+          title="Move up"
+        >
+          ▲
+        </button>
+        <button
+          className="btn btn-secondary"
+          style={{ fontSize: 10, padding: "2px 6px", minWidth: 24 }}
+          onClick={onMoveDown}
+          disabled={index === total - 1}
+          title="Move down"
+        >
+          ▼
+        </button>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 11, color: "var(--green-bright)", marginBottom: 6, fontWeight: 500 }} title={description}>
+          {label}
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {actionDef && actionDef.params.map(param => renderParamInput(param))}
+          {!actionDef && (
+            <div style={{ fontSize: 10, color: "var(--text-dim)" }}>
+              Unknown action type: {action.type}
+            </div>
+          )}
+        </div>
+      </div>
+      <button
+        className="btn btn-danger"
+        style={{ fontSize: 10, padding: "4px 8px" }}
+        onClick={onDelete}
+        title="Delete action"
+      >
+        ✕
+      </button>
+    </div>
+  );
+}

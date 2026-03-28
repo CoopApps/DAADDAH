@@ -1,0 +1,1 @@
+{"vocabulary":[{"word":"drive","wordType":"verb","id":7},{"word":"enter","wordType":"verb","id":8},{"word":"use","wordType":"verb","id":9},{"word":"show","wordType":"verb","id":10},{"word":"talk","wordType":"verb","id":11},{"word":"interview","wordType":"verb","id":12},{"word":"accuse","wordType":"verb","id":13},{"word":"look","wordType":"verb","id":14}]}

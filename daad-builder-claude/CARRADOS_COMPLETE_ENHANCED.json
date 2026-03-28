@@ -1,0 +1,2826 @@
+{
+  "partNumber": 1,
+  "title": "The Eyes of Max Carrados - Extended Edition",
+  "author": "Christopher Olewicz - Adapted from Ernest Bramah",
+  "version": "2.0",
+  "introText": "London, December 1914. You are Max Carrados, the blind detective whose other senses compensate remarkably for his lack of sight.\n\nYour friend Louis Carlyle has brought you a baffling case: a terrible railway accident at Knight's Cross Station killed twenty-seven people when a steam train ran past a danger signal and crashed into an electric train.\n\nThe engine-driver, Hutchins, insists he saw a green clear signal. The signalman swears it was red at danger. Both seem honest. Both cannot be right.\n\nOr can they?\n\nYou have promised Carlyle you will investigate. The truth, as always, lies in the details that others overlook...",
+  "locations": [
+    {
+      "id": 0,
+      "name": "Carrados's Study",
+      "description": "The familiar embrace of your study at The Turrets. Electric lamps blaze brilliantly—a characteristic touch of irony, Carlyle once remarked. The leather of your armchair speaks of quality beneath your fingertips. Books line the walls, their embossed spines a landscape for your touch. The scent of good tobacco mingles with old paper and furniture polish. Carlyle's breathing tells you he sits opposite, papers rustling occasionally in his hands. The fire crackles softly in the grate.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": 1,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": null
+      },
+      "x": 320,
+      "y": 200
+    },
+    {
+      "id": 1,
+      "name": "Richmond Terrace",
+      "description": "The pavement of Richmond Terrace beneath your feet, familiar cobblestones worn smooth by decades of traffic. Your Kensington home rises behind you. The December air carries the sharp bite of approaching rain and the distant rumble of London traffic. Parkinson's presence is unmistakable—the faint scent of engine oil, the patient stillness. Your motor car waits, its engine ticking as it cools. The street is quiet now, but echoes suggest substantial houses on either side.",
+      "isDark": false,
+      "exits": {
+        "north": 0,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": 2,
+        "out": null
+      },
+      "x": 490,
+      "y": 200
+    },
+    {
+      "id": 2,
+      "name": "Motor Car (Richmond Terrace)",
+      "description": "The comfortable rear seat of your motor car, leather upholstery supple beneath you. Polished wood fittings gleam under your fingertips. The vehicle rocks gently on its springs, settling. Through the partition you sense Parkinson at the wheel—his weight shifts the suspension slightly, his coat rustles as he adjusts his position. The distinctive smell of petrol and fine leather. The engine's warmth radiates through the floorboards.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": 1
+      },
+      "x": 700,
+      "y": 200
+    },
+    {
+      "id": 3,
+      "name": "Klondyke Street, Holloway",
+      "description": "A working-class street in Holloway. The air tastes of coal smoke and yesterday's cooking—cabbage, boiled meat. The pavement beneath your feet is worn, uneven in places where the flagstones have settled. Children's voices echo from somewhere down the street, a woman calls from an upper window. The houses press close on either side—you sense their proximity in the way sound reflects. Number 107 is before you; Hutchins's residence. The motor car's engine ticks as it cools at the curb.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": 5,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": 4,
+        "out": null
+      },
+      "x": 490,
+      "y": 290
+    },
+    {
+      "id": 4,
+      "name": "Motor Car (Klondyke Street)",
+      "description": "The rear seat of your motor car. Through the window glass comes the muffled sounds of Holloway—a hawker calling his wares, the clatter of a cart over cobbles, the sharp voices of street children. The smell of coal smoke seeps even into the car's interior. Parkinson waits patiently, the occasional creak of leather as he shifts position.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": 3
+      },
+      "x": 320,
+      "y": 290
+    },
+    {
+      "id": 5,
+      "name": "Hutchins's Kitchen",
+      "description": "A modest kitchen, warm from a coal range. The smell of tea—strong, well-stewed—and fresh bread. The table beneath your fingertips is plain wood, scrubbed smooth by years of use, though your sensitive touch detects old knife marks. Simple chairs, their joints creaking softly. A clock ticks steadily from the mantel. Hutchins's breathing is nervous, rapid. The man radiates tension like heat from the stove. His wife moves quietly in the background, the rustle of her apron, the clink of cups.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": null,
+        "west": 3,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": null
+      },
+      "x": 700,
+      "y": 300
+    },
+    {
+      "id": 6,
+      "name": "Hampton Court Street",
+      "description": "The air is markedly fresher here than in London proper. Hampton Court—country smells mingle with the urban: grass, trees, the river not far off. Birds call from nearby gardens. The street is quieter, the houses more widely spaced; sound carries differently here, less confined, less echoing. A horse and cart passes, wheels rattling. Modest cottages rise on either side. The famous palace is somewhere nearby—you can almost sense its mass in the way the wind moves.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": null,
+        "west": 8,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": 7,
+        "out": null
+      },
+      "x": 490,
+      "y": 400
+    },
+    {
+      "id": 7,
+      "name": "Motor Car (Hampton Court Street)",
+      "description": "The rear seat of your motor car, parked in the country air of Hampton Court. Through the windows drift the sounds of a quieter world—birdsong, the rustle of leaves, a dog barking in the distance. The smell of grass and clean air, so different from the smoke-laden atmosphere of the city. Parkinson's patient presence at the wheel.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": 6
+      },
+      "x": 320,
+      "y": 400
+    },
+    {
+      "id": 8,
+      "name": "Mead's Cottage",
+      "description": "A small cottage, well-kept from what your hands tell you—the furniture is polished, the floor swept clean. The smell of cooking, soap, lavender. A clock ticks somewhere. Mrs. Mead's presence fills the room with nervous energy—you hear the catch in her breathing, sense the way she wrings her hands. Working-class furnishings, simple but cared for. The cottage is warmer than the street outside; a fire burns low. Through the walls you sense another structure beyond—the workshop Mead mentioned, perhaps.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": 6,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": null
+      },
+      "x": 700,
+      "y": 400
+    },
+    {
+      "id": 9,
+      "name": "Woundy Station Platform",
+      "description": "A country railway station platform. The rails hum faintly—you feel their vibration through the platform boards beneath your feet. The smell of coal smoke, hot metal, engine oil. A signal mechanism clicks and clacks somewhere nearby—the signal box, no doubt. Wind sweeps across the open platform, unimpeded. The space feels exposed, empty. Occasionally a distant train rumbles, making the rails sing. The accident happened here. You sense the weight of tragedy in the very air.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": 11,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": 10,
+        "out": null
+      },
+      "x": 490,
+      "y": 520
+    },
+    {
+      "id": 10,
+      "name": "Motor Car (Woundy Station)",
+      "description": "The rear seat of your motor car, parked at the country station. Through the windows come the sounds of the railway—distant signals, the hiss of steam, the metallic ring of tools on metal. The smell of coal smoke and hot iron. Parkinson waits patiently, as always.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": 9
+      },
+      "x": 320,
+      "y": 520
+    },
+    {
+      "id": 11,
+      "name": "Signal Box",
+      "description": "The signal box where the tragedy occurred. A confined space—your outstretched hands quickly find the walls. The levers rise before you, cold iron heavy with purpose. Each one has its own distinctive weight and resistance. The smell of oil and metal is overwhelming. The mechanisms tick and click with mechanical precision. Everything has its place here—this is a world of absolute order, where a single mistake means death. The floor vibrates slightly when a distant train passes. Somewhere here lies the evidence of sabotage.",
+      "isDark": false,
+      "exits": {
+        "north": 9,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": null
+      },
+      "x": 700,
+      "y": 520
+    },
+    {
+      "id": 12,
+      "name": "City Street",
+      "description": "The heart of London's financial district. The street pulses with energy—footsteps echo from every direction, quick and purposeful. Voices rise and fall in negotiation, argument, casual greeting. The smell of cigars, wool suits, leather portfolios. Carriages rattle over cobblestones, their drivers calling out. Newspaper boys shout headlines. The buildings rise tall on either side—you sense their height in the way sound bounces, channeled upward. Money changes hands nearby; you hear the chink of coins, the rustle of banknotes. Commerce fills every corner of this space.",
+      "isDark": false,
+      "exits": {
+        "north": 14,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": 13,
+        "out": null
+      },
+      "x": 490,
+      "y": 640
+    },
+    {
+      "id": 13,
+      "name": "Motor Car (City Street)",
+      "description": "The rear seat of your motor car, parked in the bustling financial district. Through the windows comes the cacophony of commerce—the shouts of traders, the rumble of omnibuses, the sharp crack of a cabman's whip, the cry of newspaper vendors. Even here, enclosed in leather and wood, the city's energy penetrates. Parkinson's steady presence at the wheel, unmoved by the chaos outside.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": 12
+      },
+      "x": 320,
+      "y": 640
+    },
+    {
+      "id": 14,
+      "name": "Pendleton's Office",
+      "description": "A small office in a stockbroking firm. The air is stale—old cigar smoke, dust, the sharp tang of anxiety. Papers rustle everywhere; your hands encounter them on every surface. Ledgers stacked haphazardly, files in disorder. The desk is cluttered, chaotic. Pendleton's breathing is shallow, rapid. You smell his nervous sweat. The man radiates financial desperation like a fever. The space feels cramped, pressing in. This is the office of a man drowning in debt, grasping for salvation. Outside, the city's commerce roars on, indifferent.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": 12,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": null
+      },
+      "x": 700,
+      "y": 630
+    },
+    {
+      "id": 15,
+      "name": "Mead's Workshop",
+      "description": "A cramped workshop behind the cottage. The air hangs heavy with machine oil and metal dust—your acute sense detects at least six different metalworking compounds beneath the overwhelming lamp oil. A substantial workbench dominates the space directly ahead; your hands find it immovable, bolted to the floor. Tools hang from a rack to your right—they clink softly in the draft, each with its own voice. The floor beneath your feet has a gritty texture; metal filings, certainly. Something about this space feels deliberate, methodical. Every item has its precise place. This is where secrets are made. You are alone here—truly alone. No Carlyle to see for you. Your other senses must suffice.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": 8,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": null
+      },
+      "x": 900,
+      "y": 400
+    },
+    {
+      "id": 16,
+      "name": "Telegram Office, Richmond",
+      "description": "A small public telegram office. The telegraph key clicks with practiced precision—you can almost read the rhythm of the messages in the operator's keystrokes. The sharp scent of ink and paper mingles with the mustiness of the building. The floor creaks beneath your feet. Papers rustle. Someone coughs. The space feels confined, official, purposeful. Messages arrive and depart with mechanical efficiency. Somewhere here Carlyle received the summons that took him away from the investigation.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": 1
+      },
+      "x": 320,
+      "y": 100
+    }
+  ],
+  "objects": [
+    {
+      "id": 0,
+      "noun": "ruler",
+      "adjective": "marked",
+      "description": "A wooden ruler, smooth beneath your fingertips. The marks are carved grooves at regular intervals—you trace them: one inch, two inches, three... At four and seven-eighths inches the groove feels deeper than the others, as if measured repeatedly. The wood there is slightly worn, handled often. The ruler still holds faint warmth, suggesting recent use. This is the instrument of precise measurement—and perhaps of crime.",
+      "icon": "📏",
+      "location": {
+        "type": "at",
+        "locationId": 11
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 1,
+      "noun": "glass",
+      "adjective": "broken",
+      "description": "A piece of lamp glass, its edges too clean and precise to be accidental. Your sensitive touch follows the break line—it was measured, scored with a diamond or hard steel, then snapped with deliberate care. The edge is uniform, exact. This was not an accident or vandalism. The glass is cold, slightly greasy with lamp oil. Your fingers detect minute scratches near the break—tool marks, perhaps. This piece was manufactured to deceive.",
+      "icon": "🔍",
+      "location": {
+        "type": "at",
+        "locationId": 11
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 2,
+      "noun": "newspaper",
+      "adjective": "morning",
+      "description": "The Morning Herald, its pages crisp with fresh ink that leaves a faint metallic smell on your fingertips. Your secretary has marked certain articles with embossed pins, guiding your fingers to the relevant passages about the railway disaster. The paper crackles as you handle it—still new, today's edition. The headlines scream of tragedy and incompetence. Twenty-seven dead. Someone must be blamed.",
+      "icon": "📰",
+      "location": {
+        "type": "at",
+        "locationId": 0
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 3,
+      "noun": "notebook",
+      "adjective": "leather",
+      "description": "Your leather-bound investigation notebook. The cover is supple beneath your hands, worn smooth by years of use. The pages are textured paper that takes embossed notes well—you press hard with your stylus and the impressions remain, readable by touch. Several pages are already filled with your observations from this case. The notebook fits perfectly in your inner pocket, always within reach.",
+      "icon": "📓",
+      "location": {
+        "type": "carried"
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 4,
+      "noun": "telegram",
+      "adjective": "urgent",
+      "description": "A telegram on the distinctive rough paper used by the postal service. Your fingers trace the raised impressions left by the typewriter keys: MR CARRADOS STOP DESPERATELY NEED HELP STOP ACCIDENT DELIBERATE STOP WILL BE BLAMED STOP HUTCHINS. The desperation is palpable even in the mechanical letters. The paper still carries the faint smell of the telegraph office—ink and anxiety.",
+      "icon": "📨",
+      "location": {
+        "type": "at",
+        "locationId": 0
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 5,
+      "noun": "certificate",
+      "adjective": "stock",
+      "description": "A stock certificate on heavy parchment—expensive paper, the kind used for important documents. Your fingers trace the embossed seal of the stock exchange, feeling the detailed impression. The printed figures are raised enough to read by touch: substantial amounts, invested the day before the accident. The dates are damningly precise. The parchment smells of anxiety and desperate speculation. This paper proves financial motive—the reason twenty-seven people died.",
+      "icon": "📜",
+      "location": {
+        "type": "at",
+        "locationId": 14
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 11,
+      "noun": "workbench",
+      "adjective": "heavy",
+      "description": "A heavy wooden workbench, immovable beneath your hands—bolted firmly to the floor. The wood surface is a landscape of scars, gouges, and burns from years of metalwork. Your fingers explore methodically. Then you find them: three deliberate grooves carved into the front edge. Not random damage—these are intentional. Your sensitive touch traces their shapes precisely. The first curves like a six. The second is angular, like a two. The third has sharp edges—a four. Someone carved these numbers here. A reminder? A code? The wood around them is smooth, handled often.",
+      "icon": "🔨",
+      "location": {
+        "type": "at",
+        "locationId": 15
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 12,
+      "noun": "rack",
+      "adjective": "tool",
+      "description": "A wall-mounted rack, tools hanging from hooks by their handles. Air currents make them clink and chime against each other—each tool has its own distinctive voice. Your acute hearing maps them: the light tinkle of chisel blades, the dull clunk of hammer heads, the rasp of files. You could count them by sound alone if you concentrated. This is a craftsman's collection, each piece precisely placed, ready to hand.",
+      "icon": "🔧",
+      "location": {
+        "type": "at",
+        "locationId": 15
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 13,
+      "noun": "apron",
+      "adjective": "leather",
+      "description": "A heavy leather apron hanging from a peg. The leather is stiff with dried compounds—it crackles slightly as you handle it. The overwhelming smell is lamp oil, thick and cloying. But beneath it, your acute nose detects a complex signature of metalworking chemicals. So many scents layered here, each distinct if you concentrate: cutting fluids, solvents, metal polish, acids. This apron has absorbed years of workshop secrets.",
+      "icon": "👔",
+      "location": {
+        "type": "at",
+        "locationId": 15
+      },
+      "weight": 2,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 14,
+      "noun": "drawer",
+      "adjective": "locked",
+      "description": "A drawer in the workbench, secured with a three-digit combination lock. Your fingers detect the numbered dial—it rotates smoothly, well-oiled. Each number clicks faintly as the dial passes it. The lock is quality work, precise mechanism. Three digits. Somewhere in these thousand combinations lies the key to whatever Mead kept hidden. What secret does it protect?",
+      "icon": "🔒",
+      "location": {
+        "type": "at",
+        "locationId": 15
+      },
+      "weight": 0,
+      "isContainer": true,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 15,
+      "noun": "letter",
+      "adjective": "blackmail",
+      "description": "A letter on expensive stationery—heavy paper stock, the kind used by successful businesses. Your fingers trace the embossed letterhead: Pendleton & Associates, Stockbrokers. The elaborate script is deeply impressed. The paper still carries the faint scent of expensive cologne—something woody, assertive. The letter itself was typed with violence—the keys struck hard, the impressions deep enough to feel on the reverse. This was written in anger. Or perhaps fear disguised as anger.",
+      "icon": "📄",
+      "location": {
+        "type": "at",
+        "locationId": 252
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 16,
+      "noun": "receipts",
+      "adjective": "payment",
+      "description": "Bank receipts on official banking stock—heavy, crisp paper that crackles authoritatively. Your sensitive touch detects the raised seal of the Bank of England, the official stamps impressed deep into the fiber. Each receipt bears the characteristic texture of stamped seals and official signatures—you can even feel where the clerk pressed hard with the pen, signing his name. The amounts are substantial—your fingers trace the figures: five hundred pounds in total. Blood money.",
+      "icon": "💷",
+      "location": {
+        "type": "at",
+        "locationId": 252
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 17,
+      "noun": "diagram",
+      "adjective": "technical",
+      "description": "Technical drawings on stiff paper—draughtsman's quality. Your fingers follow the embossed lines of the design. The draughtsman pressed hard with his pencil, perhaps in concentration or anger—the lines are deep enough to read like braille. It's a detailed schematic of a signal lamp mechanism, with precise measurements marked at every critical point. Four and seven-eighths inches appears repeatedly. The handwriting on the annotations matches the flourish on the blackmail letter—you recognize the distinctive pressure patterns. Pendleton's hand. Pendleton's plan.",
+      "icon": "📐",
+      "location": {
+        "type": "at",
+        "locationId": 252
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 18,
+      "noun": "telegram",
+      "adjective": "urgent",
+      "description": "A telegram bearing Carlyle's name. The paper crackles urgently in your hands—even without reading the words, you sense its importance from how quickly it was delivered, from the way the messenger's boots still echo in memory. The raised letters spell summons, duty, separation. This small slip of paper took Carlyle away just when you needed his eyes. Or perhaps just when you needed to prove you didn't.",
+      "icon": "📨",
+      "location": {
+        "type": "at",
+        "locationId": 16
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 19,
+      "noun": "lock",
+      "adjective": "combination",
+      "description": "A three-digit combination lock securing the drawer. The dial rotates smoothly under your fingertips—quality mechanism, well-maintained. Each number clicks faintly as you pass it, metal tumblers shifting inside. The lock is cold, slightly oily. You can feel the precision of its construction in the way the dial moves, no play in the mechanism, each increment exact. Somewhere in these combinations lies the truth.",
+      "icon": "🔐",
+      "location": {
+        "type": "at",
+        "locationId": 15
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 20,
+      "noun": "mead",
+      "adjective": "mrs",
+      "description": "Mrs. Mead. Her voice trembles when she speaks—you hear the catch in her throat, the way her breath quickens with anxiety. She moves nervously, fabric rustling, hands never quite still. The scent of lavender soap clings to her, but beneath it your acute nose detects the sharp tang of fear—perspiration, the stress hormones she cannot hide. She wrings her hands; you hear the slight rasp of skin on skin. This is a woman terrified for her husband, desperate for his name to be cleared, yet afraid of what you might discover.",
+      "icon": "👤",
+      "location": {
+        "type": "at",
+        "locationId": 8
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": true
+    }
+  ],
+  "rules": [
+    {
+      "id": 0,
+      "name": "EXAMINE RULER - Set Flag 38",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 1
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 0
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 0
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 38
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "EXAMINE GLASS - Set Flag 39",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 2
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 1
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 39
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "EXAMINE CERTIFICATE - Set Flag 40",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 6
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 5
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 9
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 40
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "READ NEWSPAPER",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 5,
+            "noun": 3
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 6
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "READ TELEGRAM",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 5,
+            "noun": 5
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 4
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 3
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "INTERVIEW HUTCHINS",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 12,
+            "noun": 12
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 5
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 4
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "INTERVIEW MEAD",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 12,
+            "noun": 13
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 8
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 5
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "INTERVIEW PENDLETON",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 12,
+            "noun": 14
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 14
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 7
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "DRIVE HOLLOWAY from Richmond",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 7
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 4
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "DRIVE HAMPTON from Richmond",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 8
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 7
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "DRIVE WOUNDY from Richmond",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 9
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 10
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "DRIVE CITY from Richmond",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 10
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 13
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "DRIVE RICHMOND from Holloway",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 11
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 4
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 2
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "DRIVE HAMPTON from Holloway",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 8
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 4
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 7
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "DRIVE WOUNDY from Holloway",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 9
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 4
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 10
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "DRIVE CITY from Holloway",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 10
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 4
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 13
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "DRIVE RICHMOND from Hampton",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 11
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 7
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 2
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "DRIVE HOLLOWAY from Hampton",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 7
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 7
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 4
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "DRIVE WOUNDY from Hampton",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 9
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 7
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 10
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "DRIVE CITY from Hampton",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 10
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 7
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 13
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "DRIVE RICHMOND from Woundy",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 11
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 10
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 2
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "DRIVE HOLLOWAY from Woundy",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 7
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 10
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 4
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "DRIVE HAMPTON from Woundy",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 8
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 10
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 7
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "DRIVE CITY from Woundy",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 10
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 10
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 13
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "DRIVE RICHMOND from City",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 11
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 13
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 2
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "DRIVE HOLLOWAY from City",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 7
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 13
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 4
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "DRIVE HAMPTON from City",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 8
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 13
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 7
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "DRIVE WOUNDY from City",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 7,
+            "noun": 9
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 13
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 2
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 10
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "ACCUSE PENDLETON - Success (3 evidence)",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 13,
+            "noun": 14
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 14
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 38
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 39
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 40
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 10
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 11
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 12
+          }
+        },
+        {
+          "type": "END",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "ACCUSE PENDLETON - Insufficient Evidence",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 13,
+            "noun": 14
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 14
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 8
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "ACCUSE PENDLETON - Wrong Location",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 13,
+            "noun": 14
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 13
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "name": "ACCUSE HUTCHINS",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 13,
+            "noun": 12
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 14
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "name": "ACCUSE MEAD",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 13,
+            "noun": 13
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 15
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "name": "ENTER WORKSHOP - Carlyle offers to interview Mrs. Mead",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 8,
+            "noun": 26
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 8
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 50
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 23
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 50
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 15
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "name": "FEEL WORKBENCH - Clue 1 (6-2-4)",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 16,
+            "noun": 17
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 15
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 24
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 55
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "name": "LISTEN in Workshop - Clue 2 (6-2-4)",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 17,
+            "noun": 255
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 15
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 25
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 56
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "name": "SMELL APRON - Clue 3 (6-2-4)",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 18,
+            "noun": 20
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 13
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 26
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 57
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "name": "UNLOCK DRAWER with combination 6-2-4",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 19,
+            "noun": 18
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 15
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 51
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 27
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 51
+          }
+        },
+        {
+          "type": "PLACE",
+          "params": {
+            "objno": 15,
+            "locno": 15
+          }
+        },
+        {
+          "type": "PLACE",
+          "params": {
+            "objno": 16,
+            "locno": 15
+          }
+        },
+        {
+          "type": "PLACE",
+          "params": {
+            "objno": 17,
+            "locno": 15
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 28
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "name": "READ BLACKMAIL LETTER",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 5,
+            "noun": 22
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 15
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 29
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 52
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "name": "EXAMINE PAYMENT RECEIPTS",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 23
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 16
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 30
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 53
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "name": "EXAMINE TECHNICAL DIAGRAM",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 24
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 17
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 31
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 54
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "name": "ACCUSE PENDLETON - Extended Victory (6 evidence)",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 13,
+            "noun": 14
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 14
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 38
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 39
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 40
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 52
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 53
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 54
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 32
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 33
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 34
+          }
+        },
+        {
+          "type": "END",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    }
+  ],
+  "flags": [
+    {
+      "id": 1,
+      "name": "objects_carried",
+      "description": "Number of objects currently carried (automatically updated)",
+      "initialValue": 0
+    },
+    {
+      "id": 37,
+      "name": "max_carry_objects",
+      "description": "Maximum number of objects player can carry (DAAD default: 4)",
+      "initialValue": 6
+    },
+    {
+      "id": 52,
+      "name": "max_carry_weight",
+      "description": "Maximum weight player can carry (DAAD default: 10)",
+      "initialValue": 10
+    },
+    {
+      "id": 38,
+      "name": "ruler_examined",
+      "description": "Set when ruler is examined - Evidence 1/6",
+      "initialValue": 0
+    },
+    {
+      "id": 39,
+      "name": "glass_examined",
+      "description": "Set when glass is examined - Evidence 2/6",
+      "initialValue": 0
+    },
+    {
+      "id": 40,
+      "name": "certificate_examined",
+      "description": "Set when certificate is examined - Evidence 3/6",
+      "initialValue": 0
+    },
+    {
+      "id": 50,
+      "name": "workshop_visited",
+      "description": "Set when player enters workshop (Carlyle separation occurs)",
+      "initialValue": 0
+    },
+    {
+      "id": 51,
+      "name": "drawer_unlocked",
+      "description": "Set when combination lock is solved (6-2-4)",
+      "initialValue": 0
+    },
+    {
+      "id": 52,
+      "name": "blackmail_letter_read",
+      "description": "Set when blackmail letter is examined - Evidence 4/6",
+      "initialValue": 0
+    },
+    {
+      "id": 53,
+      "name": "receipts_examined",
+      "description": "Set when payment receipts are examined - Evidence 5/6",
+      "initialValue": 0
+    },
+    {
+      "id": 54,
+      "name": "diagram_examined",
+      "description": "Set when technical diagram is examined - Evidence 6/6",
+      "initialValue": 0
+    },
+    {
+      "id": 55,
+      "name": "clue_workbench",
+      "description": "Set when workbench is felt (6-2-4 carved)",
+      "initialValue": 0
+    },
+    {
+      "id": 56,
+      "name": "clue_tools",
+      "description": "Set when tools are counted by listening (6-2-4)",
+      "initialValue": 0
+    },
+    {
+      "id": 57,
+      "name": "clue_chemicals",
+      "description": "Set when apron chemicals are smelled (6-2-4)",
+      "initialValue": 0
+    }
+  ],
+  "messages": [
+    "Your fingertips explore the ruler with practiced precision. The marks are carved grooves—you trace them methodically. At four and seven-eighths inches, the groove feels deeper than the others, worn by repeated measurement. This is the instrument of precise sabotage.",
+    "Your sensitive touch follows the break line of the lamp glass. Too clean. Too precise. This was measured, scored with a diamond or hard steel, then snapped with deliberate care. The edge is uniform, exact. Not an accident. A manufactured deception.",
+    "Parkinson skillfully navigates the motor car through London streets. The engine hums, the leather seats creak, the cobblestones rumble beneath the wheels. You sense the city flowing past through sound and smell—coal smoke giving way to cleaner air, or vice versa. The journey takes time, but Parkinson knows every turn.",
+    "Your fingers trace the raised letters of the telegram: MR CARRADOS STOP DESPERATELY NEED HELP STOP ACCIDENT DELIBERATE STOP WILL BE BLAMED STOP HUTCHINS. The desperation is palpable even in mechanical type. An honest man, terrified.",
+    "Hutchins's voice trembles as he speaks. 'I saw green, Mr. Carrados. I swear it on my children's lives. The signal was clear—I know the difference between red and green, even at night, even in bad weather. Twenty years on the railways, sir. Twenty years without incident.' His breathing quickens with barely suppressed panic. 'But something was wrong with that lamp. I know it was.'",
+    "Mead speaks quietly, carefully, like a man walking on thin ice. 'I pulled the signal, yes. But I was told... that is, I believed...' He trails off. His breathing is shallow, rapid. You smell his fear—sharp, acrid. 'I can't say more, Mr. Carrados. I have a family. You understand.' The unspoken threat hangs in the air like smoke.",
+    "Carlyle reads from the newspaper: 'Railway stocks have fallen dramatically in the wake of the disaster. The Knight's Cross accident has shaken investor confidence across the sector. Meanwhile, shares in competing omnibus and tramway companies have risen sharply. Some speculators appear to have profited handsomely from the tragedy.'",
+    "Pendleton's office radiates desperation. Papers rustle everywhere—you hear them sliding, cascading as he moves nervously. His breathing is shallow, quick. The smell of stale cigar smoke and anxious sweat. 'I don't know what you're implying, Mr. Carrados,' he says, too quickly. 'I'm a respectable businessman. These are difficult times for everyone.' But his voice cracks. This is a man drowning in debt.",
+    "You shake your head. 'I cannot make an accusation without evidence, Mr. Pendleton. The law requires proof, not suspicion.' You sense his relief—too much relief. 'But I am still investigating,' you add quietly. 'I will find the truth.'",
+    "Your fingers trace the embossed seal of the stock exchange on the certificate. The printed figures are raised enough to read: substantial amounts, invested the day before the accident. The timing is damning. The parchment practically radiates financial desperation. This paper proves motive.",
+    "'Mr. Pendleton,' you say quietly, 'I have evidence you measured and cut the signal lamp glass to precisely four and seven-eighths inches.' He starts to protest. 'I have evidence of your financial motive—the stock certificates show you profited from the railway's collapse.' His breathing quickens. 'And I have evidence of your method.' You pause. 'Twenty-seven people died for your financial gain.'",
+    "Pendleton's voice cracks. 'How could you possibly know all this? You can't even see—' He stops, realizing the irony. You allow yourself a thin smile. 'You chose the wrong detective to oppose, Mr. Pendleton. You thought my blindness would hinder me. But my other senses found what you thought you'd hidden. Every detail you overlooked because you were too confident in what you could see.'",
+    "*** VICTORY ***\n\nYou have solved The Eyes of Max Carrados!\n\nThrough brilliant deduction and the superior use of your heightened senses, you've exposed Harold Pendleton's conspiracy. He sabotaged the signal lamp for financial gain, manipulating railway stocks to cover his debts.\n\nHutchins has been cleared. Mead's involvement remains uncertain.\n\nPendleton faces the gallows for mass murder.\n\nThe truth, as always, lay in the details others overlooked.",
+    "Harold Pendleton is not here. You sense the absence. To accuse a man of mass murder, you should at least have the courtesy to do it to his face. His office in the City is where you'll find him.",
+    "Hutchins is the victim in this case, not the criminal. His voice carried nothing but honest terror when you spoke with him. He was framed for the accident. A scapegoat for a more cunning mind.",
+    "Mead was manipulated. You heard it in his voice—the fear beneath the words, the unspoken threats. He is not the mastermind behind this crime. Someone else pulled his strings.",
+    "Mrs. Mead's voice trembles as she speaks. 'Mr. Carrados, my husband... he has a workshop out back. Very private about it, he is. Won't let anyone in there—not even me, most days.' She hesitates. 'But if it would help clear his name...'\n\nCarlyle clears his throat tactfully. 'Mrs. Mead, while Mr. Carrados examines the workshop, perhaps you and I could talk? I'd like to know about your husband's recent visitors, his state of mind before the accident.'\n\nYou sense his unspoken message: he's giving you space to investigate using your own methods. Without visual distraction.\n\n'The workshop is terribly cramped,' Mrs. Mead adds nervously. 'Barely room for one person. You'll have to go in by yourself, Mr. Carrados.'",
+    "Your fingertips explore the workbench surface with practiced precision. The wood grain flows smoothly until... there. Three deep gouges carved deliberately into the surface. Your sensitive touch traces their shapes: the first curves like a six, the second angular like a two, the third sharp-edged like a four. Someone carved these intentionally—a reminder? A code? Six. Two. Four.",
+    "You stand perfectly still, letting the silence speak. Air currents shift through the workshop, disturbing the hanging tools. They clink softly against each other—a metallic symphony. You count by sound alone: six chisels of varying sizes, their edges singing different notes... two hammers, heavy and dull... four files, their textured surfaces creating a distinct rasp. Six. Two. Four. The pattern repeats.",
+    "You raise the leather apron to your face. Beneath the overwhelming scent of lamp oil, your acute sense detects layers of chemical signatures. Six distinct metal-working compounds—you can almost taste the copper, iron, steel... Two types of oil, one heavier than the other... Four different solvents, each with its own sharp note. Six chemicals. Two oils. Four solvents. The pattern manifests again. Six. Two. Four.",
+    "Your sensitive fingers rotate the dial with absolute precision. First to six—you feel the faint click of the internal mechanism aligning. Then two—another precise click, metal on metal. Finally four—the lock releases with a satisfying snap that echoes through the silent workshop. The drawer slides open smoothly, releasing a waft of paper and ink. Success.",
+    "Inside the drawer, your fingers find documents. Heavy paper stock with embossed letterheads. Bank receipts with raised seals. Technical drawings on stiff paper, the lines pressed deep enough to feel. This is evidence. Important evidence. The pieces of a conspiracy, hidden in Mead's secret workshop.",
+    "You trace the embossed letterhead with your fingertips: Pendleton & Associates, Stockbrokers. The letter itself was typed with violence—the keys struck hard. Your touch reads the impressions: 'Do as instructed or your family will suffer the consequences. The payment has been arranged. Destroy this letter.' Signed with Pendleton's characteristic flourish. This is not cooperation. This is coercion. Blackmail.",
+    "Bank receipts documenting payments from Pendleton to Mead. Your sensitive touch follows the official stamps and seals. Five hundred pounds in total, paid in three installments. The dates align with the period before the accident. This wasn't payment for willing service. This was blood money. Mead was forced.",
+    "Technical drawings, every line precisely embossed. Your fingers trace the schematic—a railway signal lamp mechanism with exact specifications for cutting the glass to four and seven-eighths inches. The handwriting on the notes matches the blackmail letter's flourish. Pendleton's hand. Pendleton's plan. This is premeditation in physical form.",
+    "'Mr. Pendleton,' you say quietly, 'I have evidence you measured and cut the signal lamp glass.' He starts to protest. 'I have evidence of your financial motive.' His breathing quickens. 'I have evidence you blackmailed Mead, threatening his family.' Silence. 'I have the payment receipts. The technical diagrams. The letter in your own hand.' You feel him collapse into his chair, defeated. 'And I have something you can never fake—the truth.'",
+    "'How?' Pendleton whispers hoarsely. 'How could a blind man possibly—' You smile. 'You chose the wrong detective, Mr. Pendleton. You thought my blindness would hinder me. But my other senses found what you thought you'd hidden. The carved numbers. The tool counts. The chemical traces. Every detail you overlooked because you were too confident in what you could see. No blundering, self-confident eyes to be hoodwinked.'",
+    "*** COMPLETE VICTORY ***\n\nYou have solved The Eyes of Max Carrados - Extended Edition!\n\nThrough brilliant deduction and the masterful use of your heightened senses, you've exposed the full conspiracy. Harold Pendleton not only sabotaged the signal lamp for financial gain, but blackmailed the innocent signalman Mead, threatening his family to ensure cooperation.\n\nHutchins has been cleared. Mead will face minor charges but as a victim of coercion. Pendleton faces life imprisonment for mass murder and extortion.\n\nYour blindness was not a limitation—it was your greatest strength. You solved a puzzle designed to require sight using only touch, sound, and smell.\n\nThe truth, as always, lay in the details others overlooked."
+  ],
+  "vocabulary": [
+    {
+      "word": "thing",
+      "wordType": "noun",
+      "id": 0
+    },
+    {
+      "word": "ruler",
+      "wordType": "noun",
+      "id": 1
+    },
+    {
+      "word": "marked",
+      "wordType": "adjective",
+      "id": 1
+    },
+    {
+      "word": "glass",
+      "wordType": "noun",
+      "id": 2
+    },
+    {
+      "word": "broken",
+      "wordType": "adjective",
+      "id": 2
+    },
+    {
+      "word": "newspaper",
+      "wordType": "noun",
+      "id": 3
+    },
+    {
+      "word": "morning",
+      "wordType": "adjective",
+      "id": 3
+    },
+    {
+      "word": "notebook",
+      "wordType": "noun",
+      "id": 4
+    },
+    {
+      "word": "leather",
+      "wordType": "adjective",
+      "id": 4
+    },
+    {
+      "word": "telegram",
+      "wordType": "noun",
+      "id": 5
+    },
+    {
+      "word": "urgent",
+      "wordType": "adjective",
+      "id": 5
+    },
+    {
+      "word": "certificate",
+      "wordType": "noun",
+      "id": 6
+    },
+    {
+      "word": "stock",
+      "wordType": "adjective",
+      "id": 6
+    },
+    {
+      "word": "examine",
+      "wordType": "verb",
+      "id": 1
+    },
+    {
+      "word": "get",
+      "wordType": "verb",
+      "id": 2
+    },
+    {
+      "word": "take",
+      "wordType": "verb",
+      "id": 3
+    },
+    {
+      "word": "drop",
+      "wordType": "verb",
+      "id": 4
+    },
+    {
+      "word": "read",
+      "wordType": "verb",
+      "id": 5
+    },
+    {
+      "word": "ask",
+      "wordType": "verb",
+      "id": 6
+    },
+    {
+      "word": "drive",
+      "wordType": "verb",
+      "id": 7
+    },
+    {
+      "word": "enter",
+      "wordType": "verb",
+      "id": 8
+    },
+    {
+      "word": "use",
+      "wordType": "verb",
+      "id": 9
+    },
+    {
+      "word": "show",
+      "wordType": "verb",
+      "id": 10
+    },
+    {
+      "word": "talk",
+      "wordType": "verb",
+      "id": 11
+    },
+    {
+      "word": "interview",
+      "wordType": "verb",
+      "id": 12
+    },
+    {
+      "word": "accuse",
+      "wordType": "verb",
+      "id": 13
+    },
+    {
+      "word": "look",
+      "wordType": "verb",
+      "id": 14
+    },
+    {
+      "word": "inventory",
+      "wordType": "verb",
+      "id": 15
+    },
+    {
+      "word": "feel",
+      "wordType": "verb",
+      "id": 16
+    },
+    {
+      "word": "listen",
+      "wordType": "verb",
+      "id": 17
+    },
+    {
+      "word": "smell",
+      "wordType": "verb",
+      "id": 18
+    },
+    {
+      "word": "unlock",
+      "wordType": "verb",
+      "id": 19
+    },
+    {
+      "word": "holloway",
+      "wordType": "noun",
+      "id": 7
+    },
+    {
+      "word": "hampton",
+      "wordType": "noun",
+      "id": 8
+    },
+    {
+      "word": "woundy",
+      "wordType": "noun",
+      "id": 9
+    },
+    {
+      "word": "city",
+      "wordType": "noun",
+      "id": 10
+    },
+    {
+      "word": "richmond",
+      "wordType": "noun",
+      "id": 11
+    },
+    {
+      "word": "hutchins",
+      "wordType": "noun",
+      "id": 12
+    },
+    {
+      "word": "mead",
+      "wordType": "noun",
+      "id": 13
+    },
+    {
+      "word": "pendleton",
+      "wordType": "noun",
+      "id": 14
+    },
+    {
+      "word": "workbench",
+      "wordType": "noun",
+      "id": 17
+    },
+    {
+      "word": "drawer",
+      "wordType": "noun",
+      "id": 18
+    },
+    {
+      "word": "rack",
+      "wordType": "noun",
+      "id": 19
+    },
+    {
+      "word": "apron",
+      "wordType": "noun",
+      "id": 20
+    },
+    {
+      "word": "lock",
+      "wordType": "noun",
+      "id": 21
+    },
+    {
+      "word": "letter",
+      "wordType": "noun",
+      "id": 22
+    },
+    {
+      "word": "receipts",
+      "wordType": "noun",
+      "id": 23
+    },
+    {
+      "word": "diagram",
+      "wordType": "noun",
+      "id": 24
+    },
+    {
+      "word": "combination",
+      "wordType": "noun",
+      "id": 25
+    },
+    {
+      "word": "workshop",
+      "wordType": "noun",
+      "id": 26
+    },
+    {
+      "word": "tools",
+      "wordType": "noun",
+      "id": 27
+    },
+    {
+      "word": "heavy",
+      "wordType": "adjective",
+      "id": 9
+    },
+    {
+      "word": "locked",
+      "wordType": "adjective",
+      "id": 10
+    },
+    {
+      "word": "blackmail",
+      "wordType": "adjective",
+      "id": 11
+    },
+    {
+      "word": "technical",
+      "wordType": "adjective",
+      "id": 12
+    },
+    {
+      "word": "payment",
+      "wordType": "adjective",
+      "id": 13
+    }
+  ],
+  "music": []
+}

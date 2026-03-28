@@ -1,0 +1,182 @@
+{
+  "partNumber": 1,
+  "title": "DRC Test Game",
+  "author": "Compliance Tester",
+  "version": "1.0",
+  "introText": "Welcome to the test adventure. You are in a dark forest.",
+  "locations": [
+    {
+      "id": 0,
+      "name": "Forest",
+      "description": "A dark and mysterious forest. Exits lead north.",
+      "isDark": false,
+      "connections": [
+        {
+          "direction": "north",
+          "target_location": 1
+        }
+      ],
+      "exits": {
+        "north": 1
+      },
+      "image": null
+    },
+    {
+      "id": 1,
+      "name": "Clearing",
+      "description": "A sunny clearing in the forest. An exit leads south.",
+      "isDark": false,
+      "connections": [
+        {
+          "direction": "south",
+          "target_location": 0
+        }
+      ],
+      "exits": {
+        "south": 0
+      },
+      "image": null
+    }
+  ],
+  "objects": [
+    {
+      "id": 0,
+      "name": "torch",
+      "description": "gives light",
+      "noun": "TORCH",
+      "adjective": "",
+      "location": {
+        "type": "carried"
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": true,
+      "isPsi": false,
+      "containerCapacity": null,
+      "icon": ""
+    },
+    {
+      "id": 1,
+      "name": "key",
+      "description": "opens doors",
+      "noun": "KEY",
+      "adjective": "RUSTY",
+      "location": {
+        "type": "location",
+        "value": 0
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPsi": false,
+      "containerCapacity": null,
+      "icon": ""
+    }
+  ],
+  "vocabulary": [
+    {
+      "id": 1,
+      "word": "GO",
+      "wordType": "verb"
+    },
+    {
+      "id": 2,
+      "word": "N",
+      "wordType": "noun"
+    },
+    {
+      "id": 3,
+      "word": "S",
+      "wordType": "noun"
+    },
+    {
+      "id": 20,
+      "word": "GET",
+      "wordType": "verb"
+    },
+    {
+      "id": 21,
+      "word": "DROP",
+      "wordType": "verb"
+    },
+    {
+      "id": 22,
+      "word": "EXAM",
+      "wordType": "verb"
+    },
+    {
+      "id": 100,
+      "word": "TORCH",
+      "wordType": "noun"
+    },
+    {
+      "id": 101,
+      "word": "KEY",
+      "wordType": "noun"
+    },
+    {
+      "id": 200,
+      "word": "RUSTY",
+      "wordType": "adjective"
+    }
+  ],
+  "messages": [
+    "OK",
+    "You can't go that way.",
+    "You don't have that.",
+    "You can't do that."
+  ],
+  "rules": [
+    {
+      "id": 0,
+      "name": "Look at torch",
+      "enabled": true,
+      "processTable": "response",
+      "conditions": [
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 0
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 0
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    }
+  ],
+  "flags": [
+    {
+      "id": 1,
+      "name": "objects_carried",
+      "description": "Number of objects carried",
+      "initialValue": 0
+    },
+    {
+      "id": 37,
+      "name": "max_carry_objects",
+      "description": "Max objects to carry",
+      "initialValue": 4
+    },
+    {
+      "id": 52,
+      "name": "max_carry_weight",
+      "description": "Max weight to carry",
+      "initialValue": 10
+    }
+  ],
+  "music": []
+}

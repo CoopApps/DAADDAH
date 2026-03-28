@@ -1,0 +1,1 @@
+{"rules":[{"id":30,"name":"ACCUSE PENDLETON - Wrong Location","process":"PRO0","enabled":false,"conditions":[],"actions":[{"type":"MESSAGE","params":{"mesno":13}},{"type":"DONE","params":{}}]}]}

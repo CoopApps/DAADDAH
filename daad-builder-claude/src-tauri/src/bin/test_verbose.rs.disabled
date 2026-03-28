@@ -1,0 +1,186 @@
+// Test the verbose DSF generation
+// Run with: cargo run --bin test_verbose
+
+use daad_builder_lib::codegen::DaadCodeGenerator;
+use daad_builder_lib::game::DaadGame;
+use std::fs;
+
+fn main() {
+    println!("\n{}", "=".repeat(70));
+    println!("DAAD Verbose DSF Generation Test");
+    println!("{}\n", "=".repeat(70));
+
+    // Create a simple test game
+    let test_game_json = serde_json::json!({
+        "title": "Test Adventure",
+        "author": "Test Author",
+        "version": "1.0",
+        "introText": "Welcome to the test adventure!",
+        "vocabulary": [
+            {"word": "NORTH", "id": 1, "wordType": "verb"},
+            {"word": "SOUTH", "id": 2, "wordType": "verb"},
+            {"word": "EAST", "id": 3, "wordType": "verb"},
+            {"word": "WEST", "id": 4, "wordType": "verb"},
+            {"word": "EXAMINE", "id": 30, "wordType": "verb"},
+            {"word": "LOOK", "id": 30, "wordType": "verb"},
+            {"word": "TAKE", "id": 10, "wordType": "verb"},
+            {"word": "DROP", "id": 18, "wordType": "verb"},
+            {"word": "KEY", "id": 50, "wordType": "noun"},
+            {"word": "DOOR", "id": 51, "wordType": "noun"}
+        ],
+        "locations": [
+            {
+                "id": 0,
+                "name": "Start Room",
+                "description": "You are in a small room. There is a door to the north.",
+                "connections": [
+                    {"direction": "north", "targetLocation": 1}
+                ],
+                "isDark": false,
+                "editorX": 100.0,
+                "editorY": 100.0
+            },
+            {
+                "id": 1,
+                "name": "North Room",
+                "description": "A larger room with exits to the south and east.",
+                "connections": [
+                    {"direction": "south", "targetLocation": 0},
+                    {"direction": "east", "targetLocation": 2}
+                ],
+                "isDark": false,
+                "editorX": 100.0,
+                "editorY": 50.0
+            },
+            {
+                "id": 2,
+                "name": "East Room",
+                "description": "A dark room. You can go west.",
+                "connections": [
+                    {"direction": "west", "targetLocation": 1}
+                ],
+                "isDark": true,
+                "editorX": 200.0,
+                "editorY": 50.0
+            }
+        ],
+        "objects": [
+            {
+                "id": 0,
+                "name": "brass key",
+                "noun": "KEY",
+                "adjective": "",
+                "description": "a small brass key",
+                "location": {"type": "at", "locationId": 0},
+                "weight": 1,
+                "isContainer": false,
+                "isWearable": false,
+                "isTakeable": true,
+                "isLightSource": false,
+                "isPSI": false,
+                "icon": "🔑"
+            },
+            {
+                "id": 1,
+                "name": "lamp",
+                "noun": "LAMP",
+                "adjective": "",
+                "description": "a brass lamp",
+                "location": {"type": "at", "locationId": 1},
+                "weight": 2,
+                "isContainer": false,
+                "isWearable": false,
+                "isTakeable": true,
+                "isLightSource": true,
+                "isPSI": false,
+                "icon": "🔦"
+            }
+        ],
+        "messages": [
+            "You found the key!",
+            "The door opens with a click.",
+            "The lamp flickers to life."
+        ],
+        "flags": [
+            {
+                "id": 100,
+                "name": "door_open",
+                "description": "Whether the door is unlocked",
+                "initialValue": 0
+            }
+        ],
+        "rules": [
+            {
+                "id": 0,
+                "name": "Examine key",
+                "process": "PRO5",
+                "verb": "EXAMINE",
+                "noun": "KEY",
+                "conditions": [
+                    {"type": "CARRIED", "params": {"objectId": 0}}
+                ],
+                "actions": [
+                    {"type": "MESSAGE", "params": {"messageId": 65}},
+                    {"type": "DONE", "params": {}}
+                ],
+                "enabled": true
+            }
+        ]
+    });
+
+    println!("Creating test game...");
+    let game: DaadGame = match serde_json::from_value(test_game_json) {
+        Ok(g) => g,
+        Err(e) => {
+            eprintln!("ERROR: Failed to parse game JSON: {}", e);
+            return;
+        }
+    };
+    println!("  ✓ Game created: \"{}\" by {}", game.title, game.author);
+    println!("  ✓ {} locations, {} objects, {} vocabulary entries",
+        game.locations.len(), game.objects.len(), game.vocabulary.len());
+    println!();
+
+    println!("Generating verbose DSF output...\n");
+    let (dsf_code, logs) = DaadCodeGenerator::generate_verbose(&game);
+
+    // Print all log messages
+    for log in &logs {
+        println!("{}", log);
+    }
+
+    println!("\n{}", "=".repeat(70));
+    println!("DSF CODE PREVIEW (first 50 lines)");
+    println!("{}\n", "=".repeat(70));
+
+    for (i, line) in dsf_code.as_str().lines().take(50).enumerate() {
+        println!("{:4} | {}", i + 1, line);
+    }
+
+    let total_lines = dsf_code.as_str().lines().count();
+    if total_lines > 50 {
+        println!("... ({} more lines)\n", total_lines - 50);
+    }
+
+    // Save the DSF to a file for inspection
+    let output_path = "D:/daadah/test_verbose_output.dsf";
+    match fs::write(output_path, &dsf_code) {
+        Ok(_) => println!("✓ DSF saved to: {}", output_path),
+        Err(e) => eprintln!("✗ Failed to save DSF: {}", e),
+    }
+
+    // Save the logs to a file
+    let log_path = "D:/daadah/test_verbose_output.log";
+    let log_content: String = logs.join("\n");
+    match fs::write(log_path, &log_content) {
+        Ok(_) => println!("✓ Logs saved to: {}", log_path),
+        Err(e) => eprintln!("✗ Failed to save logs: {}", e),
+    }
+
+    println!("\n{}", "=".repeat(70));
+    println!("Next steps:");
+    println!("  1. Review the DSF file: {}", output_path);
+    println!("  2. Review the logs: {}", log_path);
+    println!("  3. Compile with DRF: drf.exe pc vga {}", output_path);
+    println!("{}\n", "=".repeat(70));
+}

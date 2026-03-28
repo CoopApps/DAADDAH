@@ -1,0 +1,376 @@
+Main Menu
+Smart load
+Snapshot
+Machine
+Audio
+Display
+Storage
+Debug
+Network
+Settings
+Search menu
+Procrastinate
+Help
+ESC Close menu
+F10 Exit ZEsarUX
+
+Tape
+--Standard Tape--
+    Input [<SE\ZX128K\TEST.TAP]
+[X] Input tape inserted
+    Tape Viewer
+    Output []
+[ ] Output tape inserted
+    Tape Viewer
+--Input Real Tape--
+    File []
+[ ] Inserted
+[ ] Playing
+    Tape Viewer
+    Visual Real Tape
+    Visual Casette Tape
+    Run Tape Copier
+    Software made by me
+ESC Close
+
+Betadisk
+    TRD File []
+[ ] TRD Emulation
+[ ] Write protect
+[X] Persistent Writes
+[ ] Betadisk Enabled
+[X] Allow Boot
+    TRD Viewer
+    Visual Floppy
+ESC Close
+
+Main Menu-> Storage-> IF1/Microdrive
+[ ] Enable
+--Microdrive 1--
+    Microdrive File []
+[ ] Microdrive Emulation
+[ ] Write Protection
+[X] Persistent Writes
+    Visual Microdrive
+--Microdrive 2--
+    Microdrive File []
+[ ] Microdrive Emulation
+[ ] Write Protection
+[X] Persistent Writes
+    Visual Microdrive
+--Microdrive 3--
+    Microdrive File []
+[ ] Microdrive Emulation
+[ ] Write Protection
+[X] Persistent Writes
+    Visual Microdrive
+--Microdrive 4--
+    Microdrive File []
+[ ] Microdrive Emulation
+[ ] Write Protection
+[X] Persistent Writes
+    Visual Microdrive
+ESC Close
+
+3" CF2 Floppy
+    DSK File [<E\ZXPLUS3\TEST.DSK]
+[X] DSK Emulation
+[ ] Write protect
+[ ] Persistent Writes
+[X] PD765 enabled
+[ ] +3DOS Traps
+    Disk Info
+    Tracks list
+    Disk Format Viewer
+    Visual Floppy
+ESC Close
+
+Main Menu-> Storage
+Tape
+3" CF2 Floppy
+Betadisk
+ESXDOS Handler
+HiLow Data Drive
+IDE
+iFrom
+Kartusho
+LEC memory
+SD/MMC
+Speccy Superupgrade
+ZX Dandanator
+Copy Interfaces
+ESC Close
+
+Main Menu-> Storage Menu-> 3" CF2 Floppy
+    DSK File [<E\ZXPLUS3\TEST.DSK]
+[X] DSK Emulation
+[ ] Write protect
+[ ] Persistent Writes
+[X] PD765 enabled
+[ ] +3DOS Traps
+    Disk Info
+    Tracks list
+    Disk Format Viewer
+    Visual Floppy
+ESC Close
+
+Main Menu-> Debug
+Reset
+Generate NMI
+Debug CPU
+Debug Adventure
+Machine Info
+Hexadecimal Editor
+View Basic
+View Basic variables
+View Sprites
+Visual memory
+Load binary block
+Save binary block
+Ascii Table
+Find
+Poke
+ESC Close
+
+Main Menu-> Machine
+--Select manufacturer--
+Amstrad
+Ascii Corp
+Cambridge Computers
+Chloe Corporation
+Coleco Industries
+Czerweny Electronica
+Investronica
+Jupiter Cantab
+Mario Prato
+Microdigital Eletronica
+Miles Gordon Technology
+NedoPC
+New Horizons
+Pentagon
+Science of Cambridge
+Sega
+Sinclair Research
+Spectravideo Intl
+Timex Computer
+Timex Sinclair
+TS Labs
+VTrucco/FB Labs
+ZXUno Team
+ESC Close
+
+Main Menu-> Settings
+Accessibility
+Audio
+Configuration file
+Display
+Function keys
+General
+Hardware
+Statistics
+Storage
+ZX Desktop
+ZX Vision
+[ ] Advanced menu items
+ESC Back
+
+Main Menu-> Settings-> Hardware
+    Emulated Joystick [Cursor&Shift]
+    Fire key [Home]
+[ ] Kempston Mouse emulation
+    Emulator Speed [100%]
+Keyboard settings
+Memory Settings
+Printing emulation
+Real joystick settings
+ESC Close
+
+Main Menu-> Network
+UART Bridge emulation
+ZX81 online browser
+Speccy online browser
+Download ZEsarUX extras
+Network traffic
+ZENG
+ZENG Online Client
+ZENG Online Server
+ESC Close
+
+Main Menu-> Settings Menu-> General Settings
+[ ] Full Screen
+[X] Border enabled
+[X] Auto Frameskip
+    Window Size Zoom [2]
+[X] Autochange Zoom big display
+    Language [Default]
+    ZEsarUX logo [Normal]
+[ ] Show welcome logo & message
+    Online Download Path []
+[X] Search index enabled
+    Reset search index
+    Full scan search index
+ESC Close
+
+Main Menu-> Settings Menu-> ZX Desktop Settings
+[X] Enabled
+[ ] Open Menu on ZX Desktop
+[X] Direct access upper buttons
+[X] Direct access lower buttons
+[X] Icons on ZX Desktop
+--Background--
+    Fill type [Solid]
+    Primary Fill Color [Cyan]
+    SCR file []
+ESC Close
+
+Main Menu-> Settings Menu-> ZX Vision Settings
+    Menu char width [8]
+    Menu char height [8]
+[X] First aid help
+    Style [Clean]
+[X] Tooltips
+[ ] Multitask menu
+[X] Old menu behaviour (ESC, etc)
+[ ] Background windows
+Special FX
+ESC Back
+
+Main Menu-> Machine menu-> Amstrad
+ZX Spectrum +2
+ZX Spectrum +2 (French)
+ZX Spectrum +2 (Spanish)
+ZX Spectrum +2A (ROM v4.0)
+ZX Spectrum +2A (ROM v4.1)
+ZX Spectrum +2A (Spanish)
+ZX Spectrum +3 (ROM v4.0)
+ZX Spectrum +3 (ROM v4.1)
+ZX Spectrum +3 (Spanish)
+CPC 464
+CPC 4128
+CPC 664
+CPC 6128
+PCW 8256
+PCW 8512
+ESC Close
+
+Main Menu-> Machine menu-> Sinclair Research
+ZX80
+ZX81
+ZX Spectrum 16k
+ZX Spectrum 48k
+ZX Spectrum+ 48k
+ZX Spectrum+ 128k
+QL
+ESC Close
+
+Main Menu-> Help
+About
+Help
+Background Windows Help
+Keyboard Help
+Readme
+Features
+Exclusive features
+History
+Acknowledgements
+Donors
+Donate
+FAQ
+Changelog
+Alternate ROMS
+Included tapes
+Install
+Install on Windows
+Compile info
+Statistics
+Core Statistics
+Running info
+Licenses
+In Memoriam
+ESC Close
+
+Main Menu-> Display
+Load Screen
+Save Screen
+Quicksave Screen
+View Screen
+Video Output
+View Colour Palettes
+On Screen Keyboard
+Text Adventure Tools
+ESC Close
+
+Main Menu-> Settings Menu-> ZX Vision Settings-> Special FX Settings
+    Menu Mix Method [Over]
+[ ] B&W on menu+no multitask
+ESC Back
+
+View Stack
+731E
+7EC7
+8B1B
+8BEE
+0000
+8A6D
+8B54
+0044
+6129
+6042
+3E00
+C7C3
+7C7E
+001F
+0000
+0000
+00C9
+C900
+7D98
+00C9
+C300
+7D9D
+F4C3
+C372
+788C
+51C3
+C379
+7A99
+2FC3
+C378
+ESC Close
+
+Main Menu-> Snapshot
+Load snapshot
+Save snapshot
+Quickload
+Quicksave
+Snapshots to RAM
+ESC Close
+
+Main Menu-> Settings Menu-> Storage Settings
+[X] Autoload medium
+[X] Fast autoload
+[X] Autoselect medium opts
+Tape
+ESC Close
+
+Main Menu-> Settings Menu-> Audio Settings
+    Output Volume [100%]
+[X] Autoenable AY Chip
+[X] AY Chip
+[X] Beeper
+[X] Real Beeper
+--Audio SDL settings--
+[New] Callback Type
+Audio Chip to MIDI Output
+ESC Close
+
+Main Menu-> Settings Menu-> Audio Settings-> Audio Chip to MIDI output
+[0] Midi port
+[ ] Initialized
+[ ] Allow tone+noise
+ESC Close
+
+Main Menu-> Machine menu-> VTrucco/FB Labs
+ZX Spectrum Next
+ESC Close
+

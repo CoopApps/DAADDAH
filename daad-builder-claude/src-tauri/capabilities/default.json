@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.tauri.app/config/2/capabilities",
+  "identifier": "default",
+  "description": "Default capabilities for DAAD Builder",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "shell:allow-open",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "dialog:allow-message",
+    "fs:allow-read-text-file",
+    "fs:allow-write-text-file",
+    "fs:allow-exists",
+    "fs:allow-create",
+    "fs:allow-mkdir",
+    "sql:default",
+    "sql:allow-load",
+    "sql:allow-execute",
+    "sql:allow-select"
+  ]
+}

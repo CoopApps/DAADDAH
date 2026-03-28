@@ -1,0 +1,27 @@
+{
+  "name": "daad-builder-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for DAAD Game Builder - allows Claude Desktop to create and manage DAAD text adventure games",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "daad-builder-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "mcp",
+    "daad",
+    "text-adventure",
+    "game-builder",
+    "claude"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "node-fetch": "^3.3.2"
+  }
+}

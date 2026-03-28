@@ -1,0 +1,109 @@
+==============================================================================
+HOW TO SET UP THE COMPLETE MAX CARRADOS GAME
+==============================================================================
+
+STEP 1: ADD ALL NECESSARY VOCABULARY
+-------------------------------------
+Go to the Vocabulary panel and click these template buttons in order:
+
+1. Click "+ Movement"
+   - This adds: go, walk, run, climb, jump, swim, enter, exit, leave, drive
+
+2. Click "+ Interaction"
+   - This adds: talk, ask, tell, show, give, interview, accuse, question, greet, listen, search, find, investigate
+
+3. Click "+ System" (optional)
+   - This adds: inv, save, load, quit, help, wait, again, undo
+
+After clicking these buttons, you should have all the verbs needed for the game.
+
+STEP 2: LOAD THE COMPLETE GAME DATA
+------------------------------------
+1. Go to the "Merge Data" panel
+2. Open the file: MAX_CARRADOS_COMPLETE.txt
+3. Copy ALL the contents (Ctrl+A, Ctrl+C)
+4. Paste into the large text area in the Merge Data panel
+5. Click "Merge Data"
+
+You should see a success message showing:
+- Updated title: The Eyes of Max Carrados
+- Updated author: Christopher Olewicz - Adapted from Ernest Bramah
+- Updated intro text
+- Added/updated 15 locations
+- Added/updated 6 objects
+- Added/updated 33 rules
+- Added/updated vocabulary words
+- Added/updated 16 messages
+
+STEP 3: VERIFY THE MERGE WORKED
+--------------------------------
+Check these panels to confirm:
+
+GAME INFO PANEL:
+- Title should show: "The Eyes of Max Carrados"
+- Author should show: "Christopher Olewicz - Adapted from Ernest Bramah"
+- Intro text should be visible
+
+VOCABULARY PANEL:
+- Should have verbs like: examine, drive, interview, accuse
+- Should have nouns like: ruler, glass, newspaper, telegram, hutchins, pendleton, mead, holloway, richmond, city, woundy, hampton
+- Should have adjectives like: marked, broken, morning, urgent, leather, stock
+
+ROOMS PANEL:
+- Should have 15 locations including: Carrados's Study, Richmond Terrace, Motor Car locations, Hutchins's Kitchen, Pendleton's Office, Signal Box, etc.
+
+ITEMS PANEL:
+- Should have 6 objects: ruler, glass, newspaper, notebook, telegram, certificate
+
+RESPONSES PANEL:
+- Should have 33 rules including EXAMINE, READ, INTERVIEW, DRIVE, and ACCUSE rules
+
+STEP 4: TEST THE GAME
+---------------------
+Go to the PlayTest panel and try these commands:
+
+1. Press Enter to start (gets past intro screen)
+2. Type: look
+3. Type: examine telegram
+4. Type: read telegram
+5. Type: s (go south to Richmond Terrace)
+6. Type: in (enter motor car)
+7. Type: drive holloway (should transport you to Klondyke Street)
+8. Type: e (go east to Hutchins's Kitchen)
+9. Type: interview hutchins (should get dialogue)
+10. Type: w (back to street)
+11. Type: in (enter motor car)
+12. Type: drive city (go to financial district)
+13. Type: n (enter Pendleton's office)
+14. Type: accuse pendleton (should say insufficient evidence)
+
+TO WIN THE GAME:
+You need to examine all three key pieces of evidence first:
+- EXAMINE RULER (at Signal Box - sets flag 38)
+- EXAMINE GLASS (at Signal Box - sets flag 39)
+- EXAMINE CERTIFICATE (at Pendleton's Office - sets flag 40)
+
+Then: ACCUSE PENDLETON (at Pendleton's Office with all 3 flags set)
+
+TROUBLESHOOTING
+---------------
+If "drive" doesn't work:
+- Go to Vocabulary panel
+- Click "+ Movement" to add drive and other movement verbs
+- Try again in PlayTest
+
+If "interview" or "accuse" don't work:
+- Go to Vocabulary panel
+- Click "+ Interaction" to add conversation verbs
+- Try again in PlayTest
+
+If rules don't work at all:
+- Make sure you loaded MAX_CARRADOS_COMPLETE.txt via Merge Data panel
+- Check Responses panel - should show 33 rules
+- All rules should be enabled (green checkmarks)
+
+If objects/locations missing:
+- You need to load MAX_CARRADOS_COMPLETE.txt via Merge Data
+- Don't try to manually create everything - use the complete file
+
+==============================================================================

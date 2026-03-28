@@ -1,0 +1,883 @@
+{
+  "title": "The Eyes of Max Carrados",
+  "author": "Christopher Olewicz - Adapted from Ernest Bramah",
+  "version": "2.0 - Extended Edition",
+  "locations": [
+    {
+      "id": 15,
+      "name": "Mead's Workshop",
+      "description": "A cramped workshop behind the cottage. The air hangs heavy with machine oil and metal dust. You sense a substantial workbench directly ahead, tools clinking softly on a rack to your right. The floor beneath your feet has a gritty texture - metal filings, perhaps. Something about this space feels deliberate, methodical. This is where secrets are made.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": 8,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": null
+      },
+      "x": 900,
+      "y": 400
+    },
+    {
+      "id": 16,
+      "name": "Telegram Office, Richmond",
+      "description": "A small public telegram office. The clerk's fingers dance across the telegraph key with practiced precision, creating a rhythmic clicking that fills the space. The sharp scent of ink and paper mingles with the mustiness of the building. Carlyle often receives urgent messages here.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": 1
+      },
+      "x": 320,
+      "y": 100
+    }
+  ],
+  "objects": [
+    {
+      "id": 11,
+      "noun": "workbench",
+      "adjective": "heavy",
+      "description": "A sturdy wooden workbench, bolted firmly to the floor. The surface is scarred with years of use.",
+      "icon": "🔨",
+      "location": {
+        "type": "at",
+        "locationId": 15
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 12,
+      "noun": "rack",
+      "adjective": "tool",
+      "description": "A rack mounted on the wall, holding various tools that clink softly when disturbed by air currents.",
+      "icon": "🔧",
+      "location": {
+        "type": "at",
+        "locationId": 15
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 13,
+      "noun": "apron",
+      "adjective": "leather",
+      "description": "A heavy leather apron hanging from a peg. It reeks of lamp oil and various chemicals.",
+      "icon": "👔",
+      "location": {
+        "type": "at",
+        "locationId": 15
+      },
+      "weight": 2,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 14,
+      "noun": "drawer",
+      "adjective": "locked",
+      "description": "A drawer in the workbench, secured with a three-digit combination lock. Your fingers detect the numbered dial.",
+      "icon": "🔒",
+      "location": {
+        "type": "at",
+        "locationId": 15
+      },
+      "weight": 0,
+      "isContainer": true,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 15,
+      "noun": "letter",
+      "adjective": "blackmail",
+      "description": "A letter on expensive stationery. Your fingers trace the embossed letterhead - Pendleton & Associates, Stockbrokers. The paper still carries the faint scent of expensive cologne.",
+      "icon": "📄",
+      "location": {
+        "type": "at",
+        "locationId": 252
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 16,
+      "noun": "receipts",
+      "adjective": "payment",
+      "description": "Bank receipts documenting payments. Your sensitive touch detects the raised seal of the Bank of England. The amounts are substantial - £500 in total.",
+      "icon": "💷",
+      "location": {
+        "type": "at",
+        "locationId": 252
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 17,
+      "noun": "diagram",
+      "adjective": "technical",
+      "description": "Technical drawings on stiff paper. Your fingers follow the embossed lines - a detailed schematic of a signal lamp mechanism with precise measurements marked.",
+      "icon": "📐",
+      "location": {
+        "type": "at",
+        "locationId": 252
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 18,
+      "noun": "telegram",
+      "adjective": "urgent",
+      "description": "An urgent telegram for Carlyle summoning him to his chambers immediately regarding a pressing legal matter.",
+      "icon": "📨",
+      "location": {
+        "type": "at",
+        "locationId": 16
+      },
+      "weight": 1,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": true,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 19,
+      "noun": "lock",
+      "adjective": "combination",
+      "description": "A three-digit combination lock securing the drawer. The dial rotates smoothly under your fingertips.",
+      "icon": "🔐",
+      "location": {
+        "type": "at",
+        "locationId": 15
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": false
+    },
+    {
+      "id": 20,
+      "noun": "mead",
+      "adjective": "mrs",
+      "description": "Mrs. Mead, the signalman's wife. Her voice trembles with worry when she speaks. The scent of lavender soap clings to her, but beneath it you detect the sharp tang of fear.",
+      "icon": "👤",
+      "location": {
+        "type": "at",
+        "locationId": 8
+      },
+      "weight": 0,
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": true
+    }
+  ],
+  "vocabulary": [
+    {
+      "word": "feel",
+      "wordType": "verb",
+      "id": 16
+    },
+    {
+      "word": "listen",
+      "wordType": "verb",
+      "id": 17
+    },
+    {
+      "word": "smell",
+      "wordType": "verb",
+      "id": 18
+    },
+    {
+      "word": "unlock",
+      "wordType": "verb",
+      "id": 19
+    },
+    {
+      "word": "use",
+      "wordType": "verb",
+      "id": 20
+    },
+    {
+      "word": "workbench",
+      "wordType": "noun",
+      "id": 17
+    },
+    {
+      "word": "drawer",
+      "wordType": "noun",
+      "id": 18
+    },
+    {
+      "word": "rack",
+      "wordType": "noun",
+      "id": 19
+    },
+    {
+      "word": "apron",
+      "wordType": "noun",
+      "id": 20
+    },
+    {
+      "word": "lock",
+      "wordType": "noun",
+      "id": 21
+    },
+    {
+      "word": "letter",
+      "wordType": "noun",
+      "id": 22
+    },
+    {
+      "word": "receipts",
+      "wordType": "noun",
+      "id": 23
+    },
+    {
+      "word": "diagram",
+      "wordType": "noun",
+      "id": 24
+    },
+    {
+      "word": "combination",
+      "wordType": "noun",
+      "id": 25
+    },
+    {
+      "word": "workshop",
+      "wordType": "noun",
+      "id": 26
+    },
+    {
+      "word": "tools",
+      "wordType": "noun",
+      "id": 27
+    },
+    {
+      "word": "heavy",
+      "wordType": "adjective",
+      "id": 9
+    },
+    {
+      "word": "locked",
+      "wordType": "adjective",
+      "id": 10
+    },
+    {
+      "word": "blackmail",
+      "wordType": "adjective",
+      "id": 11
+    },
+    {
+      "word": "technical",
+      "wordType": "adjective",
+      "id": 12
+    },
+    {
+      "word": "payment",
+      "wordType": "adjective",
+      "id": 13
+    }
+  ],
+  "rules": [
+    {
+      "id": 40,
+      "name": "Trigger Carlyle Departure at Mead's",
+      "process": "PRO2",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 8
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 50
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 23
+          }
+        },
+        {
+          "type": "PLACE",
+          "params": {
+            "objno": 6,
+            "locno": 16
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 50
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 24
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "name": "FEEL WORKBENCH - Clue 1",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 16,
+            "noun": 17
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 15
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 25
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 55
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "name": "LISTEN in Workshop - Clue 2",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 17,
+            "noun": 255
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 15
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 26
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 56
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "name": "SMELL APRON - Clue 3",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 18,
+            "noun": 20
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 13
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 27
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 57
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "name": "UNLOCK with correct combination 624",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 19,
+            "noun": 18
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 15
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 51
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 28
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 51
+          }
+        },
+        {
+          "type": "PLACE",
+          "params": {
+            "objno": 15,
+            "locno": 15
+          }
+        },
+        {
+          "type": "PLACE",
+          "params": {
+            "objno": 16,
+            "locno": 15
+          }
+        },
+        {
+          "type": "PLACE",
+          "params": {
+            "objno": 17,
+            "locno": 15
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 29
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "name": "READ BLACKMAIL LETTER",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 5,
+            "noun": 22
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 15
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 30
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 52
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "name": "EXAMINE PAYMENT RECEIPTS",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 23
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 16
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 31
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 53
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "name": "EXAMINE TECHNICAL DIAGRAM",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 1,
+            "noun": 24
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 17
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 32
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 54
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "name": "ACCUSE PENDLETON - Complete Victory (6 evidence)",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 13,
+            "noun": 14
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 14
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 38
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 39
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 40
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 52
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 53
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 54
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 33
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 34
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 35
+          }
+        },
+        {
+          "type": "END",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "name": "Enter Workshop from Cottage",
+      "process": "PRO0",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "verb": 8,
+            "noun": 26
+          }
+        },
+        {
+          "type": "AT",
+          "params": {
+            "locno": 8
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {
+            "mesno": 36
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 15
+          }
+        },
+        {
+          "type": "DESC",
+          "params": {}
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    }
+  ],
+  "messages": [
+    "A telegram boy arrives breathlessly. 'Mr. Carlyle, sir! Urgent message from your chambers!' Carlyle tears open the envelope, his sharp intake of breath telling you it's serious. 'Max, I'm terribly sorry - there's an emergency. A client's been arrested and I must attend immediately. I'll return as soon as I can.' His footsteps fade rapidly down the path.",
+    "You are alone now. The workshop door creaks in the breeze. Mrs. Mead's nervous voice drifts from the cottage: 'My husband's workshop is through the back garden, Mr. Carrados. He... he doesn't like visitors there. But if it helps clear his name...' Her voice trails off uncertainly.",
+    "Your fingertips explore the workbench surface with practiced precision. The wood grain flows smoothly until... there. Three deep gouges carved deliberately into the surface. Your sensitive touch traces their shapes: the first curves like a '6', the second angular like a '2', the third sharp-edged like a '4'. Someone carved these intentionally - a reminder? A code?",
+    "You stand perfectly still, letting the silence speak. Air currents shift through the workshop, disturbing the hanging tools. They clink softly against each other - a metallic symphony. You count by sound: six chisels of varying sizes, their edges singing different notes... two hammers, heavy and dull... four files, their textured surfaces creating a distinct rasp as they touch. Six. Two. Four.",
+    "You raise the leather apron to your face. Beneath the overwhelming scent of lamp oil, your acute sense detects layers of chemical signatures. Six distinct metal-working compounds - you can almost taste the copper, iron, steel... Two types of oil, one heavier than the other... Four different solvents, each with its own sharp note. Six chemicals. Two oils. Four solvents. The pattern repeats.",
+    "Your sensitive fingers rotate the dial with absolute precision. First to 6... you feel the faint click of the internal mechanism aligning. Then 2... another precise click, metal on metal. Finally 4... the lock releases with a satisfying snap that echoes through the silent workshop. The drawer slides open smoothly, releasing a waft of paper and ink.",
+    "Inside the drawer, your fingers find documents. The paper quality speaks of expense - heavy stock, embossed letterhead. Bank receipts with raised seals. Technical drawings on stiff paper, the lines pressed deep enough to feel. This is evidence. Important evidence.",
+    "You trace the embossed letterhead with your fingertips: Pendleton & Associates, Stockbrokers. The letter itself is typed, but your touch detects the pressure variations - this was written in anger, the keys struck hard. As you carefully feel the words, the message becomes clear: 'Do as instructed or your family will suffer the consequences. The payment has been arranged. Destroy this letter.' It's signed with Pendleton's characteristic flourish. Blackmail. Not cooperation - coercion.",
+    "Bank receipts documenting payments from Pendleton to Mead. Your sensitive touch follows the official stamps and seals of the Bank of England. The amounts are staggering - £500 in total, paid in three installments over two weeks. The dates... just before the accident. This wasn't payment for willing service. This was blood money.",
+    "Technical drawings on stiff paper. Your fingers trace the embossed lines with extraordinary precision - every measurement, every detail. It's a schematic of a railway signal lamp mechanism with exact specifications for cutting the glass to precisely 4-7/8 inches. The handwriting on the notes matches the flourish on the blackmail letter. Pendleton's hand. Pendleton's plan. Pendleton's crime. This is premeditation in physical form.",
+    "'Mr. Pendleton,' you say quietly, your voice cutting through his blustering denials. 'I have evidence you measured and cut the signal lamp glass.' He starts to protest. 'I have evidence of your financial motive - the stock certificates.' His breathing quickens. 'I have evidence you blackmailed Mead, threatening his family.' Silence. 'I have the payment receipts. The technical diagrams. The letter in your own hand.' You feel him collapse into his chair, defeated.",
+    "'How?' Pendleton whispers, his voice hollow. 'How could you possibly know all this?' You allow yourself a thin smile. 'You chose the wrong detective to oppose, Mr. Pendleton. You thought my blindness would hinder me. But my other senses found what you thought you'd hidden. The carved numbers. The tool counts. The chemical traces. Every detail you overlooked because you were too confident in what you could SEE.'",
+    "*** VICTORY ***\n\nYou have solved The Eyes of Max Carrados!\n\nThrough brilliant deduction and the superior use of your heightened senses, you've exposed Harold Pendleton's conspiracy. Not only did he sabotage the signal lamp for financial gain, but he blackmailed the innocent signalman Mead, threatening his family to ensure cooperation.\n\nHutchins has been cleared. Mead will face minor charges but as a victim of coercion. Pendleton faces life imprisonment for mass murder.\n\nYour blindness was not a limitation - it was your greatest strength.\n\nThe truth, as always, lay in the details others overlooked.",
+    "Mrs. Mead leads you through the back garden. 'Here's the workshop, Mr. Carrados. My husband spends hours here... making things. Fixing things. At least, that's what he used to tell me.' Her voice cracks with emotion. 'Since the accident, he won't let anyone in. But you... you need to see the truth, don't you?' You sense her stepping back, leaving you alone at the threshold."
+  ],
+  "flags": [
+    {
+      "id": 50,
+      "name": "carlyle_departed",
+      "description": "Set when Carlyle is called away to telegram office",
+      "initialValue": 0
+    },
+    {
+      "id": 51,
+      "name": "drawer_unlocked",
+      "description": "Set when combination lock is solved (6-2-4)",
+      "initialValue": 0
+    },
+    {
+      "id": 52,
+      "name": "blackmail_letter_read",
+      "description": "Set when blackmail letter is examined",
+      "initialValue": 0
+    },
+    {
+      "id": 53,
+      "name": "receipts_examined",
+      "description": "Set when payment receipts are examined",
+      "initialValue": 0
+    },
+    {
+      "id": 54,
+      "name": "diagram_examined",
+      "description": "Set when technical diagram is examined",
+      "initialValue": 0
+    },
+    {
+      "id": 55,
+      "name": "clue_workbench",
+      "description": "Set when workbench is felt (6-2-4 carved)",
+      "initialValue": 0
+    },
+    {
+      "id": 56,
+      "name": "clue_tools",
+      "description": "Set when tools are counted by listening (6-2-4)",
+      "initialValue": 0
+    },
+    {
+      "id": 57,
+      "name": "clue_chemicals",
+      "description": "Set when apron chemicals are smelled (6-2-4)",
+      "initialValue": 0
+    }
+  ]
+}

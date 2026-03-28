@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HKGF5S1N0F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HKGF5S1N0F');
+</script>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>DAAD Ready - Graphics, sound and video</title>
+  <meta name="description" content="Documentación DAAD Ready - Multimedia">
+  <meta name="author" content="@Uto_dev">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="res/normalize.css">
+  <link rel="stylesheet" href="res/skeleton.css">
+
+</head>
+<body style='font-family: Speccy, Verdana, Arial, Helvetica'>
+
+<div class="skip"><a href="#content">Skip to content</a></div>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<div class="container">
+  <div class="row">
+    <div class="twelve column" style='background-color:#045FB4;color:white'>
+      <h2><a href="/">Multimedia in DAAD Ready</a></h2>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="twelve column">
+    <a name='content'></a>
+    <h4>Documentation on multimedia in DAAD Ready</h4>
+
+    <p>In Spanish <a href="multimedia_es.html">here <img src="res/spanish.gif" /></a></p>
+
+<p>This document extends the content of the DAAD Ready manual, as a reference to add graphics,
+  sound, and in some cases video or animations, to your adventure. To some extent you already need to know 
+  DAAD Ready to understand this document, so it is recommended to first read <a href="doc_es.html">the main DAAD Ready manual</a>,
+  and then this one.</p>
+
+<p>The first section of the manual (Important Stuff) explains some basic principles, and have several chapters.</p>
+<p></p><u><b><center>Please don't skip that part</center></b></u></p>
+<p> The second one "Multimedia by platform" explains how to include graphics, sounds or animations the way DAAD Ready expects them for each machine. Once you reach this section, 
+  you can skip to your preferred machine if you want.</p>
+
+
+
+<H4>TABLE OF CONTENTS</H4>
+
+<ul>
+  <li><a href='#overview'>Important Stuff</a></li>
+  <ul>
+    <li><a href='#features'>Chapter 1 - DAAD Ready multimedia features</a></li>
+    <li><a href='#daadready'>Chapter 2 - DAAD Ready Basics</a></li>
+    <li><a href="#condacts">Chapter 3 - Multimedia Condacts</a></li>
+    <li><a href="#resources">Chapter 4 - Multimedia Resources</a></li>
+  </ul>
+
+  <li><a href='#multimediabyplatform'>Multimedia by platform</a></li>
+  <ul>
+    <li><a href='#zx48k'>ZX Spectrum 48K</a></li>
+    <li><a href='#zx128k'>ZX Spectrum 128K (tape) and +3</a></li>
+    <li><a href="#zxnext">ZX Spectrum Next</a></li>
+    <li><a href='#esxdos'>ZX Spectrum with DivMMC/DivIDE interface</li>
+    <li><a href='#zxuno'>ZX-Uno</a></li>
+    <li><a href='#msx1'>MSX1</a></li>
+    <li><a href='#msx2'>MSX2</a></li>   
+    <li><a href='#c64'>Commodore 64</a></li>
+    <li><a href='#cplus4'>Commodore Plus/4</a></li>
+    <li><a href='#cpc'>Amstrad CPC</a></li>
+    <li><a href='#amiga'>Commodore Amiga and Atari ST</a></li>
+    <li><a href='#pcdos'>MSDOS</a></li>
+    <li><a href='#html'>HTML</a></li>
+    <li><a href='#windows'>Windows</a></li>
+    <li><a href='#macOS'>MacOS</a></li>   
+  </ul>
+  <li><a href='#appendix'>Appendixes</a></li>
+  <ul>
+    <li><a href='#loadingscreens'>Appendix A - Loading screens</a></li>  
+    <li><a href='#tools'>Appendix B - Utilities</a></li>
+  </ul> 
+</ul>
+<a name="overview"></a>
+<H4>IMPORTANT STUFF</H4>
+
+
+
+<a name='features'></a></li>
+<h4>Chapter 1 - DAAD Ready multimedia features</h4>
+
+<p>DAAD Ready has certain functionalities for image, sound and animation playback, but not all machines support them:</p>
+
+<u>Images</u>
+
+<p>Although DAAD used vector graphics to draw images on screen in the 8 bit machines, DAAD Ready is made for digitized graphics (bitmaps). Despite DAAD it's made to have more or less the same code for all targets, 
+  images are deeply dependant on the hardware, so we will use different images for almost all  targets.</p>
+
+<p>The images in DAAD have some properties. Some of them apply to some targets, some others don't because that property is not implemented for that target, either because is too complicated or irrelevant:</p>
+
+<ul>
+  <li>Fixed vs floating images: You can tell DAAD your images are fixed, that is, always appear in a given X,Y location in the screen. Fixed images will ignore windows that can be defined with WINDOW/WINSIZE/WINAT from DAAD code. There's also
+    floating images, that will appear inside the currently selected window (if any) and don't have a fixed location. The images will be cropped to fit the window if too big.</li>
+  <li>On those machines that supports indexed palettes (Amiga, Atari ST, MSDOS, Spectrum Next and ZX-Uno), DAAD allows specifying a range of colors from the palette to be applied,
+     so other colors can be reserved for text or other purposes. In some targets both float and fixed images can limit the palette colors to apply. In some others, only fixed images 
+     can do it, and float images never apply the palette at all (just use the palette previously applied by some fixed image).</li>
+
+  <li>Images can have a size smaller than full resolution. Although for most machines you have to provide a full resolution image (i.e. 320x200 for MSDOS or 256x192 for ZX Spectrum) as source image, you can specify you only want
+     a part of it to go to the game. For example, you can provide a 320x200 image for MSDOS, but tell DAAD Ready you only want to use 320x96 pixels from it. In some targets, you can also specify the width, so you can have images
+     less wide than the full screen width. When DAAD Ready processes the images, only the specified area will be included in the game, so don't worry about using full screen images as source, they won't go as is to the final game.</li>
+  </li>
+  <li>
+    DAAD Ready can mark some images as "buffered", meaning they are loaded into RAM and kept there until the end of the adventure, so they can be drawn faster when needed. There are some targets that don't support buffered images, 
+    mostly because they don't have enough RAM to keep them there, or because they don't need them (i.e. SD card based systems). In some targets, all images are buffered automatically (i.e. Spectrum 128K tape version).
+</ul>
+
+<u>Sound</u>
+
+<p>About sound, DAAD supports BEEP condact in many targets but not all. BEEP is a condact that accepts a duration and a frequency as parameter. As that is not very comfortable for human beings to play with, the compiler 
+  implements a metacondact called XPLAY, that accepts a string as parameter (see the main manual for more detail). When the compiler finds XPLAY "CDE", it translates it into three BEEP condacts automatically, and 
+the game plays C, D, E (Do-Re-Mi)</p>
+
+<p>On the other hand, Amiga, Atari ST, and DOS targets support playing mono 8 bit samples, and HTML target supports playing MP3 files.</p>
+
+<u>Animations</u>
+<p>Some targets support proper animations or video (FLI, MP4). Other targets only can do that by printing multiple pictures.</p>
+
+
+<a name="daadready"></a>
+<h4>Chapter 2 - DAAD Ready Basics</h4>
+
+<p>DAAD Ready is built so it can pick images and animations in specific formats (depends on target machine) from the IMAGES folder, and in some cases sounds from the SOUNDS folder, and include them into the game.</p>
+
+<p>As said above, you should provide a full screen images (i.e. 320x200 for Amiga, or 256x212 for MSX2). DAAD Ready will default anyway to pick the first 96 lines of the image and will create fixed images that will be displayed at coordinates 0,0, including
+  only the useful part into the final game.</p>
+  
+<p>That, size of screen width and 96 pixels height is, let's say, the “lowest common denominator” for all machines. You can, though, change that behaviour in your preferred targets. If you don't want
+  to complicate things, just live with this and have images on top of the screen with a height of 96 pixels.</p>
+</p>
+
+<a name="condacts"></a>
+<h4>Chapter 3 - Multimedia Condacts</h4>
+
+<p>There are several condacts and metacondacts closely related to DAAD Ready’s multimedia:</p>
+
+<p><b>PICTURE</b> is DAAD’s condact to load graphics into memory (not to actually draw them). The one that really paints them on screen is DISPLAY. That is, first we select the graphic with PICTURE, then display it on screen with DISPLAY. PICTURE is also
+  used to load sound samples into RAM in some targets. Yes, it's weird, but it was probably done back in the day to save some RAM in smaller targets. In that case, once loaded, the sound is played with SFX condact, not DISPLAY.</p>
+</p>
+
+<p><b>BEEP</b> is a simple sound condact. It takes duration and frequency as parameters, allowing for small sound effects or even melodies.</p>
+
+<p><b>XPLAY</b>, as explained above is a metacondact known by the DAAD Ready compiler, rather than the interpreters. It converts human readable strings into BEEPs:</p>
+
+<code>
+  XPLAY "CDE"
+</code>
+
+<p>If you want to learn about how to define those music strings, it's  a subset of a melody definition system called <a href="https://en.wikipedia.org/wiki/Music_Macro_Language">MML (Music Macro Language)</a>.</p>
+
+<p><b>SFX</b> is a condact that integrates advanced sound functionality to play sound samples and in some targets, music.</p>
+
+<p><b>GFX</b> is a condact that integrates advanced graphical functions. It's available in a few targets.</p>
+
+<a name="resources"></a>
+<h4>Chapter 4 - Multimedia Resources</h4>
+
+<p>Multimedia resources in DAAD Ready are identified by a number from 0 to 255, which is then used in DAAD code. For example, the PICTURE condact loads graphics, taking the resource number as a parameter. If we want
+   to show the graphic for location 1, we use PICTURE 1 followed by DISPLAY 0. DISPLAY parameters uses to be 0, but PICTURE parameter says which resource to use.</p>
+
+<p>For each platform, you must place resources in the IMAGES or SOUNDS folder and name them with three digits and the appropriate extension. For example, for Spectrum +3, place file 001.SCR in the IMAGES folder to show the graphic
+   for location 1. For MSDOS, place file 020.DRO in the SOUNDS folder, which can then be played as music resource 20. As you see all resources should be numbered with three digits, so you have to add trailing zeros if necessary.</p>   
+
+<p>In the case of graphics, the DAAD Ready default game template automatically displays the corresponding image for each location—e.g., 001.SCR appears automatically when entering location 1. But you can also create
+   graphics not tied to locations, such as 200.SCR, which you can display manually from DAAD (using PICTURE 200 / DISPLAY 0).</p>
+
+<p>Make sure two different kind of resources don't share same number (i.e. 001.PBG and 001.WAV) </p>   
+
+<p><b> The important stuff section ends here, now that you have the basic information, you can jump to your preferred platform.</b></p>
+
+<a name="multimediabyplatform"></a>
+<h3>Multimedia by platform</h3>
+
+
+<a name="zx48k"></a>
+<h4>ZX Spectrum 48K</h4>
+
+
+
+<p>This target does not support graphics neither animations in DAAD Ready.</p>
+
+<p>As for sound, it supports BEEP, so sound can be done with BEEP or XPLAY.</p>
+
+<p>This machine doesn’t support animations or other sound types.</p>
+
+
+
+<a name='zx128k'></a>
+<h4>Spectrum 128K (tape) and +3</h4>
+
+<p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+<p>To add graphics, simply create .SCR files (in the usual emulator 6912-byte .SCR format) and put them in the IMAGES folder. For instance, just add 001.SCR
+  for location 1, 002.SCR for location 2, and so on. You can also create images to be manually displayed via PICTURE/DISPLAY (i.e. create 100.SCR and then 
+  use PICTURE 100, DISPLAY 0 to show it).</p>
+</p>
+
+<p>As 128K it’s a tape-based system, all graphics must be preloaded into RAM — nobody would want to load from tape constantly. In practice, this means you’ll only fit about 20–30 graphics,
+  although it depends on size and compression of the images.</p>
+
+<p>For the Spectrum +3, graphics are loaded from disk on demand. They are also compressed to be able to fit more images per disk.</p>
+
+<p>If you have problems fitting the images in RAM or floppy disk, you should know the interpreters use ZX0 compression to save space, which compresses better if:</p>
+<ul>
+  <li>The image has large areas of solid pixels or empty space when read horizontally.</li>
+  <li>Patterns repeat. Same pixel patterns repeating across scanlines compress better than scanlines different each row.</li>
+</ul>
+
+<p>Because of the compression method, dithering tools like <a href="https://www.dadither.com/#Download">DaDither</a> aren’t ideal for this machine (though usable). Hand drawn graphics made with <a href="https://sourcesolutions.itch.io/zx-paintbrush">ZX Paintbrush</a>, 
+  <a href="http://grafx2.chez.com/">GrafX2</a> or <a href="http://multipaint.kameli.net/">Multipaint</a> work best. You can also use dithering and then clean it manually so there aren't that many loose pixels.</p>
+
+<p>Sound-wise, Spectrum 128K and +3 support BEEP and XPLAY. The sound plays through the 128K’s sound chip rather than the speaker.</p>
+
+<p>This machines doesn’t support animations or sound other than the mentioned above.</p>
+
+<a name="advzxplus3128k"></a>
+<h4>Advanced multimedia for the ZX Spectrum 128K and +3</h4>
+
+<p>If you look at ZXPLUS3.BAT or ZX128K.BAT, there are some lines that generate the graphics:</p>
+
+<code>
+for /L %%i in (0, 1, 9) do IF exist 00%%i.ZX0 ..\TOOLS\SCRMAKER\SCRMAKER spectrum128 00%%i.zx0 00%%i.128 %IMGWIDTH% %IMGLINES% 0,0<br/>
+for /L %%i in (10, 1, 99) do IF exist 0%%i.ZX0  ..\TOOLS\SCRMAKER\SCRMAKER spectrum128 0%%i.zx0 0%%i.128 %IMGWIDTH% %IMGLINES% 0,0<br/>
+for /L %%i in (100, 1, 256) do IF exist %%i.ZX0  ..\TOOLS\SCRMAKER\SCRMAKER spectrum128 %%i.zx0 %%i.128 %IMGWIDTH% %IMGLINES% 0,0<br/>
+</code>
+
+<p>First line is for graphics 000 to 009, second for 010 to 099, and third for 100 to 255. It's a good idea to have float graphics in the 100-255 range, and fixed in the 0-99 range, if you are going to use both of them.</p>
+
+<ul>
+  <li>IMGLINES is a value defined in CONFIG.BAT, whose default is 96. It affects all targets. If you change the value to 48 ou’ll see the graphics become half as tall. You can also set more, say 104, although in that case the text 
+  may overlap the graphic (since the DAAD template displays text at a fixed height, a taller graphic will overwrite it).</li>
+  <li>IMGWIDTH is defined somewhere above in the ZX128K.BAT or ZXPLUS3.BAT, and defaults to 256. You can change image with chaging IMGWITH value, or just replacing it by a number.</li>
+  <li>The "0,0" makes the image be <u>fixed</u> at position x=0, y=0 — the top-left corner. </li>
+</ul>
+
+<p>As you see, all that together makes the images be 256x96 and appear fixed at the top-left corner of the screen, the minimum common denominator in DAAD Ready.</p>
+
+<p>What if I want floating graphics, say for a graphical inventory?</p>
+
+<p>Ok, let’s assume we’ll make all graphics above number 100 floating. Simply change the last line like this:</p>
+
+<code>
+for /L %%i in (0, 1, 9) do IF exist 00%%i.ZX0 ..\TOOLS\SCRMAKER\SCRMAKER spectrum128 00%%i.zx0 00%%i.128 %IMGWIDTH% %IMGLINES%  
+</code>
+
+<p>To make floating images remove the 0,0. If no fixed coordinates are provided, the image will be floating.</p>
+
+<p>You can also change their width and height:</p>
+
+<code>
+for /L %%i in (100, 1, 256) do IF exist %%i.ZX0  ..\TOOLS\SCRMAKER\SCRMAKER spectrum128 %%i.ZX0 %%i.128 32 32
+</code>
+
+<p>This way, graphics 100–255 (if any) will be floating (no coordinates), and 32x32 pixels in size. The source file (the SCR file) you provide must still be full screen (256x192 pixels), but only the 32x32 pixels in the upper left corner will be included in the game.</p>
+
+<p>And what if I want a footer graphic—8 pixels tall, 256 pixels wide, always shown at the bottom?</p>
+
+<p>Let’s add a fourth line at the end, for graphic 200 for example:</p>
+
+<code>
+    for /L %%i in (200, 1, 200) do IF exist %%i.ZX0  ..\TOOLS\SCRMAKER\SCRMAKER spectrum128 %%i.ZX0 %%i.128 256 8 0,184
+</code>
+
+<p>As you can see, it creates a 256x8 graphic at position x=0, y=184.</p>
+
+<p>Can I create buffered images?</p>
+
+<p>Well, in the 128K tape version, all images are buffered, but in the +3 version, you can create buffered images. To say you want an image to be buffered on +3, just put “L:” in the line that generates it, right before the ZX filename.  
+
+  For example, if we want all images from 100 and above buffered, float, and 32x32 it would look like this:</p>
+
+<code>
+      for /L %%i in (100, 1, 256) do IF exist %%i.ZX0  ..\TOOLS\SCRMAKER\SCRMAKER spectrum %%i.ZX0 L:%%i.128 32 32 
+</code>
+
+<p>You have 8,960 bytes available for preeloaded images.</p>
+
+
+<a name='zxnext'></a>
+<h4>ZX Spectrum Next</h4>
+
+<p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+<p>The Spectrum Next uses its Layer2 mode, 256x192 pixels, with 256 colors from a 512-color palette.</p>
+
+<p>To add graphics, you need to put indexed 256 colous 256x192 PCX images in the IMAGES folder (e.g., 001.PCX for location 1). In fact, it's better to create images with just 240 colors, we will see why below.</p>
+
+<p>However, there’s a small problem: the Spectrum Next palette offers only 256 colors from 512, while PCX allows 256 colors from 262,144. This means you could use PCX colors not reproducible on Next.</p>
+
+<p>To avoid this, either:</p>
+<ul>
+  <li>if you hand-draw the images, use this palette: <br/><img src="res/nextpalette512.png"/></li>
+  <li>If you can't control the colors, use <a href="https://www.dadither.com/#Download">DaDither</a> with “Spectrum Next / RGB333” palette mode and 256x192x8 settings to reduce to
+     Spectrum Next palette, then export  as PNG and convert it to an indexed 256-color PCX. To convert from PNG to indexed PCX one easy to use tool is <a href="https://www.gimp.org/">Gimp</a>. Load the PNG, switch to indexed mode in the Image/Mode menu, and choose 240 colors.
+     If your PNG file was already indexed, convert to RGB in the Images/Mode menu, and then back to ensure 240 max colors.</p>
+
+
+<p>NOTES:</p>
+<ul>
+  <li>Reducing from 256 to 240 may slightly degrade quality; try to limit manual artwork to 240 colors.</li>
+  <li>If Gimp detects fewer than 17 colors, it may create a 16-color PCX (which is not valid). Add dummy pixels below row 96 with extra colors to reach 17+ colors so Gimp saves a 256-color PCX.</li>
+  <li>Pure magenta (255,0,255) is treated as transparent on Next. Use it for transparent areas only (see also below about Spectrum Next layers).</li>
+</ul>
+
+<p>The Spectrum Next only support BEEP and XPLAY for sound, and it does not support animations.</p>
+
+<a name='advzxnext'></a>
+<h4>Advanced multimedia for the ZX Spectrum Next</h4>
+
+<p>In the ZXNEXT.BAT file you can find these lines:</p>
+
+<code>
+for /L %%i in (0, 1, 9) do IF exist 00%%i.PCX ..\TOOLS\SCRMAKER\SCRMAKER specnext 00%%i.PCX 00%%i.LY2 256 %IMGLINES% 0,0 /s<br/>
+for /L %%i in (10, 1, 99) do IF exist 0%%i.PCX  ..\TOOLS\SCRMAKER\SCRMAKER specnext 0%%i.PCX 0%%i.LY2 256 %IMGLINES% 0,0 /s<br/> 
+for /L %%i in (100, 1, 256) do IF exist %%i.PCX  ..\TOOLS\SCRMAKER\SCRMAKER specnext %%i.PCX %%i.LY2 256 %IMGLINES% 0,0 /s 
+</code>
+
+<p>First line is for graphics 000 to 009, second for 010 to 099, and third for 100 to 255.</p>
+
+<p>Let's have a look at this:</p>
+
+<code>256 %IMGLINES% 0,0 /s</code>
+
+<ul>
+  <li>About the /s: the Spectrum Next uses a color palette. That means color 0 isn’t necessarily black, it depends on how color 0 is defined in the palette.  
+  That’s why we see the /s parameter. What does it do? It tells DAAD Ready to shift the palette up by 16 colors and replace the first 16 colors with the standard
+  Spectrum colors.  In practice, this prevents the graphics from altering text colors, which normally use those first 16 palette slots. Do you remember when we
+  said to use only 240 colors in the PCX file? That’s why. If you remove /s, the shift won’t happen, and all 256 colors can be used, but then you must ensure
+  yourself color 0 is black, 7 is white, etc., so text displays correctly.</li>
+<li>About "256 %IMGLINES%"": 256 is the width of the image in pixels and IMGLINES is defined in CONFIG.BAT, and its default value is 96, so images will be
+   256x96 pixels. You can change that value to make taller or shorter images.</li>
+<li>That "0,0": it's saying the image is fixed at 0,0 (upper left corner)</li>
+
+</ul>
+<p>So in the end those lines are asking DAAD Ready to convert PCX images to Layer2 format (LY2) for Spectrum Next, 256 pixels wide, IMGLINES pixels tall (96 by default), fixed at position 
+  0,0 (top-left corner), and shifting the palette to preserve text colors.</p>
+
+<u>Possible changes</u>
+
+<p>Displaying more than one image in the Spectrum Next is possible, but as images use palette, when loading one image, the palette changes for the entire screen, affecting all images on screen. So, unless
+  all images use exactly the same palette, color conflicts may occur. You can limit the palette colors applied by a specific imag though, so for instance you can have colors 0-127 for the text and 
+  location picture, and use colors above that for a frame. This line asks DAAD Ready to only apply colors from 0 to 127 when loading this images:</p>
+
+<code>
+    for /L %%i in (100, 1, 256) do IF exist %%i.PCX  ..\TOOLS\SCRMAKER\SCRMAKER specnext %%i.PCX %%i.LY2 256 %IMGLINES% 0,0 0-127
+</code>
+
+<p>If you want some image to use the current colors (apply none) just write an inverted range (second number lower than the first):</p>
+
+<code>
+    for /L %%i in (100, 1, 256) do IF exist %%i.PCX  ..\TOOLS\SCRMAKER\SCRMAKER specnext %%i.PCX %%i.LY2 256 %IMGLINES% 0,0 1-0
+</code>
+
+<p>If you change the 0,0 value, the image will be fixed to somewhere else on the screen (i.e. 8,16) . You can also remove the 0,0, to tell DAAD Ready 
+  the image is floating (i.e., it will appear inside the current window).</p>
+</p>
+
+<p><u>The Layers of the Spectrum Next</u></p>
+
+<p>Unlike other machine, the Spectrum Next uses a system of layers on screen, of which DAAD only uses two.  A layer system means there are several “virtual” 
+  screens that are composited to the final display. Top layer can have transparent regions, so the layer beneath remain visible.</p>
+
+<p>DAAD uses two layers on the Spectrum Next:</p>
+
+<ul>
+  <li>The ULA layer (the original Spectrum screen), used for text and drawn first.</li>
+  <li>The Layer2 layer, allowing 256-color graphics, drawn on top of the ULA layer. Can have transparencies.</li>
+</ul>
+
+<img src="res/nextlayers_en.png" alt="Layers of the Spectrum Next" style="width: 100%; max-width: 600px;" />
+
+<p>When DAAD starts, Layer2 is fully transparent, so only the ULA layer is visible.  When graphics are drawn, they’re placed on Layer2.  
+DAAD Ready automatically ensures transparency outside the graphic area so the text below remains visible. However, if we want to place
+graphics elsewhere (for example, to build a graphical inventory) or add a decorative frame, we must ensure manually that transparent 
+areas are properly defined. To do that, simply use pure magenta (RGB 255,0,255 or #FF00FF) for any area you want to be transparent.  
+That color won't be shown and will make the underlying ULA text visible.</p>
+
+<p>Of course, that pure magenta color shouldn’t appear in actual visible graphics, since it would become transparent.</p>
+
+
+ <a name='esxdos'></a>
+  <h4>ZX Spectrum with DivIDE/DivMMC (ESXDOS)</h4>
+
+  <p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+  <p>A DivIDE or DivMMC is an interface for ZX Spectrum that allows access to an SD or CF card as if it were a hard disk. That’s why it is an
+     excellent solution for loading digitized graphics in adventures. DivIDE and DivMMC devices use an OS named ESXDOS, that's why this 
+    target is named like that. A Spectrum 48K with a DivMMC interface becomes a 256K Spectrum with hard disk, so you can do much better
+    and longer adventures for the DivMMC/IDE.</p>
+     
+   <p>The graphics and options for this target are basically the same as those used for Spectrum 128K (tape), so just check the Spectrum 128K section. The only difference is 
+    that in this case, is graphics are loaded on demand from the SD/CF card, instead of loading from tape at the beginning, but SD card is so fast that you won't even notice.</p>
+
+   <p>As for sound, DAAD supports BEEP and XPLAY, although unlike with the Spectrum 128K target, the sound will come from the Spectrum speaker (you never know if the DivMMC 
+    is connected to a 48K Spectrum without AY chip).</p>
+
+   <p>This target does not support animations or other types of sound.</p>
+   
+
+  
+  <a name='zxuno'></a>
+  <h4>ZX-Uno</h4>
+
+  <p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+  <p>The ZX-Uno is a Spanish Spectrum clone launched a couple of years before the Spectrum Next. As the Spectrum Next, it is based on an FPGA implementation of the Spectrum hardware,
+    although it incluedes some enhancements other older clones had already implemented.</p>
+    
+    <p>For intance, it supports a video mode called Timex HiColor, in which instead of having 8x8 pixel attributes as the orignal Spectrum,  where only one ink color and one paper color can
+       exist, it uses 8x1 pixel attributes, allowing much more colorful graphics. In addition, it also supports ULAPlus, whcih allows changing the default Spectrum colors and,
+        in practice, use up to 64 colors on screen.</p>
+
+  <p>Without reaching the Spectrum Next’s Layer2 mode, the combination of HiRes mode and ULAPlus allows for very high-quality graphics.</p>
+
+  <p>DAAD Ready expects images in SCR format to be placed at IMAGES/ZXUNO folder. Please notice the SCR format for ZXUNO is different from the standard Spectrum SCR format, and 
+    that's why you can't use the original ones, neither the same folder.</p>
+        
+  <p>To create graphics for ZX-Uno, you can do it in two ways:
+    <ul>
+      <li>
+        We can draw them manually using, for example, <a href="https://sourcesolutions.itch.io/zx-paintbrush">ZX Paintbrush</a>  and selecting 8x1 attributes, and then 
+        use <a href="https://worldofspectrum.net/zx-modules/83/index.html">Img2ULAPlus</a>.
+      </li>
+      <li>
+        You can also use digitized images and process them with <a href="https://www.dadither.com/#Download">DaDither</a>, selecting platform ZX Spectrum ULAPlus, Screen 256x192x8 (8x1), and palette (Color, 48 high colors, slow).  
+        This will generate an image we can save from the Result menu in SCR format, which can be used directly in DAAD Ready. The “48 high colors” palette mode keeps the first 16 colors free, which are reserved for text colors 
+      </li>
+    </ul>
+  </p>
+
+  <p>As for sound, DAAD supports BEEP and XPLAY on ZX-Uno. The sound will come from the Spectrum 128K sound chip.</p>
+
+  <p>Finally, this machine does not support animations or other types of sound.</p>
+
+<a name='advzxuno'></a>
+<h4>Advanced graphics for the ZX-Uno</h4>
+
+<p>This is the images code in ZXUNO.BAT:</p>
+
+<code>
+  for /L %%i in (0, 1, 9) do IF exist 00%%i.SCR ..\..\TOOLS\SCRMAKER\SCRMAKER zxuno 00%%i.SCR 00%%i.ZXU  256 %IMGLINES% 0,0 16-63 /SCR <br/>
+  for /L %%i in (10, 1, 99) do IF exist 0%%i.SCR  ..\..\TOOLS\SCRMAKER\SCRMAKER zxuno 0%%i.SCR 0%%i.ZXU 256 %IMGLINES% 0,0 16-63 /SCR  <br/>
+  for /L %%i in (100, 1, 256) do IF exist %%i.SCR  ..\..\TOOLS\SCRMAKER\SCRMAKER zxuno %%i.SCR %%i.ZXU 256 %IMGLINES% 0,0 16-63 /SCR <br/>
+</code>
+
+<p>First line is for graphics 000 to 009, second for 010 to 099, and third for 100 to 255.</p>
+
+<p>Let's see what the  256 %IMGLINES% 0,0 16-63 /SCR mean:</p>
+
+<ul>
+  <li>About 256 %IMAGELINES% : it's with and height of the image. IMAGELINES is defined at the CONFIG.BAT file, and defaults to 96, so DAAD Ready creates 256x96 images by default. You can change to 32 32 for instance, to create 32x32 images.</li>
+  <li>About 0,0: it's saying the image is fixed at 0,0 (upper left corner). If changed, the image would be fixed at some other position. If removed, the image will be floating. </li>
+  <li>About 16-63: it's limiting the palette to colors 16 to 63. The ZX-Uno has a 64 color palette, but DAAD Ready reserves the first 16 colors for text, so  graphics should use colors 
+      16 to 255. Here we limit to 16-63 to avoid color conflicts between several images on screen. You can of course removed this parameter, o set to 0-63, to access 
+      whole palette, but then you must ensure yourself color 0 is black, 7 is white, etc., so text displays correctly.
+  </li>
+  <li>About /SCR: it tells SCRMAKER that the input graphic is in SCR format (as produced by DaDither). If omitted, it expects MLT format, which is also valid (as produced by Img2ULAPlus).</li>
+</ul>
+
+
+  <a name='msx1'></a>
+  <h4>MSX1</h4>
+
+  <p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+  <p>To add images to the MSX1 interpreter, we need to place files with extension .SC2 (256x192) in the images folder.</p>
+        
+  <p>SC2 is a very common format on MSX, corresponding to a video mode with a resolution of 256x192, and attributes of 8x1.</p>
+
+  <p>There’s a very good converter at <a href="https://msx.jannone.org/conv/">https://msx.jannone.org/conv/</a>. Make sure to select Screen 2 and the standard MSX1 palette.</p>
+
+  <p><a href="https://www.dadither.com/#Download">DaDither</a> also allows creating images for MSX1 (Screen 2 256x192x4), and <a href="http://multipaint.kameli.net/">Multipaint</a> includes an “MSX1 mode 2”.</p>
+
+  <p>As for sound, DAAD supports BEEP on MSX1, so sound can be made with BEEP or XPLAY. The sound will come from the MSX sound chip.</p>
+
+  <p>Finally, this machine does not support animations or other types of sound.</p>
+
+  <p>There is not a section of advanced graphics for MSX1 because at the moment it can only do fixed graphics on top of the screen. Float, buffered or different size images are not supported. You can reduce 
+    or increase height though by modifying the IMGLINES variable in the CONFIG.BAT file (it affects all targets)
+  </p>
+
+  <p>However, the MSX 1 has limited SFX support, with commands different from other machines:</p>
+
+  <small>
+  <table>
+  <tr>
+    <th>Parameter 2</th><th>Parameter 1</th><th>Description</th>
+  </tr>
+  <tr><td>0-13</td><td>Any</td><td>Writes the value of the parameter in the first parameter, in the audio chip register indicated in the first parameter.</td></tr>
+  </table>
+  </small>
+
+
+
+  <a name='msx2'></a>
+  <h4>MSX2</h4>
+
+  <p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+  <p>MSX2 uses images in the standard MSX SC8 format (screen 8), which allows an advanced 256-color palette and can be used at 256x212 resolution.</p>
+  <p>We can also use the converter at <a href="https://msx.jannone.org/conv/">https://msx.jannone.org/conv/</a>, but selecting Screen 8 instead of Screen 2 as in MSX1.</p>
+  <p><a href="https://www.dadither.com/#Download">DaDither</a> also allows creating images for MSX2 (Screen 8 256x212x8).</p>
+
+  <p>In Screen 8 mode, the MSX2 interpreter prevents the text from being affected by the graphic colors, so we don’t have to worry about that.</p>
+
+  <p>As for sound, DAAD supports BEEP on MSX2, so sound can be made with BEEP or XPLAY. The sound will come from the MSX sound chip.</p>
+
+  <p>Finally, this machine does not support animations or other types of sound.</p>
+
+<a name='advmsx2'></a>
+<h4>Advanced multimedia for the MSX2</h4>
+
+<p>MSX2 uses the new MSX2DAAD interpreter, which has some specific behaviors regarding graphics:</p>
+<ul>
+  <li>Regarding usual DAAD graphics, it only supports one hybrid between floating and fixed:</li>
+  <ul>
+    <li>Like fixed graphics, they apply the palette and ignores window size.</li>
+    <li>Like floating ones, they appear positioned in the current window.</li>
+  </ul>
+  <li>It supports transparency, allowing parts of the image to remain invisible (useful for overlays).</li>
+  <li>It doesn’t support partial palette application.</li>
+</ul>
+
+<p>Because of this, working with advanced graphics on MSX2 differs slightly from other targets. This is the code in the MSX2.BAT file:</p>
+
+<code>
+for /L %%i in (0, 1, 9) do IF exist 00%%i.SC8 IF NOT exist 00%%i.IM8 ..\php\php ..\tools\imgwizard\imgwizard.php c 00%%i.SC8  %IMGLINES% RLE<br/>
+for /L %%i in (10, 1, 99) do IF exist 0%%i.SC8 IF NOT exist 0%%i.IM8 ..\php\php ..\tools\imgwizard\imgwizard.php c 0%%i.SC8 %IMGLINES% RLE<br/> 
+for /L %%i in (100, 1, 255) do IF exist %%i.SC8 IF NOT exist %%i.IM8 ..\php\php ..\tools\imgwizard\imgwizard.php c %%i.SC8 %IMGLINES% RLE 
+</code>
+
+<p>First line is for graphics 000 to 009, second for 010 to 099, and third for 100 to 255.</p>
+
+<p>We can add a transparency color—an index from 0 to 255. For example, to make color 28 transparent:</p>
+
+<code>
+for /L %%i in (100, 1, 255) do IF exist %%i.SC8 IF NOT exist %%i.IM8 ..\php\php ..\tools\imgwizard\imgwizard.php c %%i.SC8 %IMGLINES% RLE 28
+</code>
+
+<p>We can also select a rectangular region—for example, one at position 0,0 with width and height 64: (Note how we changed the “c” after imgwizard.php to an “s”.)</p>
+<code>
+for /L %%i in (100, 1, 255) do IF exist %%i.SC8 IF NOT exist %%i.IM8 ..\php\php ..\tools\imgwizard\imgwizard.php s %%i.SC8 0 0 64 64 
+</code>
+
+<p>We can also select a rectangle at x=20, y=30 with width 128 and height 32, with transparency color 6:</p>
+<code>
+for /L %%i in (100, 1, 255) do IF exist %%i.SC8 IF NOT exist %%i.IM8 ..\php\php ..\tools\imgwizard\imgwizard.php s %%i.SC8 20 30 128 32 6
+</code>
+
+<p>MSX2 doesn’t support palette limiting. Although text is unaffected by the image palette, multiple graphics must share the same palette to appear at the same time.</p>
+
+<p>About the GFX condact, MSX interpreter supports it, with the following options:</p>
+
+<small>
+<table>
+  <tr>
+    <th>Parameter 2</th><th>Parameter 1</th><th>Description</th>
+  </tr>
+  <tr><td>0</td><td>Any</td><td>Copies the buffer to the screen</td></tr>
+  <tr><td>1</td><td>Any</td><td>Copies the whole screen to the buffer</td></tr>
+  <tr><td>2</td><td>Any</td><td>Swaps the contents of the buffer and the screen</td></tr>
+  <tr><td>3</td><td>Any</td><td>Sets drawing to occur directly on the screen</td></tr>
+  <tr><td>4</td><td>Any</td><td>Sets drawing to occur on the buffer</td></tr>
+  <tr><td>5</td><td>Any</td><td>Clears the screen</td></tr>
+  <tr><td>6</td><td>Any</td><td>Clears the buffer</td></tr>
+  <tr><td>9</td><td>flagno</td><td>Changes the palette color defined in flag <coe>flagno using RGB values stored in flags flagno+1, flagno+2, and flagno+3.</td></tr>
+  <tr><td>10</td><td>flagno</td><td>Reads the palette color defined in flag flagno and stores its RGB values in flags flagno+1, flagno+2, and flagno+3.</td></tr>
+  <tr><td>128</td><td>Any</td><td>Copies the current window from the buffer to the screen</td></tr>
+  <tr><td>129</td><td>Any</td><td>Copies the current window from the screen to the buffer</td></tr>
+</table>
+</small>  
+
+ 
+  
+  <a name='c64'></a>
+  <h4>Commodore 64</h4>
+
+  <p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+  <p>DAAD Ready will default to create 320x96 images for Commodore 64, fixed at 0,0. This machine does not support float images, palette limiting, nor anything else.</p>
+  <p>To add images to the Commodore 64 interpreter, we need to place files with extension .ART (320x200) in the IMAGES folder. The ART format is very common on Commodore
+     64 for HiRes mode.</p> 
+
+  <p><a href="http://multipaint.kameli.net/">Multipaint</a> is an excellent utility for designing images directly in ART format.</p>
+
+  <p>DaDither can also be used, but it’s not recommended, for two reasons:</p>
+  <ul>
+    <li>It doesn’t achieve great quality with the limited color palette of the Commodore 64. Although better than ZX Spectrum, it’s still somewhat poor.</li>    
+    <li>Commodore 64 disks are especially slow, and graphis are loaded from disk on demand while playing. The C64 target have the graphics compressed to reduce image 
+      loading time,but DaDither’s dithered images compress very poorly, which will negatively affect game performance.</li>
+  </ul> 
+
+  <u>Split-screen mode</u>
+
+  <p>DAAD originally works in the C64’s HiRes mode (320x200). Now it’s possible to use the Multicolor mode (160x200, but with more colors) at the top of the screen by enabling what is called “split screen.” This is 
+     done by editing the CONFIG.BAT file and changing where it says splitModeOff to splitModeOn. That will affect bot Commodore 64 and Amstrad CPC.</p>
+
+  <p>Unfortunately, maintaining that split mode running requires complex interrupt routines that are difficult to handle while reading from disk, so you’ll notice the entire screen is hidden while loading a new image,
+    and you might even see some flickering or strange effects occasionally during disk reads or writes -for example, when saving or loading a game- unless you hide the images first.</p>
+
+  <p>In split-screen mode, instead of placing ART files in the IMAGES folder, you must place KOA files (Koala format) for Multicolor mode, using 160x200, 16 colors.</p>
+
+  <p>DAAD Ready will default to 96 px height for the images, which in split screen mode cannot be changed as the split line is always the same. If you don't use split screen you can change the image height by changing
+     the variable %IMGLINES% in the CONFIG.BAT file.</p>
+
+  <p>You can use <a href="http://multipaint.kameli.net/">Multipaint</a> or <a href="https://www.dadither.com/#Download">DaDither</a> to generate KOA files.</p>
+
+  <p>As for sound, DAAD supports BEEP, so sound can be made with BEEP or XPLAY. The sound will come from the SID sound chip.</p>
+
+  <p>Finally, this machine does not support animations or other types of sound.</p>
+
+  <p>There isn't an advanced graphics section for the Commodore 64 because at the moment it can only do fixed graphics on top of the screen. Float, buffered or different size images are not supported. You can reduce 
+    or increase height though by modifying the IMGLINES variable in the CONFIG.BAT file (it affects all targets)</p>
+
+
+<p>However, the C64 has limited SFX support, with commands different from other machines:</p>
+
+  <small>
+  <table>
+  <tr>
+    <th>Parameter 2</th><th>Parameter 1</th><th>Description</th>
+  </tr>
+  <tr><td>0-13</td><td>Any</td><td>Writes the value of the parameter in the first parameter, in the SID (audio chip) register indicated in the first parameter.</td></tr>
+  </table>
+  </small>
+
+
+
+
+  <a name='cplus4'></a>
+  <h4>Commodore Plus/4</h4>
+
+  <p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+  <p>DAAD Ready will default to create 320x96 images for Commodore Plus/4, fixed at 0,0. This machine does not support float images, palette limiting, nor anything else. </p>
+
+  <p>To add graphics, you must create Plus/4 PRG format images, which can be made using the <a href="http://multipaint.kameli.net/">Multipaint</a> application.</p>
+
+  <p>DaDither doesn’t support Plus/4, but you can use <a href='http://www.kameli.net/marq/?page_id=4557'>Pixel Polizei</a> instead for similar functionality.</p>
+
+  <p>As for sound, DAAD supports BEEP on Plus/4, so sound can be made with BEEP or XPLAY. The sound will come from the TED sound chip.</p>
+
+  <p>Finally, this machine does not support animations or other types of sound.</p>
+
+      
+  <a name='cpc'></a>
+  <h4>Amstrad CPC</h4>
+
+  <p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+  <p>DAAD Ready will default to create 320x96 images for Amstrad CPC, fixed at 0,0. This machine does not support float images, palette limiting, nor anything else.</p>
+
+  <p>To add images to the Amstrad CPC interpreter, you need to place files with extension .SCR (320x200) in the images/CPC folder, together with a .PAL file of the same name (for example 001.SCR and 001.PAL).  
+  Do not place them directly in the images folder, as that would overwrite Spectrum SCR files, which have a different format.</p>
+
+  <p>The SCR images must be in mode 1, 320x200, and 4 colors.</p>
+
+  <u>Split screen</u>
+
+  <p>Amstrad CPC can enable split-screen mode, in which the upper part of the screen will be in mode 0 (160x96, 16 colors).</p>
+
+  <p>To activate split-screen mode, you must edit CONFIG.BAT and change splitModeOff to splitModeOn. Doing that would also affect the Commodores 64, which also supports splitted screen.</p>
+
+  <p>You can experience flickering and screen darkenging when loading from disk, because keeping this splitted mode alive when reading from disk is very complicated, so the
+     interpreter will try to hide rare effects.</p>
+    
+  <p>The SCR/PAL format is the same regardless of whether you use mode 0 or 1. Simply generate an SCR for the mode you’ll use. You can use <a href="http://multipaint.kameli.net/">Multipaint</a> or <a href="https://www.dadither.com/#Download">DaDither</a>.</p>
+
+  <p>Images should be mode 1 by default (320x200), but if you switch to split-screen, they must be 160x200 SCR files in mode 0.</p>
+
+  <p>Another useful tool for CPC is <a href="https://www.cpcwiki.eu/index.php/ConvImgCPC">ConvImgCPC</a>, not only because it allows creating graphics like DaDither, 
+    but also because it allows editing the color palette.  On Amstrad CPC, the palette selected for the graphic affects the text, so it’s important that our graphic 
+    has appropriate tones in the right color indexes. For example, color 0 should be black and color 3 white, or at least contrasting colors. This can be done in
+    ConvImgCPC by locking those colors and forcing the tool to recalculate the image.</p>
+      
+    <p>As for sound, DAAD supports BEEP on CPC, so sound can be made with BEEP or XPLAY. The sound will come from the sound chip.</p>
+
+    <p>Finally, this machine does not support animations or other types of sound.</p>
+
+    <p>The Amstrad CPC because at the moment can only do fixed graphics on top of the screen. Float, buffered or different size images are not supported. You can reduce
+    or increase height though by modifying the IMGLINES variable in the CONFIG.BAT file (it affects all targets)</p>
+
+    <p>However, the CPC has limited SFX support, with commands different from other machines:</p>
+
+  <small>
+  <table>
+  <tr>
+    <th>Parameter 2</th><th>Parameter 1</th><th>Description</th>
+  </tr>
+  <tr><td>0-13</td><td>Any</td><td>Writes the value of the parameter in the first parameter, in the PSG register (audio chip) indicated in the first parameter.</td></tr>
+  <tr><td>14</td><td>flagno</td><td>Modifies the palette index (0-15) defined in the flag flagno, to the palette color (0-26) indicated in the flag flagno + 1.</td></tr>
+  </table>
+
+
+
+<a name='amiga'></a>
+<h4>Commodore Amiga and Atari ST</h4>
+
+<p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+<p>The Commodore Amiga and Atari ST interpreters share the same multimedia capabilities, so they are explained together. There are minor changes though that will be explained here.</p>
+
+<p>To add images to the Amiga/ST interpreters, we’ll use the .PNG format. We should create PNG files with maximum 16 colors and a resolution of 320x200. It can be either truecolor or indexed, it doesn't matter, 
+  but if you use indexed file there's no guarantte the colors will remain in the palette in the same order.</p>
+
+<p>Amiga and ST palettes affects also text, so to avoid text becoming unreadable because of using two very similar colors for paper and ink, DAAD Ready will sort the palette so the darkest color of the image will be
+   the color used for color 0, and the most brightest one the one used for color 1. As DAAD defaults to PAPER 0, INK 1 in the Amiga/ST targets, that would work fine by default.</p>
+
+<p>Images should be placed in the IMAGES folder directly (001.PNG, 003.PNG, 005.PNG, etc.).</p>
+
+<p>You can also use PI1 format images, a format very common to the Atari ST. If you use PI1 you will have to control the palette yourself though, as it won't be adapted for better INK/PAPER contrast.</p>
+
+<p>As for sound, the Amiga and ST interpreters can play 8-bit mono samples via the SFX condact. This lets you add small effects like door sounds, footsteps, or similar.</p>
+
+<p>You need a WAV file with these characteristics:</p>
+        <ul>
+          <li>Mono</li>
+          <li>PCM</li>
+          <li>8 bits</li>
+          <li>Sampling frequency of 5000, 7000, 9500, 15000, or 20000 Hz. If the sample is at a different frequency, it will be played at the immediately lower one listed here.</li>
+        </ul>
+      </li>
+      <li>Place the WAV file in the SOUNDS folder with the usual format nnn.WAV (for example 204.wav)<br>
+      <li>And to play it, in the code we do this:
+      <code>
+        PICTURE 204<br/>
+        SFX 0 255
+      </code>
+      </li>
+    </li>
+
+<p>Yes, it's strange to use PICTURE to play a sound, but it's how it was originally implemented in the 80s.</p>
+
+<p>The Amiga and Atari ST do not support BEEP, so they don't support XPLAY either.</p>
+
+<p>These machines don’t support animations beyond successive image displays.</p>
+
+<a name='advamiga'></a>
+<h4>Advanced multimedia for the Commodore Amiga and Atari ST</h4>
+
+<p>Atari ST and Amiga have full graphics support. By deafult all graphics are created as fixed images at coordinates 0,0 and with a resolution of 320x96, applying the whole palette. If you 
+   want to change any of that you need to add a file next to the graphic — a text file with the extension .json and the same number. For example, if we want to change properties for 
+   graphic 020.PNG, we must create a file named 020.json and place it in the same folder as the graphic. The content of that file would be something like this (three examples are given):</p>
+
+<code>
+    {"X":24,"Y":180,"PCS":0,"PCE":10}<br/>
+    {"float":1,"buffer":1, "width":120, "height":96}<br/>
+    {"float":1, "compress":0}
+    <br/>
+</code>
+
+<ul>
+  <li>In the first example, we indicate a fixed graphic located at 24,180, and the palette range to apply is 0–10, so when loading this image, the palette won't be applied for colors 11 to 15.</li>
+  <li>In the second example, we say that the graphic is floating, that it has dimensions of 120x96, and that it should be buffered (this means it loads into RAM when the game starts and is always available without reading the disk each time).</li>
+  <li>The third example simply states that the graphic is floating and it should not be compressed.</li>
+</ul>
+
+<p>Don't worry if you don't understand some of the terms. They will be explained below, </p>
+
+<p>The file options are as follows:</p>
+<ul>
+  <li>float:0–1 → 0 = fixed image, 1 = floating image. Defaults to fixed if absent.</li>
+  <li>buffer:0–1 → 0 = not buffered, 1 = buffered (loads into RAM at game start). Defaults to not buffered if absent.</li>
+  <li>X:0–255 → X position of the graphic on screen (only if fixed). Defaults to 0.</li>
+  <li>Y:0–255 → Y position of the graphic on screen (only if fixed) Defaults to 0.</li>
+  <li>PCS:0–15 → first color of the palette to apply (only if fixed) Defaults to 0.</li>
+  <li>PCE:0–15 → last color of the palette to apply (only if fixed) Defaults to 15.</li>
+  <li>width:0–255 → width of the graphic (only if floating). Defaults to 320.</li>
+  <li>height:0–255 → height of the graphic (only if floating).  Defaults to 96.</li> 
+  <li>compress:0–1 → 0 = no compression, 1 = compressed.  Defaults to compressed.</li>
+</ul>
+
+<p>Partially applying the palette is useful if you want to have several graphics on screen, or reserve some colors for text. And you don't want all the images to have exactly the same colors. You can 
+  reserve some color for location graphics, and some others for inventory images, for example.
+</p>
+
+<p>Please notice a float image can't have X,Y values, although if they are present they would just be ignored. Also, 
+  a float image doesn't apply palette at all, so PCS and PCE would be ignored too.</p>
+
+<p>Regarding compression, Amiga and Atari ST are compressed by default in DAAD Ready. That means they take less disk space,
+   but loading them takes slightly longer. An image compresses better the more areas where a solid color is present horizontally.
+   That is, horizontal lines of the same color compress very well, while images with a lot of color changes horizontally
+   compress poorly. The compressor itself may decide not to compress an image if it deems the result would not be smaller 
+   than the original, but you can also take that decision yourself by setting the compress option to 0 (because you need it to load fast).</p>
+
+<p>In case you prefer the images not to be compressed in general, it would be easier to edit the BAT file (either AMIGA.BAT or ATARIST.BAT)
+  and remove the "-c" parameter in the line where "img2daad" is invoked. That way, no image would be compressed unless you specifically 
+  set "compress":1 in the JSON file. This may be a good idea if you are making a game to be played from hard disk, not floppies.</p>
+</p>
+
+<p>About buffered images, they are kept in RAM rather than in disk, so they load instantly when needed. There is about 96K for buffered images. 
+  If you mark too many of them as buffered, you won't get a warning, just some of them may remain unbuffered if there is no more RAM available.
+   Use buffered images for things like graphic inventory images, or for simple animations (displaying several buffered images in sequence).</p>
+  
+<p>There is one last option you can do with the JSON file: clone images. When you clone an image you just say two images (i.e. 4 and 123) are
+  the same, so only one copy is stored on disk. To do that, just create a JSON file for the image you want to clone (123.JSON in this case)
+   with this content:</p>
+<code>
+    {"clone":1, "location":4}
+</code>
+
+<p>Please notice you still need a 123.PNG file in the folder, although it won't be included.</p>
+
+<p>Regarding the GFX condact Atari ST and Amiga support it, with the following options:</p>
+
+<small>
+<table>
+  <tr>
+    <th>Parameter 2</th><th>Parameter 1</th><th>Description</th>
+  </tr>
+  <tr><td>0</td><td>Any</td><td>Copies the whole buffer to the screen</td></tr>
+  <tr><td>1</td><td>Any</td><td>Copies the whole screen to the buffer</td></tr>
+  <tr><td>2</td><td>Any</td><td>Swaps the contents of buffer and screen</td></tr>
+  <tr><td>3</td><td>Any</td><td>Sets graphics drawing to the screen</td></tr>
+  <tr><td>4</td><td>Any</td><td>Sets graphics drawing to the buffer</td></tr>
+  <tr><td>5</td><td>Any</td><td>Clears the screen</td></tr>
+  <tr><td>6</td><td>Any</td><td>Clears the buffer</td></tr>
+  <tr><td>7</td><td>Any</td><td>Sets text drawing to the screen. Atari ST only.</td></tr>
+  <tr><td>8</td><td>Any</td><td>Sets text drawing to the buffer. Atari ST only.</td></tr>
+  <tr><td>9</td><td>flagno</td><td>Changes the palette color defined in flag flagno to the R,G,B values contained in flags flagno+1, flagno+2, and flagno+3. Not supported by the Amiga.</td></tr>
+  <tr><td>10</td><td>flagno</td><td>Reads the palette color defined in flag flagno and stores its R,G,B values into flags flagno+1, flagno+2, and flagno+3.</td></tr>
+</table>
+</small>
+
+<p>The buffer, in case it isn't clear, is like a secondary screen that is not visible. You can preserve the contents of the screen in the buffer and bring them back to the screen. You can also 
+  make it so when you draw pictures (DISPLAY) they are printed to the buffer instead of the screen. This is useful to avoid flickering when drawing complex images.</p>
+</p>
+
+<p>The palette options can be used to do a fade out / fade to black effect, by slowly reading the values and lower the RGB components. </p>
+<p> You can also make changes in the images, like for instance keeping only the blue component to simulate the same picture by night.</p>
+
+
+
+
+<a name='pcdos'></a>
+<h4>MSDOS</h4>
+
+<p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+<p>MSDOS interpreter supports VGA 256-color 320x200 graphics and also SVGA256 (VESA) 640x400. By default DAAD Ready creates location images with a resolution of 320x96, fixed, at 0,0.  
+  However, you can change the height by modifying the IMGLINES variable in the CONFIG.BAT file (it affects all targets).</p>
+
+<p>To create the images you simply need to place a .PCX file in the IMAGES/PC folder with three-digit numbers matching the location IDs, or in the IMAGES/PC/SVGA folder if you are using SVGA mode. 
+  They must be 256 color indexed (not RGB) PCX files (i.e. 001.PCX, 002.PCX, etc.). If your image has few colors (16 or less), some image editors like Gimp will create a 16 color indexed file instead of 256 colors,
+  which is not valid. Avoid that by adding some other colors to the zone at the bottom of the image, that will be cropped anyway.</p>
+
+<p>To use SVGA mode, you need to edit the CONFIG.BAT file and change the variable SVGA from 0 to 1. By default, DAAD Ready uses VGA mode for MSDOS. Please notice the text area in the SVGA mode looks like the VGA mode, 
+  you won't see smaller text. Just the images double the resolution.</p>
+
+<p>Despite 256 colours are supported, it's recommended to create files with a maximum of 240 colors though (0 to 239). If you do that, DAAD Ready will move the colors to the upper palette range (16-255), leaving
+   the first 16 colors for text and paper, with the usual PAPER 0, INK 1 settings.</p>
+</p>
+
+<p>As for sound, the DOS interpreter can play 8-bit mono samples via the SFX condact, and OPL music using the DRO file format.</p>
+
+<p>There are two ways of playing sample files, the classic DAAD one (same as Amiga or Atari ST) and the new one, in any of them we need a WAV file with the following  characteristics:</p>
+        
+<ul>
+          <li>Mono</li>
+          <li>PCM</li>
+          <li>8 bits</li>
+          <li>Sampling frequency of 5000, 7000, 9500, 15000, or 20000 Hz. If the sample is at a different frequency, it will be played at the immediately lower one listed here.</li>
+          <li>Maximum sample size: 32.000 bytes</li>
+</ul>
+
+<p>The classic to play them is:</p>
+<ul>
+      <li>Place the WAV file in the SOUNDS folder with the usual format nnn.WAV (for example 014.wav)</li>
+      <li>And to play it, in the code we do this:<br/>
+      <code>
+        PICTURE 14<br/>
+        SFX 0 255
+      </code>
+      </li>
+</ul>
+
+<p>The new way is:</p>
+<ul>
+      <li>Place the WAV file in the SOUNDS/PC folder with the usual format nnn.WAV (for example 004.wav)</li>
+      <li>And to play it, in the code we do this:<br/>
+      <code>
+        SFX 14 1
+      </code>
+      </li>
+</ul>
+
+<p>With the new way you can also play the sample in a loop, by using SFX 14 2. Or just once but with a different rate, using SFX 14 3 followed by DB xx, where XX is a value 0-255 which will make the sample play faster the larger it is. You can also 
+  play it in loop with a different rate using SFX 14 4 followed by DB xx. And finally you can stop playing an active sample using SFX 14 5, although in this case the first parameter is irrelevant (just the sample being played will be stopped, no 
+  matter if it was sample 014.WAV or not).</p>
+</p>
+
+<p>For OPL music, we need to create DRO files (DosBox Raw OPL) and place them in the SOUNDS/PC folder with three-digit numbers (for example, 020.DRO).</p>
+
+<p>To play a DRO file (i.e. 020.DRO), we use the SFX condact like this:</p>
+      <code>
+        SFX 20 6
+      </code>
+
+<p> You can also play a DRO file in endless loop using SFX 20 7 and stop the current one being playe using SFX 20 8, although in this last case the first parameter is irrelevant, SFX would stop the DRO file being player, no matter if its 020.DRO or not.</p>      
+
+<p>Additionally, MSDOS supports BEEP and XPLAY for simple sound effects or melodies.</p>
+
+<a name='advpcdos'></a>
+<h4>Advanced multimedia for MSDOS</h4>
+
+<p>In MSDOS target, the image generation is done by these lines in MSDOS.BAT:</p>
+
+<code> 
+for /L %%i in (0, 1, 9) do IF exist 00%%i.PCX %IMGPATHBACK%\TOOLS\SCRMAKER\SCRMAKER.exe msdos 00%%i.PCX 00%%i.MSD %IMGWIDTH% %IMGHEIGHT% 0,0 0-255 /s<br/>
+for /L %%i in (10, 1, 99) do IF exist 0%%i.PCX %IMGPATHBACK%\TOOLS\SCRMAKER\SCRMAKER.exe msdos 0%%i.PCX 0%%i.MSD %IMGWIDTH% %IMGHEIGHT% 0,0 0-255 /s <br/>
+for /L %%i in (100, 1, 256) do IF exist %%i.PCX %IMGPATHBACK%\TOOLS\SCRMAKER\SCRMAKER.exe msdos %%i.PCX %%i.MSD %IMGWIDTH% %IMGHEIGHT% 0,0 0-255 /s <br/>
+</code>
+
+<p>First line is for graphics 000 to 009, second for 010 to 099, and third for 100 to 255.</p>
+
+<p>The lines default to create images with a resolution of %IMGWIDTH% by %IMGHEIGHT%, which happen to be 320x96 by default, fixed image at coordinates 0,0, and apply the whole palette from 0 to 255 and shift the palette because of the /s. A shifted
+  palette means if the image has 240 colors maximum, the image will be shifted up by 16 colors to preserve text colors in the first 16 palette entries. If you want to have full control of the 256 colors, you can remove the /s parameter, but then 
+  you must ensure yourself color 0 is black, 7 is white, etc., so text displays correctly.
+</p>
+
+<p>These are some examples of possible changes to the image processing lines:</p>
+
+<code>
+for /L %%i in (100, 1, 256) do IF exist %%i.PCX %IMGPATHBACK%\TOOLS\SCRMAKER\SCRMAKER.exe msdos %%i.PCX %%i.MSD 320 96 128-255<br/>
+for /L %%i in (100, 1, 256) do IF exist %%i.PCX %IMGPATHBACK%\TOOLS\SCRMAKER\SCRMAKER.exe msdos %%i.PCX %%i.MSD 32 32 1-0<br/>
+for /L %%i in (100, 1, 256) do IF exist %%i.PCX %IMGPATHBACK%\TOOLS\SCRMAKER\SCRMAKER.exe msdos %%i.PCX %%i.MSD 320 8 0,192 0-255
+</code>
+
+<ul>
+  <li>The first example marks a floating graphic as it has no X,Y cooordinates, 320x96 in size, applying palette from colout 128 to 255.</li>
+  <li>The second marks a floating graphic, 32x32 in size, with no palette applied at all as in 1-0 the first number is greater than the second (that's the way to say you don't want to apply a single color).</li>
+  <li>The third marks a fixed graphic, 320x8, located at x=0, y=192, applying the whole palette 0–255.</li>
+</ul>
+
+<p>Partially applying the palette is useful if you want to have several graphics on screen, or reserve some colors for text. And you don't want all the images to have exactly the same colors. You can 
+  reserve some color for location graphics, and some others for inventory images, for example.</p>
+
+<p>Furthermore, MSDOS supports the following options for the GFX condact:</p>
+
+<small>
+<table>
+  <tr>
+    <th>Parameter 2</th><th>Parameter 1</th><th>Description</th>
+  </tr>
+  <tr><td>0</td><td>Any</td><td>Copies the buffer to the screen</td></tr>
+  <tr><td>1</td><td>Any</td><td>Copies the whole screen to the buffer</td></tr>
+  <tr><td>2</td><td>Any</td><td>Swaps the contents of buffer and screen</td></tr>
+  <tr><td>3</td><td>Any</td><td>Sets graphics drawing to the screen</td></tr>
+  <tr><td>4</td><td>Any</td><td>Sets graphics drawing to the buffer</td></tr>
+  <tr><td>5</td><td>Any</td><td>Clears the screen</td></tr>
+  <tr><td>6</td><td>Any</td><td>Clears the buffer</td></tr>
+  <tr><td>9</td><td>flagno</td><td>Changes the palette color defined in flag flagno to the R,G,B values contained in flags flagno+1, flagno+2, and flagno+3.</td></tr>
+  <tr><td>10</td><td>flagno</td><td>Reads the palette color defined in flag flagno and stores its R,G,B values into flags flagno+1, flagno+2, and flagno+3.</td></tr>
+  <tr><td>11</td><td>flagno</td><td>A colour cycle loop starts from colour at flag flagno to colour at flag flagno+1. Flag flagno+2 should contain the number of frames 
+  (1/50 of second) that have to pass for each cycling step. Notice if frames equals 0, or first colours number is greater than the second, the cycle won't start.
+  Remember if the palette has been shifted because of the /s parameter in the image loading, you must take that into account when defining the colours to cycle.
+    <br/>
+    <code>
+      LET 100 1<br/>
+      LET 101 15<br/>
+      LET 102 25<br/>
+      GFX 100 11  ; starts color cycling of colors from 1 to 15 every 25 frames<br/>
+    </code>
+  </td></tr>
+  <tr><td>12</td><td>Any</td><td>Stops any ongoing colour cycling.</td></tr>
+
+  <tr><td>13</td><td>resource number</td><td>Plays an Autodesk Animator FLI animation file located in the IMAGES/PC or IMAGES/PC/SVGA folder. The file must be
+     named nnn.FLI, where nnn is the resource number with three digits as with the images. The animation will be played once and then control returns to the game.
+      While playing the animation, any key press will also finish the animation.
+    <br/>
+    <code>
+      GFX 44 13 ; plays the animation file 044.FLI<br/>
+    </code>
+  </td></tr>
+  <tr><td>14</td><td>resource number</td><td>Same as the above but the animation will be played in endless loop until a key is pressed.
+    <br/>
+    <code>
+      GFX 44 14 ; plays the animation file 044.FLI in endless loop until a key is pressed<br/>
+    </code>
+    </td></tr>
+</table>
+</small>
+
+<p>Please notice playing a FLI animation may change the palette, so it's reasonable to clear the screen and load location graphics again after playing a FLI file.</p>
+
+
+<a name='html'></a>
+<h4>HTML (jDAAD)</h4>
+
+<p>To understand what's explained here, you should have read first the "Important Stuff" section of this manual. If you didn't, please do so before continuing.</p>
+
+<p>The HTML a HTML page and use JavaScript that simulate the DAAD interpreter in a web browser. This allows publishing your adventure directly online. The HTML simulates
+  a 320x200 screen with truecolor graphics, so it’s a very capable target.</p>
+</p>
+
+<p>All images must be in .PNG format, and they must be RGB (not indexed). Place them in the IMAGES folder using three-digit filenames (i.e. 001.PNG, 090.PNG). Unlike with other targets, the images
+  don't need to be full screen (320x200 in this case). You can make them be the size you want, but not larger than 320x200.</p>
+
+
+<p>As for sound, the HTML interpreter can play MP3 files as samples or as music.</p>
+
+<p>There are two ways of playing sample files, the classic DAAD one (same as Amiga or Atari ST) and the new one, in any of them we need a MP3 file.</p>
+        
+
+<p>The classic to play them is:</p>
+<ul>
+      <li>Place the MP3 file in the SOUNDS folder with the usual format nnn.MP3 (for example 014.mp3)</li>
+      <li>And to play it, in the code we do this:
+      <code>
+        PICTURE 14<br/>
+        SFX 0 255
+      </code>
+      </li>
+</ul>
+
+<p>The new way is:</p>
+<ul>
+      <li>Place the MP3 file in the SOUNDS/PC folder with the usual format nnn.MP3 (for example 004.mp3)</li>
+      <li>And to play it, in the code we do this:
+      <code>
+        SFX 14 1
+      </code>
+      </li>
+</ul>
+
+<p>With the new way you can also play the sample in a loop, by using SFX 14 2. You can stop playing an active sample using SFX 14 5, although in this case the first parameter is irrelevant (just the sample being played will be stopped, no 
+  matter if it was sample 014.WAV or not).</p>
+</p>
+
+<p>For MP3 music, we need to create MP3 files and place them in the SOUNDS folder with three-digit numbers (for example, 020.MP3).</p>
+
+<p>To play a MP3 music file (i.e. 020.MP3), we use the SFX condact like this:</p>
+      <code>
+        SFX 20 6
+      </code>
+
+<p> You can also play a MP3 file in endless loop using SFX 20 7 and stop the current one being playe using SFX 20 8, although in this last case the first parameter is irrelevant, SFX would stop the MP3 file being player, no matter if its 020.MP3 or not.</p>      
+
+<p>Please notice as both music and sfx use MP3 format, you cannot have a music and an sfx with the same number / file name, but as they are played with different SFX commands, you can play both music and effects simultaneously.</p>
+
+<a name='advhtml'></a>
+<h4>Advanced multimedia for HTML</h4>
+
+<p>In the HTML BAT file, we can see the lines that generate images:</p>
+
+<code>
+for /L %%i in (0, 1, 9) do IF exist IMAGES\HTML\00%%i.png PHP\PHP TOOLS/jDAADImager/jDAADImager.php IMAGES\HTML\00%%i.png RELEASE\HTML\images.js 0,0<br/>
+for /L %%i in (10, 1, 99) do IF exist IMAGES\HTML\0%%i.png PHP\PHP TOOLS/jDAADImager/jDAADImager.php IMAGES\HTML\0%%i.png RELEASE\HTML\images.js 0,0<br/>
+for /L %%i in (100, 1, 256) do IF exist IMAGES\HTML\%%i.png PHP\PHP TOOLS/jDAADImager/jDAADImager.php IMAGES\HTML\%%i.png RELEASE\HTML\images.js 0,0
+</code>
+
+<p>The first line is for graphics 000 to 009, second for 010 to 099, and third for 100 to 255.</p>
+
+<p>That 0,0 at the end means the image is fixed at x=0, y=0. You can change that value to position the image anywhere on the screen.</p>
+
+<p>You can also say an image is float by omitting the pair of comma-separated numbers at the end. If they appear, they define a fixed position; if not,
+   the image is floating:</p>
+
+<code>
+for /L %%i in (100, 1, 256) do IF exist IMAGES\HTML\%%i.png PHP\PHP TOOLS/jDAADImager/jDAADImager.php IMAGES\HTML\%%i.png RELEASE\HTML\images.js 50,50<br/>
+for /L %%i in (100, 1, 256) do IF exist IMAGES\HTML\%%i.png PHP\PHP TOOLS/jDAADImager/jDAADImager.php IMAGES\HTML\%%i.png RELEASE\HTML\images.js
+</code>
+
+<p>On the other hand, HTML supports the following GFX options:</p>
+
+<small>
+<table>
+  <tr>
+    <th>Parameter 2</th><th>Parameter 1</th><th>Description</th>
+  </tr>
+  <tr><td>0</td><td>Any</td><td>Copies the buffer to the screen</td></tr>
+  <tr><td>1</td><td>Any</td><td>Copies the whole screen to the buffer</td></tr>
+  <tr><td>2</td><td>Any</td><td>Swaps the contents of buffer and screen</td></tr>
+  <tr><td>3</td><td>Any</td><td>Sets graphics drawing to the screen</td></tr>
+  <tr><td>4</td><td>Any</td><td>Sets graphics drawing to the buffer</td></tr>
+  <tr><td>5</td><td>Any</td><td>Clears the screen</td></tr>
+  <tr><td>6</td><td>Any</td><td>Clears the buffer</td></tr>
+  <tr><td>7</td><td>Any</td><td>Sets text drawing to the screen</td></tr>
+  <tr><td>8</td><td>Any</td><td>Sets text drawing to the buffer</td></tr>
+  <tr><td>9</td><td>flagno</td><td>Changes the palette color defined in flag flagno to the R,G,B values contained in flags flagno+1, flagno+2, and flagno+3.</td></tr>
+  <tr><td>10</td><td>flagno</td><td>Reads the palette color defined in flag flagno and stores its R,G,B values into flags flagno+1, flagno+2, and flagno+3.</td></tr>
+  <tr><td>13</td><td>resource number</td><td>Plays a MP4 video animation file located in the IMAGES folder. The file must be
+     named nnn.MP4, where nnn is the resource number with three digits as with the images. The animation will be played once and then control returns to the game.
+      While playing the animation, any key press will also finish the animation.
+    <br/>
+    <code>
+      GFX 44 13 ; plays the animation file 044.MP4<br/>
+    </code>
+  </td></tr>
+  <tr><td>14</td><td>resource number</td><td>Same as the above but the animation will be played in endless loop until a key is pressed.
+    <br/>
+    <code>
+      GFX 44 14 ; plays the animation file 044.MP4 in endless loop until a key is pressed<br/>
+    </code>
+    </td></tr>
+</table>
+</small>
+
+<p>MP4 playback is full screen.</p>
+
+
+
+<a name='windows'></a>
+<h4>Windows</h4>
+
+<p>For Windows, DAAD Ready uses the MSDOS version under DOSBox by default, so the same rules as MSDOS apply. However, there’s also an experimental interpreter called ADP 
+  that runs natively on Windows and can display the same 16-color graphics used by Amiga or ST. In fact, ADP ressembles those interpreters in multimedia handling, so 
+  refer to the Amiga/AtariST section if you use it.</p>
+
+<a name='macOS'></a>
+<h4>MacOS</h4>
+
+<p>For MacOS DAAD Ready uses ADP, which ressembles Amiga/AtariST interpreters in multimedia handling, so 
+  refer to the Amiga/AtariST section if you use it.
+</p>
+
+<h4>Appendixes</h4>
+
+<a name='loadingscreens'></a>
+<h4>Appendix A - Loading screens</h4>
+
+<p>Some interpreters allow displaying a loading screen while the game is initializing (before the first location is shown).  DAAD Ready supports this feature automatically for interpreters that support it.</p>
+
+
+
+<p>To add a loading screen, follow the instructions for each target:</p>
+
+<table>
+<tbody>
+<tr><td>Spectrum</td><td>Enabled for tape versions (48K and 128K) and Spectrum +3. Just place a file named DAAD.SCR in the IMAGES folder.</td></tr>
+<tr><td>MSX 1</td><td>Put a file named DAAD.SC2 in the IMAGES folder.</td></tr>
+<tr><td>MSX 2</td><td>Put a file named DAAD.SC8 in the IMAGES folder.</td></tr>
+<tr><td>MSDOS/Windows</td><td>Put a file named DAAD.PCX in the IMAGES/PC, o IMAGES/PC/SVGA. Note that even in SVGA mode you need a 320x200 loading screen.</td></tr>
+<tr><td>Atari ST</td><td>Put a file named DAAD.PNG in the IMAGES folder.</td></tr>
+<tr><td>Windows Experimental</td><td>Just like with Atari ST</td></tr>
+<tr><td>MacoS Experimental</td><td>Just like with Atari ST</td></tr>
+  </tbody>
+</table>
+
+<p>Have im mind the fact a specific target is not enabled for loading screen doesn't mean a loading screen is not possible. Maybe just DAAD Ready has not a way to add it automatically.</p>
+
+
+
+<a name="tools"></a>
+<h4>Appendix B - Tools</h4>
+
+<p>This is a collection of utilities mentioned throughout the document that can be useful for multimedia work.  
+It is followed by another list of additional software that you may not strictly need, but can be handy.</p>
+
+<ul>
+  <li><a href="http://multipaint.kameli.net/">Multipaint</a> — a graphics editor for retro computers.</li>
+  <li><a href="https://grafx2.chez.com/">GrafX2</a> — a bitmap paint program inspired by Deluxe Paint.</li>
+  <li><a href="https://www.dadither.com/#Download">DaDither</a> — a digitized image converter for retro machines.</li>
+  <li><a href="https://www.gimp.org/">Gimp</a> — the best-known free design tool.</li>
+  <li><a href="http://ldeplanque.free.fr/ConvImgCpc/new/">ConvImageCPC</a> — a converter for digitized images on CPC.</li>
+  <li><a href="https://www.cpcwiki.eu/index.php/Pixel_Polizei">Pixel Polizei</a> — a converter for digitized images on retro systems.</li>
+  <li><a href="https://sourcesolutions.itch.io/zx-paintbrush">ZX Paintbrush</a> — a graphics editor for ZX Spectrum.</li>
+  <li><a href="https://worldofspectrum.net/zx-modules/83/index.html">Img2ULAPlus</a> — a digitized image converter for ZX-Uno.</li>
+  <li><a href="https://www.audacityteam.org/">Audacity</a> — an audio track
+ <li><a href="http://adlibtracker.net/">Adlib Tracker II</a> — a tool to create OPL music for DOS.</li>
+  <li><a href="https://jestarjokin.net/apps/drotrimmer/">DRO Trim</a> — a tool to trim DRO music captures from DOSBox.</li>
+  </ul>
+
+</div>
+
+</body>
+</html>

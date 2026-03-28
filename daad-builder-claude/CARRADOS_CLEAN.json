@@ -1,0 +1,93 @@
+{
+  "partNumber": 1,
+  "title": "The Eyes of Max Carrados - Complete Edition",
+  "author": "Christopher Olewicz - Adapted from Ernest Bramah",
+  "version": "3.0 - Carlyle as Eyes System",
+  "introText": "London, December 1914. You are Max Carrados, the blind detective whose other senses compensate remarkably for his lack of sight.\\n\\nYour friend Louis Carlyle accompanies you—his eyes see what yours cannot, though your other senses often perceive what his eyes miss.\\n\\nCarlyle has brought you a baffling case: a terrible railway accident at Knight's Cross Station killed twenty-seven people when a steam train ran past a danger signal and crashed into an electric train.\\n\\nThe engine-driver, Hutchins, insists he saw a green clear signal. The signalman swears it was red at danger. Both seem honest. Both cannot be right.\\n\\nTogether, you will uncover the truth...",
+  "walkthrough": [
+    "look",
+    "south",
+    "in"
+  ],
+  "locations": [
+    {
+      "id": 0,
+      "name": "Carrados's Study",
+      "description": "The familiar embrace of your study at The Turrets. Electric lamps blaze brilliantly—a characteristic touch of irony, you've been told. The leather of your armchair speaks of quality beneath your fingertips. Books line the walls, their embossed spines a landscape for your touch. The scent of good tobacco mingles with old paper and furniture polish. Carlyle's breathing tells you he sits opposite, papers rustling in his hands. The fire crackles softly.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": 1,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": null
+      },
+      "x": 320,
+      "y": 200
+    },
+    {
+      "id": 1,
+      "name": "Richmond Terrace",
+      "description": "The pavement of Richmond Terrace beneath your feet, familiar cobblestones worn smooth. Your Kensington home rises behind you. December air carries the sharp bite of approaching rain and distant London traffic. Parkinson's presence is unmistakable—engine oil and patient stillness. Your motor car waits, engine ticking as it cools.",
+      "isDark": false,
+      "exits": {
+        "north": 0,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": 2,
+        "out": null
+      },
+      "x": 490,
+      "y": 200
+    },
+    {
+      "id": 2,
+      "name": "Motor Car",
+      "description": "The comfortable rear seat of your motor car. Leather upholstery supple beneath you. Polished wood fittings under your fingertips. Through the partition, Parkinson waits at the wheel. The distinctive smell of petrol and fine leather. Engine warmth radiates through the floorboards.",
+      "isDark": false,
+      "exits": {
+        "north": null,
+        "south": null,
+        "east": null,
+        "west": null,
+        "northeast": null,
+        "northwest": null,
+        "southeast": null,
+        "southwest": null,
+        "up": null,
+        "down": null,
+        "in": null,
+        "out": 1
+      },
+      "x": 700,
+      "y": 200
+    }
+  ],
+  "objects": [],
+  "rules": [],
+  "flags": [
+    {"id": 1, "name": "objects_carried", "description": "Auto-tracked", "initialValue": 0},
+    {"id": 37, "name": "max_carry_objects", "description": "Max 6 objects", "initialValue": 6},
+    {"id": 52, "name": "max_carry_weight", "description": "Max weight 10", "initialValue": 10}
+  ],
+  "messages": [],
+  "vocabulary": [
+    {"word": "thing", "wordType": "Noun", "id": 0},
+    {"word": "look", "wordType": "Verb", "id": 14}
+  ],
+  "music": []
+}

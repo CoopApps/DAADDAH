@@ -1,0 +1,280 @@
+DAAD Ready A2 21/02/2026
+========================
+
+- Manuals: The multimedia manual has been rebuilt and (hopefuly) simplified.
+- MSDOS: Added support for color cycling via the GFX condact. Also, FLI playback has been moved from SFX
+         to GFX. Fixed a bug where system message 8 was shown by the condact itself when DOALL didn't
+         find any object.
+- HTML : several fixes, including issues in "More.." behaviour, PLACE condact and other condacts related to 
+         PLACE. COLS symbol fixed to 53 columns. Also, FLI playback has been moved from SFX to GFX. Fixed a bug
+         where system message 8 was shown by the condact itself when DOALL didn't  find any object.
+- ATARI: the image packer compresses the images now. 
+- AMIGA: the image packer compresses the images now. 
+- Spectrum 128K: Fixed bug with data corruption in the images under some circumstances. Fixed ink colour 
+                 changing when LOAD was called.
+- Spectrum Next: fixed crashes in real machine that were not happening in the emulator. Fixed a bug where
+                 the interpreter was not detecting no succesful PICTURE was called before DISPLAY. Fixed
+                 EXIT and END: now properly clear ULA layer on exit, not only Layer 2.
+- ZX-Uno: Fixed a bug where the interpreter was not detecting no succesful PICTURE was called before 
+          DISPLAY.
+- Commodore 64: it's now a full disk interpreter, saving to tape has been removed. Also, fixed a bug that 
+                was preventing xmessages to work fine when too many of them.                 
+- Commodore Plus/4: it's now a full disk interpreter, saving to tape has been removed. Also, fixed a bug 
+                    that was preventing xmessages to work fine when too many of them.
+- CPC: SFX condact can write directly to PSG registers (that was already there, but not documented) and 
+       also can modify the palette via SFX command 14.
+       
+
+
+DAAD Ready A1 17/11/2025
+========================
+
+- Fixed a bug with CPC not properly usign CR/LF after a PICTURE call fails to find the picture.
+- Improved ZX128K image compression by erasing the part of the SCR file that is not used
+- Fixed a bug where ZX128K wasn't working if loading screen file DAAD.SCR was missing
+- ZX128K can now use bank 0 for images if there's room for them.
+- ZX128K warns now users if there are two images that are the same.
+- ZXPLUS3 can now use compressed images as the ZX128K target, making possible to fit much
+  more images in the disk. 
+- Fixed a bug with SAVE/LOAD in ESXDOS that was reseting the game, and also fixed a bug where all 
+  Spectrum targets but 128K were disabling wordwrap after save/load.
+
+
+DAAD Ready A 20/10/2025
+=======================
+
+Documentation
+-------------
+Documentation has been separated into basic and multimedia documentation.  Multimedia documentation
+includes basic and advanced graphics, audio and animations/video information.
+
+Multimedia
+----------
+- DAAD Ready can now add SFX sounds by adding 8 bit mono WAV files to SOUNDS folder, using the classic 
+  PICTURE/SFX approach, in the Amiga, PC/DOS and Atari ST targets. The HTML interpreter can do the same
+  with MP3 files.
+- You can also add DRO files to SOUNDS folder to play OPL music in the background in the PC/DOS target. 
+  The PC/DOS target can play music and sound effects at the same time,and has extended ways to play the
+  SFX sounds, aside of the original  PICTURE/SFX approach (i.e. repeat, loop). The HTML interpreter can
+  do the same with MP3 files.
+- The PC/DOS interpreter now supports floating/fixed images and partial palette loading. It also supports
+  FLI 320x200 animations and MOUSE condact.
+- The HTML interpreter now supports floating/fixed images. It also supports MP4 animations and both BEEP
+  and MOUSE condact.
+- Spectrum Next and ZX-Uno interpreters don't use XPICTURE anymore, and now use original PICTURE/DISPLAY
+  approach. They also supports floating/fixed images and partial palette loading.
+- Spectrum +3, Spectrum 128K, Spectrum ESXDOS also use PICTURE/DISPLAY now, and support floating/fixed
+  images. Spectrum +3 also support buffered images (the others don't really need it).
+- Amstrad CPC, C64, Plus/4 and MSX1 interpreters now use PICTURE/DISPLAY also, but only support Maluva 
+  style fixed images (top image) and neither support floating images nor buffered images.
+- CPC interpreter does now support BEEP.
+- Split screen modes in CPC and C64 are not default modes anymore. Users have to activate them if they
+  want to use them. 
+- Some changes have been made in default fonts so the upper font looks different from the lower one. 
+  Also, look of the character "ç" has been improved.
+
+Other features
+--------------
+- CPC games can now run from drive B.
+- In the new interpreters, based in original source code, some of the remaining "Maluva condacts" have been
+  implemented internally:
+    + XMESSAGE: implemented in all targets that used Maluva before.
+    + XUNDONE: implemented in all targets that used Maluva before.
+    + XSPLITSCR: implemented in all targets that used split screen before (C64 and CPC).
+    + XPART: has been removed because of lack of use.
+    + XSPEED: has been removed, although the targets that used it before (Spectrum Next and ZX-Uno) control 
+      the speed internally, so it's not required anymore.
+- PCW interpreter does also include XMESSAGE and XUNDONE support. It also doesn't shown the "part" selection
+  screen anymore.       
+- Targets not supporting XMESSAGES (Amiga, AtariST and Spectrum 48K) use the -force-normal-messages parameter
+  to DRC, so the game will not use XMESSAGES but the normal messages system. Authors can now work with XMESSAGES
+  if needed while not needing  to add #ifdef for some targets
+
+Bug fixes
+---------
+- Fixed WHATO condAct in the PC/DOS interpreter. It was not working fine when using adjectives.
+- Fixed a bug where flag 63 was not being updated in many interpreters when WINDOW was called.
+- Fixed a bug in the CPC and PCW English interpreters that were not allowing the WINAT condact to work  properly.
+- Fixed a bug where the CPC interpreter was usign a key for the "Ñ" character, which overlapped the "N" key in 
+  AZERTY keyboards. It uses now the one just right of that one, to avoid overlapping.
+
+Important changes in interpreters
+---------------------------------
+- All Spectrum targets but the 48K one, C64, Plus4, CPC and MSX1 don't support vectorial graphics anymore. This 
+  means the almost 2K of RAM used by the Maluva extension before are now available for the game, as the new 
+  interpreters replace the vectorial graphics with the PICTURE/DISPLAY approach.
+- The old MSDOS target has been definitively removed.
+- ZXDAAD128 has been replaced as main interpreter for the Spectrum 128K and +3 targets. Now, a new interpreter 
+  based in the original source codeis used. ZXDAAD128 remains though in the experimental targets.
+
+Quick notes about Spectrum 128K tape version
+---------------------------------------------
+- The new 128K tape interpreter stores XMESSAGEs and IMAGES in the upper pages of the Spectrum 128K RAM. The rest
+  remains in the same place as the old 48K interpreter. This means that there may be free RAM available, but still 
+  the game not fitting. If you run out of 'lower' RAM, you can replace some MESSAGE/MES with XMESSAGE/MES, so the
+  text of those message will be stored in the upper pages. 
+
+- The image compression takes a while, so the ZX128K.BAT file doesn't create all the images every time. If you want
+  to process again some image, you will have to delete the files with extension .zx0 and .128 from the IMAGES. That
+  will force compression of those images again. Also, if you want to delete an image, you will have to delete the .scr
+  file, but also the .zx0 and .128 files.
+
+-  In upper RAM, XMESSAGES fill the pages first, then the images are placed in the remaining space using a "bigger than
+  fits first" algorythm. Images will compress better if they are simpler (the more blank space the better). Also, it will 
+  compress better if there are repeated patterns in the image. If you run out of space try to make them simpler. Also,
+  you can try to use the same image in different locations.
+
+- The experimental 128K interpreter has differente approaches for the way the RAM is handled, so you may try to use it
+  as well. Have in mind though it's experimental, and bugs may appear. 
+
+
+DAAD Ready 0.9.3 27/03/2024
+===========================
+
+- Spectrum Next: New interpreter. Embbeds Maluva features such as XPICTURE/XMESSAGE/XUNDONE/XSPEED. 
+  Also, fixes the issues we had with END/EXIT not erasing last picture on game exit, and restores 
+  normal speed on EXIT. As counterpart, it does not include drawstrings (vector) graphics support.
+  This interpreter has about 2 more kilobytes available for the DDB. The old Spectrum Next intrepreter
+  is still available under the OLDZXNEXT.BAT file, in case you need drawstring. Also, the
+  compiler has been updated for Spectrum Next new interpreter.
+
+- HTML: jDAAD More... feature has been improved, again. 
+
+- MSDOS: Fixed bug with END condact. Last convertible noun is now #39 instead of #19. Fixed support 
+         of locno+ in several condacts. Fixed weight and height in PCX load.  Fixed bug with article
+         replacing in English.
+
+- ZX128PLUS3 and ZX128TAPE: Fixed bug with XPICTURE that was drawing a black band. Last convertible noun is now #39 
+  instead of #19
+
+- Compiler: New symbols NUM_CARRIED and NUM_WORN added, to allow the programmer to automatically know how many objects are carried or worn when the game starts.
+
+DAAD Ready 0.9.2 01/01/2024
+===========================
+- MSDOS: Fixed bug with MODE condact and character selection
+- HTML : Fixed bug with MODE condact and character selection
+- ATARIST: now a proper .ST floppy disk image is created with your game. The floppy disk
+  image will be located at RELEASE\ATARIST\FLOPPY, although the testing will be done with
+  the separated files at RELEASE\ATARIST as is faster to test with them.
+- AMIGA: now a proper .ADF floppy disk image is created with your game. The floppy disk
+  image will be located at RELEASE\AMIGA\FLOPPY, although the testing will be done with
+  the separated files at RELEASE\AMIGA as is faster to test with them.
+- MSDOS, HTML, ZX128TAPE and ZX128PLUS3: Fixed bug with '@' being replaced in English games
+- ZX128TAPE and ZX128PLUS3: Fixed bug with with TAKEOUT, as flags were not being updated
+- ZX128TAPE and ZX128PLUS3: Fixed bug with HABLA in Spanish interpreter
+- DRC: the compiler accepts processes in any order now.
+- Start databases: start DSF files for all 5 languages have been updated for easy readability
+- HTML: fixed another bug with "More..." feature that was happening when the input prompt was
+  the text forcing "More..." to happen
+- Compiler: processes can now appear in any order and process list can have gaps. Also the same
+  process can appear more than one (if so, those with some number are just merged together as 
+  if they were parts of a single process)
+  
+DAAD Ready 0.9.1 28/10/2023
+===========================
+- jDAAD (HTML): fixed bug with ANYKEY when using virtual Keyboard
+- jDAAD (HTML): fixed bug that made virtual keyboard keys' text selectable
+- ZX128TAPE and ZX128PLUS3 can now include images which use only their 96 first lines, just like
+  other Maluva targets do. These targets can now also save space by making mirrored images (images
+  where right half is an exact mirror of left half). The system will detect it and save just half
+  the image, saving RAM.
+- ZX128TAPE and ZX128PLUS3: fixed bug with Spanish pronoun sufixes
+
+
+DAAD Ready 0.9 15/10/2023
+=========================
+- MSDOS (PCDAAD): New SVGA mode
+- HTML (jDAAD): new virtual keyboard built-in for touch devices
+- New Windows and MacOS targets using ADP (experimental)
+- jDAAD: DROPALL fixed
+- PCDAAD: DROPALL fixed
+
+DAAD Ready 0.8.2 24/09/2023
+===========================
+- AtariST: pacthed interpreters included, allowing the creation of EXTERN in the 8 bit style
+- jDAAD: Keyboard input has been refactored and works better now. Also fixes a bug with INKEY.
+- jDAAD: EXTERN has been fixed.
+- jDAAD: Fixed non working XMESSAGE code
+- ZXDAAD128: Fixed a bug with XPICTURE in tape target
+- ZXDAAD128: fixed bug with INKEY
+- ZX48: Optional loading screen added
+- ZX48 and ZXNEXT:added control on daadmaker failure cause of Spectrum memory full
+
+DAAD Ready 0.8.1 04/08/2023
+===========================
+- Fixed an error in English base game that was preventing English games to work
+- jDAAD and PCDAAD: Added EXCEPT support for DOALL
+- jDAAD and PCDAAD: Article replacement properly implemented in English
+- jDAAD: Player orders can be lowercase now just like in other interpreters
+- jDAAD: "More..." feature improved after finding some cases where it was not working properly
+
+DAAD Ready 0.8 21/07/2023
+=========================
+
+- jDAAD has been checked in depth and now HTML it's a not an experimental target anymore
+- WINDOWS.BAT can now create a Windows setup file in the RELEASE\WINDOWS folder. Icon used 
+  has CC license, by icons8.
+- New Amiga patched interpreters allow the whole Amiga original 4096 colours palette to be 
+  used for graphics, not just 512. Still only 16 colours per picture though.
+- New Amiga patched interpreters allow running EXTERN code the way the 8 bit machines do.
+- Fixed bug with Plus/4 folder
+- Fixed charset generator for AtariST
+- New Telegram official channel added to documentation
+- DAAD ready will check now on start if version used is latest version
+- Comments for new authors added to Spanish base DSF file 
+- CH82chr: new tool added to convert CH8 character sets to DAAD format
+- New hooks for custom BAT files added. Also session variable for script hooks added.
+- WinAPE has been replaced with CPCE as Amstrad CPC emulator
+- ZEsarUX updated to version 10.3
+
+
+DAAD Ready 0.7 (15/01/2023)
+===========================
+- Fixed a bug in DRC that was allowing object definitions with weight greater than 63, and eventually leading to fails.
+- Replaced some tools with their respective 32 bit versions, so DAAD Ready can now work in 32 bit based Windows (at least on latest versions, for older Windows will depend on compatibility of each tool, mainly emulators).
+- Updated PCDAAD
+- Added jDAAD for HTML target (experimental)
+- Restored old MSDOS target as legacy (OLDMSDOS.BAT)
+
+DAAD Ready 0.6.1 (08/06/2022)
+=============================
+- ZXDAAD128 interpreter updated to fix some bugs and also to add some standarization at color codes
+- PCDAAD DOS interpreter updated to fix bug with object listing.
+- Added Windows build (well, it was already there, but it has been made visible)
+- Fixed a bug in C64 script that was making XMESSAGES to be wrongly stored in D64 file
+- Fixed Commodore Plus/4 script
+- Reinstalled WinAPE folder as it was failing for some users
+
+DAAD Ready 0.6  (08/05/2022)
+============================
+- PC and MSX2 interpreters Updated again
+- Added some color to scripts
+- ZEsarUX updated from v8.1 to v10.0
+- Added Amiga and Atari ST targets, with graphics
+- Added ZXDAAD128 targets (ZX Spectrum 128K tape and ZX Spectrum 128K +3DOS)
+
+
+DAAD Ready 0.5 (31/10/2021)
+===========================
+PC and MSX2 interpreters Updated
+Added support for French (in the same way Portuguese and German are supported)
+Maluva updated, now works fine with M4 interface in Amstrad CPC
+Updated imagewizard for MSX2 images
+Fixed bugs in MSDOS and MSX2 build files
+
+DAAD Ready 0.4 (24/07/2021)
+==============================
+- PC VGA16 interpreter replaced with VGA256 interpreter. Now DAAD Ready can add graphics to PC target too. See instructions in the documentation.
+- Fixed some bugs in the DSF templates, that was making weird text overlaps when the player typed LOOK.
+
+DAAD Ready 0.3 (04/04/2021)
+===============================
+- Updated Maluva for CPC, to avoid SPLIT mode to be active by default
+- Now a picture 000 is shown  - if exists - at the intro location (location 0). Also picture 255 is shown if existis and no picture available for a location. 
+- Fixed a bug in DRC with WEIGHT condact semantic
+- Fixed english manual, the definition of the underscore ('_') escape sequence was incorrect.
+- Fixed DAT file and removed VGS file from MSDOS assets, also fixed missing "v" parameter in MSDOS bat files.
+- Fixed bug in DRC with #else directives, also now nested #ifdef are allowed
+- Fixed some bugs in the build scripts and errors in the manual (thanks Carlos Perezgrín)
+- Fixed a bug with DRB, which was generating Spanish compatible databases for english targets
+- A patched version of GCS font editor with English texts is available now (thanks @CrispinSerenia). Still, as it has not been tested in depth, instructions remain the same in case you have to use the Spanish one.

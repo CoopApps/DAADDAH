@@ -1,0 +1,1 @@
+{"vocabulary":[{"id":12,"word":"hutchins","wordType":"noun"},{"id":13,"word":"mead","wordType":"noun"},{"id":14,"word":"pendleton","wordType":"noun"}]}

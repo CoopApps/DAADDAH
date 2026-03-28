@@ -1,0 +1,86 @@
+========================================
+🚀 DAAD BUILDER - GET STARTED NOW
+========================================
+
+FIXED! Scripts now use full paths to your tools.
+
+YOUR TOOLS:
+-----------
+✅ Node.js: D:\nodejs
+✅ Cargo:   D:\.cargo\bin
+✅ Rustup:  D:\.rustup
+
+All scripts are now configured correctly!
+
+========================================
+STEP 1: INSTALL DEPENDENCIES (ONE TIME)
+========================================
+
+Double-click this file:
+    install-dependencies.bat
+
+This will:
+- Install all npm packages
+- Verify Rust is working
+- Take about 2-3 minutes
+
+========================================
+STEP 2: START THE APP
+========================================
+
+Double-click this file:
+    quick-start.bat
+
+This will:
+- Verify your tools
+- Build the app (5-10 min first time)
+- Start the HTTP server on :3456
+
+Watch for:
+    "🚀 DAAD Builder MCP API server starting on http://localhost:3456"
+
+========================================
+STEP 3: USE CLAUDE DESKTOP
+========================================
+
+1. Restart Claude Desktop
+
+2. Open a new conversation
+
+3. Say:
+    "Check if the DAAD Builder app is running"
+
+4. Then try:
+    "Create a mysterious forest location"
+
+5. Watch it appear in the app! ✨
+
+========================================
+TROUBLESHOOTING
+========================================
+
+If Node.js not found:
+- Check D:\nodejs\node.exe exists
+- Check D:\nodejs\npm.cmd exists
+
+If Cargo not found:
+- Check D:\.cargo\bin\cargo.exe exists
+
+If dependencies fail:
+- Run: setup-environment.bat
+- Then manually: npm install
+
+========================================
+WHAT TO DO NOW
+========================================
+
+1. Run: install-dependencies.bat
+2. Run: quick-start.bat
+3. Wait for app to start
+4. Use Claude Desktop to create games!
+
+========================================
+
+Questions? See START_HERE.md for detailed docs.
+
+Happy game building! 🎮

@@ -1,0 +1,81 @@
+==============================================================================
+DIAGNOSTIC CHECKLIST - Is Your Game Properly Loaded?
+==============================================================================
+
+If "drive holloway" doesn't work, check these things:
+
+1. GO TO VOCABULARY PANEL
+   -------------------------
+   Check if you have these VERBS:
+   ☐ drive (should be id:7)
+   ☐ interview (should be id:12)
+   ☐ accuse (should be id:13)
+
+   Check if you have these NOUNS:
+   ☐ holloway (should be id:7)
+   ☐ hampton (should be id:8)
+   ☐ woundy (should be id:9)
+   ☐ city (should be id:10)
+   ☐ richmond (should be id:11)
+   ☐ hutchins (should be id:12)
+   ☐ mead (should be id:13)
+   ☐ pendleton (should be id:14)
+
+2. GO TO RESPONSES PANEL
+   ----------------------
+   Check if you have these rules:
+   ☐ Rule 8: "DRIVE HOLLOWAY from Richmond"
+   ☐ Rule 9: "DRIVE HAMPTON from Richmond"
+   ☐ Rule 10: "DRIVE WOUNDY from Richmond"
+   ☐ Rule 11: "DRIVE CITY from Richmond"
+
+   You should have 33 rules total (0-32)
+
+3. GO TO GAME INFO PANEL
+   ----------------------
+   Check these fields:
+   ☐ Title: "The Eyes of Max Carrados"
+   ☐ Author: "Christopher Olewicz - Adapted from Ernest Bramah"
+   ☐ Intro Text starts with: "London, December 1914..."
+
+4. GO TO ROOMS PANEL
+   ------------------
+   Check if you have these locations:
+   ☐ Location 0: Carrados's Study
+   ☐ Location 1: Richmond Terrace
+   ☐ Location 2: Motor Car (Richmond Terrace)
+   ☐ Location 3: Klondyke Street, Holloway
+   ☐ Location 4: Motor Car (Klondyke Street)
+   ☐ Location 5: Hutchins's Kitchen
+
+   You should have 15 locations total (0-14)
+
+==============================================================================
+IF ANY OF THE ABOVE ARE MISSING:
+==============================================================================
+
+YOU NEED TO LOAD THE COMPLETE GAME!
+
+Step 1: Go to Merge Data panel
+Step 2: Open MAX_CARRADOS_COMPLETE.txt in a text editor
+Step 3: Select All (Ctrl+A) and Copy (Ctrl+C)
+Step 4: Paste into the big text box in Merge Data panel
+Step 5: Click "Merge Data" button
+Step 6: Wait for success message showing all updates
+Step 7: Go back to PlayTest and try "drive holloway" again
+
+==============================================================================
+UNDERSTANDING THE PROBLEM:
+==============================================================================
+
+The template buttons (+ Basic Verbs, + Movement, + Interaction) only add
+VERB words to vocabulary. They don't add:
+- The NOUN words (holloway, city, etc.)
+- The RULES that make commands work
+- The LOCATIONS where the game happens
+- The OBJECTS you can interact with
+- The MESSAGES that are displayed
+
+You MUST load the complete game file to get all of these!
+
+==============================================================================

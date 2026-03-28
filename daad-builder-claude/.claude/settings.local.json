@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(PHP/php.exe:*)",
+      "Bash(dos2unix:*)",
+      "Bash(/d/projects/daadah/daad-builder-claude/daadready/PHP/php.exe:*)",
+      "Bash(./daadmaker.exe:*)",
+      "Bash(cat:*)",
+      "Bash(./drf.exe:*)",
+      "Bash(./target/release/daad-compile.exe:*)",
+      "Bash(ls:*)",
+      "Bash(/d/projects/daadah/daad-builder-claude/daadready/ASSETS/MSDOS/dosbox.exe -c \"mount c .\" -c \"c:\" -c \"PCDAAD.EXE\" -c \"exit\")",
+      "Bash(taskkill:*)",
+      "Bash(tasklist:*)",
+      "Bash(tasklist.exe:*)",
+      "Bash(dir:*)",
+      "Bash(/d/projects/daadah/daad-builder-claude/daadready/ASSETS/MSDOS/dosbox.exe -c \"mount c D:/daadah\" -c \"mount d D:/projects/daadah/daad-builder-claude/daadready/ASSETS/MSDOS/GAME\" -c \"d:\" -c \"copy c:\\the_eyes_of_max_carrados.DDB PART1.DDB\" -c \"PCDAAD.EXE\" -c \"exit\")",
+      "Bash(/d/projects/daadah/daad-builder-claude/daadready/ASSETS/MSDOS/dosbox.exe -c \"mount c D:/daadah\" -c \"mount d D:/projects/daadah/daad-builder-claude/daadready/ASSETS/MSDOS/GAME\" -c \"d:\" -c \"copy c:\\the_eyes_of_max_carrados.DDB PART1.DDB\" -c \"PCDAAD.EXE\")",
+      "Bash(/d/projects/daadah/daad-builder-claude/daadready/ASSETS/MSDOS/dosbox.exe -c \"mount c D:/daadah\" -c \"mount d D:/projects/daadah/daad-builder-claude/daadready/ASSETS/MSDOS/GAME\" -c \"d:\" -c \"copy c:\\the_eyes_of_max_carrados.ddb PART1.DDB\" -c \"PCDAAD.EXE\")",
+      "Bash(cargo build:*)",
+      "Bash(/d/projects/daadah/daad-builder-claude/src-tauri/target/release/test_verbose.exe:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
