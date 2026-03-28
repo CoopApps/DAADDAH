@@ -101,7 +101,7 @@ impl DaadCodeGenerator {
         code.push_str(&Self::generate_connections(&game.locations));
 
         // 8. /OBJ - Object Definitions
-        code.push_str(&Self::generate_object_definitions(&game.objects));
+        code.push_str(&Self::generate_object_definitions(&game.objects, &game.locations));
 
         // 9. /PRO - Process tables (PRO 0-12)
         code.push_str(&Self::generate_processes(game, &msg_indices));
@@ -265,7 +265,7 @@ impl DaadCodeGenerator {
 
         // 8. OBJ Section
         logs.push("[OBJ] Object definitions...".to_string());
-        code.push_str(&Self::generate_object_definitions(&game.objects));
+        code.push_str(&Self::generate_object_definitions(&game.objects, &game.locations));
         if !game.objects.is_empty() {
             logs.push(format!("  ✓ {} object properties defined", game.objects.len()));
             let mut carried = 0;
@@ -342,6 +342,19 @@ impl DaadCodeGenerator {
         logs.push("  ✓ All sections in correct DRC order".to_string());
         logs.push("  ✓ System messages (0-64) included".to_string());
         logs.push("  ✓ PRO 5 rule ordering correct".to_string());
+
+        // Check for container objects whose IDs clash with location IDs
+        let loc_ids: std::collections::HashSet<u8> = game.locations.iter().map(|l| l.id).collect();
+        for obj in &game.objects {
+            if obj.is_container && loc_ids.contains(&obj.id) {
+                logs.push(format!(
+                    "  ⚠ WARNING: Object #{} ({}) is a container but location #{} exists. \
+                     DAAD reserves location N for container object N's contents. \
+                     Renumber the object or the location to avoid a conflict.",
+                    obj.id, obj.name, obj.id
+                ));
+            }
+        }
 
         let line_count = code.lines().count();
         logs.push(String::new());
@@ -478,7 +491,7 @@ impl DaadCodeGenerator {
             "/15 \"OK.\"",
             "/16 \"Press any key to continue.\"",
             "/17 \"\";*You have taken\"",
-            "/18 \"\";*\\\\sturn\"",
+            "/18 \"\";*#sturn\"",
             "/19 \"\";*s\"",
             "/20 \"\";*.[CR]\"",
             "/21 \"\";*You have scored\"",
@@ -612,7 +625,9 @@ impl DaadCodeGenerator {
         code
     }
 
-    fn generate_object_definitions(objects: &[Object]) -> String {
+    fn generate_object_definitions(objects: &[Object], locations: &[Location]) -> String {
+        // Collect location IDs to detect container conflicts
+        let loc_ids: std::collections::HashSet<u8> = locations.iter().map(|l| l.id).collect();
         let mut code = String::from("/OBJ\n\n");
 
         if objects.is_empty() {
@@ -631,7 +646,10 @@ impl DaadCodeGenerator {
                 code.push_str(&format!("  {:<12}", loc_str));
 
                 code.push_str(&format!("{:<3}", obj.weight.min(63)));
-                code.push_str(if obj.is_container { " Y" } else { " _" });
+                // Suppress container flag if object ID clashes with a location ID
+                // (DAAD reserves location N for container object N's contents)
+                let container_ok = obj.is_container && !loc_ids.contains(&obj.id);
+                code.push_str(if container_ok { " Y" } else { " _" });
                 code.push_str(if obj.is_wearable { " Y" } else { " _" });
 
                 // 16 user-defined attribute flags (DAAD OBJ spec)
@@ -647,7 +665,8 @@ impl DaadCodeGenerator {
                 code.push_str(&format!(" {}", adjective.to_uppercase()));
 
                 let mut attrs = Vec::new();
-                if obj.is_container { attrs.push("container"); }
+                if obj.is_container && container_ok { attrs.push("container"); }
+                if obj.is_container && !container_ok { attrs.push("container(suppressed:loc clash)"); }
                 if obj.is_wearable { attrs.push("wearable"); }
                 if obj.is_light_source { attrs.push("light"); }
                 if obj.is_psi { attrs.push("psi"); }

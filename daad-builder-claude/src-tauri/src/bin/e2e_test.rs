@@ -119,8 +119,11 @@ fn main() {
     }
     println!("  0 validation errors");
 
-    // Step 4: Write DSF file
-    let dsf_path = Path::new(json_path).with_extension("dsf");
+    // Step 4: Write DSF file (use _build/ subdir to avoid DRF overwriting source JSON)
+    let build_dir = Path::new("_build");
+    std::fs::create_dir_all(build_dir).expect("Failed to create _build directory");
+    let stem = Path::new(json_path).file_stem().unwrap_or_default();
+    let dsf_path = build_dir.join(format!("{}.dsf", stem.to_string_lossy()));
     println!("\n[4] Writing DSF to {}...", dsf_path.display());
 
     let (encoded, _, _) = encoding_rs::WINDOWS_1252.encode(&dsf_code);
