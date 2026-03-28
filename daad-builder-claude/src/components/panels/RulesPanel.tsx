@@ -398,7 +398,7 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
           style={{ fontSize: 12 }}
         />
 
-        {/* Process filter */}
+        {/* Process filter — standard PRO0-5 plus any custom tables used by rules */}
         <select
           className="form-input form-select"
           value={processFilter}
@@ -412,6 +412,12 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
           <option value="PRO3">PRO 3 — After description</option>
           <option value="PRO4">PRO 4 — Auto events</option>
           <option value="PRO5">PRO 5 — Response table</option>
+          {/* Dynamic: show any custom process tables (PRO6+) used by rules */}
+          {Array.from(new Set((game.rules || []).map(r => r.process)))
+            .filter(p => !["PRO0","PRO1","PRO2","PRO3","PRO4","PRO5"].includes(p))
+            .sort()
+            .map(p => <option key={p} value={p}>{p.replace("PRO", "PRO ")} — Custom</option>)
+          }
         </select>
 
         <div style={{ fontSize: 12, fontWeight: 600, color: "var(--green-bright)" }}>
@@ -534,20 +540,44 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto auto", gap: 12 }}>
                 <div className="form-group">
                   <label className="form-label">Process Table</label>
-                  {/* ── CHANGE 2: Add PRO4 and PRO5 to process dropdown ── */}
-                  <select
-                    className="form-input form-select"
-                    value={selectedRuleData.process}
-                    onChange={e => updateRule(selectedRuleData.id, { process: e.target.value as ProcessTable })}
-                    style={{ fontSize: 12 }}
-                  >
-                    <option value="PRO0">PRO 0 — Location loop</option>
-                    <option value="PRO1">PRO 1 — Pre-input</option>
-                    <option value="PRO2">PRO 2 — Before description</option>
-                    <option value="PRO3">PRO 3 — After description</option>
-                    <option value="PRO4">PRO 4 — Auto events</option>
-                    <option value="PRO5">PRO 5 — Response table</option>
-                  </select>
+                  {/* Process table selector — standard + custom (type any PRO number) */}
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <select
+                      className="form-input form-select"
+                      value={selectedRuleData.process}
+                      onChange={e => updateRule(selectedRuleData.id, { process: e.target.value as ProcessTable })}
+                      style={{ fontSize: 12, flex: 1 }}
+                    >
+                      <option value="PRO0">PRO 0 — Location loop</option>
+                      <option value="PRO1">PRO 1 — Pre-input</option>
+                      <option value="PRO2">PRO 2 — Before description</option>
+                      <option value="PRO3">PRO 3 — After description</option>
+                      <option value="PRO4">PRO 4 — Auto events</option>
+                      <option value="PRO5">PRO 5 — Response table</option>
+                      {/* Show any custom tables already in use */}
+                      {Array.from(new Set((game.rules || []).map(r => r.process)))
+                        .filter(p => !["PRO0","PRO1","PRO2","PRO3","PRO4","PRO5"].includes(p))
+                        .sort()
+                        .map(p => <option key={p} value={p}>{p.replace("PRO", "PRO ")} — Custom</option>)
+                      }
+                    </select>
+                    <input
+                      className="form-input"
+                      type="text"
+                      placeholder="PRO13"
+                      style={{ fontSize: 11, width: 64 }}
+                      title="Type a custom process table (e.g. PRO13)"
+                      onKeyDown={e => {
+                        if (e.key === "Enter") {
+                          const val = (e.target as HTMLInputElement).value.trim().toUpperCase();
+                          if (val.match(/^PRO\d+$/)) {
+                            updateRule(selectedRuleData.id, { process: val as ProcessTable });
+                            (e.target as HTMLInputElement).value = "";
+                          }
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
 
                 <div className="form-group">

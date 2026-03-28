@@ -62,8 +62,8 @@ impl DaadCodeGenerator {
         // 2. /VOC - Vocabulary (MUST be position 2, immediately after /CTL)
         code.push_str(&Self::generate_vocabulary(&game.vocabulary, &game.objects));
 
-        // 3. /STX - System Text Messages
-        code.push_str(&Self::generate_system_messages());
+        // 3. /STX - System Text Messages (with optional custom overrides)
+        code.push_str(&Self::generate_system_messages(game.system_messages.as_ref()));
 
         // 4. /MTX - Message Texts (also computes system message indices)
         let (mtx, msg_indices) = Self::generate_messages_with_indices(&game.messages, &game.locations, game.intro_text.as_deref().unwrap_or(""));
@@ -146,7 +146,7 @@ impl DaadCodeGenerator {
 
         // 3. STX Section
         logs.push("[STX] System text messages...".to_string());
-        code.push_str(&Self::generate_system_messages());
+        code.push_str(&Self::generate_system_messages(game.system_messages.as_ref()));
         logs.push("  ✓ 65 standard DAAD system messages (0-64)".to_string());
         logs.push(String::new());
 
@@ -433,10 +433,10 @@ impl DaadCodeGenerator {
         code
     }
 
-    fn generate_system_messages() -> String {
+    fn generate_system_messages(overrides: Option<&std::collections::HashMap<u8, String>>) -> String {
         let mut code = String::from("/STX    ;System Message Texts\n");
 
-        // Standard DAAD system messages (0-62) - required by DRC
+        // Standard DAAD system messages (0-64) - required by DRC
         let system_messages = vec![
             "/0 \"It's too dark to see anything.\"",
             "/1 \"I can also see: \"",
@@ -505,7 +505,15 @@ impl DaadCodeGenerator {
             "/64 \"You are carrying too much already.\"",
         ];
 
-        for msg in system_messages {
+        for (idx, msg) in system_messages.iter().enumerate() {
+            // Check if there's a custom override for this message index
+            if let Some(overrides) = overrides {
+                if let Some(custom_text) = overrides.get(&(idx as u8)) {
+                    let escaped = custom_text.replace('"', "\\\"").replace('\n', "#n").replace('\r', "");
+                    code.push_str(&format!("/{} \"{}\"\n", idx, escaped));
+                    continue;
+                }
+            }
             code.push_str(msg);
             code.push('\n');
         }
@@ -1443,6 +1451,34 @@ impl DaadCodeGenerator {
         code.push_str("                DPRINT Turns\n");
         code.push_str("                WINDOW 1\n\n");
 
+        // ── User-defined process tables (PRO 13+) ───────────────────────────
+        // Collect all process table numbers used by rules that aren't handled above
+        let handled_processes: std::collections::HashSet<&str> = [
+            "PRO0", "PRO1", "PRO2", "PRO3", "PRO4", "PRO5",
+        ].iter().copied().collect();
+
+        let mut custom_processes: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+        for rule in &game.rules {
+            if rule.enabled && !handled_processes.contains(rule.process.as_str()) {
+                custom_processes.insert(rule.process.clone());
+            }
+        }
+
+        for proc_name in &custom_processes {
+            // Extract process number from "PRO13" → "13"
+            let proc_num = proc_name.strip_prefix("PRO").unwrap_or(proc_name);
+            code.push_str(&format!("/PRO {}\n\n", proc_num));
+            code.push_str(&format!("; User-defined process table {}\n\n", proc_name));
+
+            let proc_rules: Vec<_> = game.rules.iter()
+                .filter(|r| r.enabled && r.process == *proc_name)
+                .collect();
+            for rule in proc_rules {
+                code.push_str(&Self::generate_rule(rule, game, indices.game_msg_start));
+                code.push('\n');
+            }
+        }
+
         code
     }
 
@@ -1510,8 +1546,17 @@ impl DaadCodeGenerator {
         let verb = rule.verb.as_deref().unwrap_or(&default_verb);
         let noun = rule.noun.as_deref().unwrap_or(&default_noun);
 
+        // Emit primary trigger
         code.push_str(">\n");
         code.push_str(&format!("{:<8} {}\n", verb, noun));
+
+        // Emit stacked triggers (additional verb/noun pairs sharing same conditions+actions)
+        if let Some(ref triggers) = rule.additional_triggers {
+            for trigger in triggers {
+                code.push_str(">\n");
+                code.push_str(&format!("{:<8} {}\n", trigger.verb, trigger.noun));
+            }
+        }
 
         // Generate conditions
         for condition in &rule.conditions {
@@ -1530,9 +1575,15 @@ impl DaadCodeGenerator {
         code
     }
 
+    /// Format a parameter value, prefixing with @ if indirect
+    fn fmt_param(value: u8, indirect: bool) -> String {
+        if indirect { format!("@{}", value) } else { format!("{}", value) }
+    }
+
     fn generate_condition(condition: &Condition, _game: &DaadGame) -> String {
         let cond_type = &condition.r#type;
         let params = &condition.params;
+        let ind = condition.indirect.unwrap_or(false);
 
         match cond_type.as_str() {
             "AT" => format!("AT {}", Self::get_u8_param(params, "locno")),
@@ -1547,12 +1598,12 @@ impl DaadCodeGenerator {
             "NOTCARR" => format!("NOTCARR {}", Self::get_u8_param(params, "objno")),
             "ISAT" => format!("ISAT {} {}", Self::get_u8_param(params, "objno"), Self::get_u8_param(params, "locno")),
             "ISNOTAT" => format!("ISNOTAT {} {}", Self::get_u8_param(params, "objno"), Self::get_u8_param(params, "locno")),
-            "ZERO" => format!("ZERO {}", Self::get_u8_param(params, "flagno")),
-            "NOTZERO" => format!("NOTZERO {}", Self::get_u8_param(params, "flagno")),
-            "EQ" => format!("EQ {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
-            "NOTEQ" => format!("NOTEQ {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
-            "GT" => format!("GT {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
-            "LT" => format!("LT {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
+            "ZERO" => format!("ZERO {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind)),
+            "NOTZERO" => format!("NOTZERO {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind)),
+            "EQ" => format!("EQ {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
+            "NOTEQ" => format!("NOTEQ {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
+            "GT" => format!("GT {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
+            "LT" => format!("LT {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
             "SAME" => format!("SAME {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "NOTSAME" => format!("NOTSAME {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "BIGGER" => format!("BIGGER {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
@@ -1688,6 +1739,7 @@ impl DaadCodeGenerator {
     fn generate_action(action: &Action, _game: &DaadGame, game_msg_start: u8) -> String {
         let action_type = &action.r#type;
         let params = &action.params;
+        let ind = action.indirect.unwrap_or(false);
 
         match action_type.as_str() {
             "GET" => format!("GET {}", Self::get_u8_param(params, "objno")),
@@ -1710,17 +1762,17 @@ impl DaadCodeGenerator {
             "AUTOR" => "AUTOR".to_string(),
             "AUTOP" => "AUTOP".to_string(),
             "AUTOT" => "AUTOT".to_string(),
-            "SET" => format!("SET {}", Self::get_u8_param(params, "flagno")),
-            "CLEAR" => format!("CLEAR {}", Self::get_u8_param(params, "flagno")),
-            "LET" => format!("LET {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
-            "PLUS" => format!("PLUS {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
-            "MINUS" => format!("MINUS {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
+            "SET" => format!("SET {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind)),
+            "CLEAR" => format!("CLEAR {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind)),
+            "LET" => format!("LET {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
+            "PLUS" => format!("PLUS {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
+            "MINUS" => format!("MINUS {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
             "ADD" => format!("ADD {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "SUB" => format!("SUB {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "COPYFF" => format!("COPYFF {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "COPYBF" => format!("COPYBF {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "RANDOM" => format!("RANDOM {}", Self::get_u8_param(params, "flagno")),
-            "MOVE" => format!("MOVE {}", Self::get_u8_param(params, "flagno")),
+            "MOVE" => format!("MOVE {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind)),
             "COPYOF" => format!("COPYOF {} {}", Self::get_u8_param(params, "objno"), Self::get_u8_param(params, "flagno")),
             "COPYFO" => format!("COPYFO {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "objno")),
             "WHATO" => "WHATO".to_string(),
@@ -1743,9 +1795,17 @@ impl DaadCodeGenerator {
             "TAB" => format!("TAB {}", Self::get_u8_param(params, "column")),
             "MODE" => format!("MODE {}", Self::get_u8_param(params, "mode")),
             // Game message indices in JSON are 0-based.
-            // In the DSF, game messages start at index 14 (after exits labels 0-13).
-            "MES" => format!("MES {}", Self::get_u8_param(params, "mesno") + game_msg_start),
-            "MESSAGE" => format!("MESSAGE {}", Self::get_u8_param(params, "mesno") + game_msg_start),
+            // In the DSF, game messages start at index game_msg_start (after exits/system labels).
+            // If action.text is set, emit inline MESSAGE "text" (DRC auto-assigns index).
+            "MES" | "MESSAGE" => {
+                if let Some(ref text) = action.text {
+                    let escaped = text.replace('"', "\\\"").replace('\n', "#n").replace('\r', "");
+                    format!("MESSAGE \"{}\"", escaped)
+                } else {
+                    let cmd = if action_type == "MES" { "MES" } else { "MESSAGE" };
+                    format!("{} {}", cmd, Self::get_u8_param(params, "mesno") + game_msg_start)
+                }
+            },
             "SYSMESS" => format!("SYSMESS {}", Self::get_u8_param(params, "sysno")),
             "DESC" => {
                 let locno = params.get("locno").and_then(|v| v.as_u64());

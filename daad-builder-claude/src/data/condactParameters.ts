@@ -93,6 +93,9 @@ export const CONDITION_PARAMS: Record<ConditionType, CondactParamDefinition[]> =
 
   // Player Interaction
   INKEY: [{ name: "keycode", type: "number", description: "ASCII key code" }],
+
+  // Quit confirmation
+  QUIT: [],
 };
 
 // Action parameter definitions

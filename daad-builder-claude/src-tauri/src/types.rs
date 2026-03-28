@@ -210,6 +210,17 @@ pub struct Rule {
     pub actions: Vec<Action>,
     /// Can disable rules without deleting them
     pub enabled: bool,
+    /// Additional verb/noun triggers sharing the same conditions+actions.
+    /// Emitted as stacked ">" headers in DSF (Rabenstein pattern).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub additional_triggers: Option<Vec<VerbNounTrigger>>,
+}
+
+/// A verb/noun pair for stacked triggers
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerbNounTrigger {
+    pub verb: String,
+    pub noun: String,
 }
 
 /// DAAD's process tables
@@ -271,6 +282,9 @@ pub struct Condition {
     #[serde(rename = "type")]
     pub r#type: String,
     pub params: std::collections::HashMap<String, serde_json::Value>,
+    /// When true, the first parameter uses DAAD indirection (@).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub indirect: Option<bool>,
 }
 
 /// Action (generic DAAD format)
@@ -279,6 +293,13 @@ pub struct Action {
     #[serde(rename = "type")]
     pub r#type: String,
     pub params: std::collections::HashMap<String, serde_json::Value>,
+    /// When true, the first parameter uses DAAD indirection (@).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub indirect: Option<bool>,
+    /// Inline message text for MESSAGE/MES actions.
+    /// When set, codegen emits MESSAGE "text" instead of MESSAGE <index>.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
 }
 
 /// Flag (game variable)

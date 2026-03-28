@@ -710,11 +710,7 @@ export const ACTIONS: Record<ActionType, CondactDef> = {
     description: "Restarts the currently executing process table from the beginning.",
     params: [],
   },
-  DOALL_CTRL: {
-    type: "DOALL_CTRL", category: "Control Flow",
-    description: "See DOALL in Input/Parser.",
-    params: [],
-  },
+  // DOALL_CTRL removed — not a valid ActionType; see DOALL in Input/Parser
   SKIP: {
     type: "SKIP", category: "Control Flow",
     description: "Jumps forward or backward by the given number of entries (-127 to 128).",
@@ -749,6 +745,11 @@ export const ACTIONS: Record<ActionType, CondactDef> = {
     type: "EXIT", category: "Control Flow",
     description: "Exits to the OS (value=0) or loads part N (value=N) on autoload machines.",
     params: [{ name: "value", type: "value", description: "0=quit, N=load part N" }],
+  },
+  QUIT: {
+    type: "QUIT", category: "Control Flow",
+    description: "Prints 'Are you sure?' and succeeds if the player confirms. Use before END.",
+    params: [],
   },
   WAIT: {
     type: "WAIT", category: "Control Flow",

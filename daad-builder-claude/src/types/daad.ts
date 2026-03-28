@@ -105,7 +105,15 @@ export interface VocabEntry {
  *
  * PRO4 = Auto-events. Run before each player input prompt.
  */
-export type ProcessTable = "PRO0" | "PRO1" | "PRO2" | "PRO3" | "PRO4" | "PRO5";
+/**
+ * Process table assignment for rules.
+ * DAAD supports up to 256 process tables (PRO 0-255).
+ * Standard tables: PRO0=location loop, PRO1=input loop, PRO2=parse error,
+ * PRO3=post-description, PRO4=status/auto-events, PRO5=response table,
+ * PRO6=init, PRO7-9=window mgmt, PRO10=exits, PRO11=status line, PRO12=turns.
+ * Custom game logic can use PRO13+.
+ */
+export type ProcessTable = string; // "PRO0" through "PRO255"
 
 export type ConditionType =
   | "AT" | "NOTAT" | "ATGT" | "ATLT"
@@ -140,11 +148,30 @@ export type ActionType =
 export interface Condition {
   type: ConditionType;
   params: Record<string, unknown>;
+  /**
+   * When true, the first parameter uses DAAD indirection (@).
+   * e.g. EQ with indirect=true and flagno=38 emits "EQ @38 value"
+   * meaning "use the value in flag 38 as the flag number".
+   */
+  indirect?: boolean;
 }
 
 export interface Action {
   type: ActionType;
   params: Record<string, unknown>;
+  /**
+   * When true, the first parameter uses DAAD indirection (@).
+   * e.g. DESC with indirect=true emits "DESC @Player"
+   * meaning "describe the location stored in flag Player (38)".
+   */
+  indirect?: boolean;
+  /**
+   * Inline message text for MESSAGE/MES actions.
+   * When set, codegen emits MESSAGE "text" instead of MESSAGE <index>.
+   * DRC auto-assigns the MTX index. This is the preferred way to
+   * author responses — no manual message index tracking needed.
+   */
+  text?: string;
 }
 
 export interface Rule {
@@ -168,6 +195,16 @@ export interface Rule {
    * Always set this explicitly to avoid name-parsing bugs.
    */
   noun?: string;
+  /**
+   * Additional verb/noun triggers that share the same conditions+actions.
+   * Emitted as stacked ">" headers in the DSF, matching Rabenstein's pattern:
+   *   > EX BLOOD
+   *   > EX PATH
+   *   AT 8
+   *   MESSAGE "..."
+   *   DONE
+   */
+  additionalTriggers?: Array<{ verb: string; noun: string }>;
 }
 
 export type NoteName = "C" | "C#" | "D" | "D#" | "E" | "F" | "F#" | "G" | "G#" | "A" | "A#" | "B" | "R";
@@ -203,6 +240,14 @@ export interface DaadGame {
   messages: string[];
   vocabulary: VocabEntry[];
   music: Music[];
+  /**
+   * Custom system messages (STX overrides).
+   * Sparse map: only include indices you want to override.
+   * e.g. { 0: "You can't see a thing!", 7: "There's no way to go there." }
+   * Indices 0-64 correspond to DAAD standard system messages.
+   * Unset indices use the default English text from blank_en.dsf.
+   */
+  systemMessages?: Record<number, string>;
 }
 
 export type PanelType =

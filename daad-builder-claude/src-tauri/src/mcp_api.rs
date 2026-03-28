@@ -1107,6 +1107,7 @@ async fn create_rule(
             conditions: req.conditions,
             actions: req.actions,
             enabled: req.enabled,
+            additional_triggers: None,
         };
 
         game.rules.push(rule);
