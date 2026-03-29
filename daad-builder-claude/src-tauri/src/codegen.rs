@@ -617,7 +617,7 @@ impl DaadCodeGenerator {
                 } else {
                     format!("a {} {}", obj.adjective.to_lowercase(), obj.noun.to_lowercase())
                 };
-                let escaped = display_text.replace('"', "\\\"");
+                let escaped = Self::escape_text(&display_text);
                 code.push_str(&format!("/{} \"{}\"\n", obj.id, escaped));
             }
             code.push('\n');
@@ -653,9 +653,15 @@ impl DaadCodeGenerator {
                 code.push_str(if obj.is_wearable { " Y" } else { " _" });
 
                 // 16 user-defined attribute flags (DAAD OBJ spec)
-                // All blank for now; Phase 2 will add per-object attribute support
-                for _ in 0..16 {
-                    code.push_str(" _");
+                // Bits 0-15, tested with HASAT/HASNAT condacts
+                if let Some(ref attrs) = obj.attributes {
+                    for bit in 0..16u8 {
+                        code.push_str(if attrs.contains(&bit) { " Y" } else { " _" });
+                    }
+                } else {
+                    for _ in 0..16 {
+                        code.push_str(" _");
+                    }
                 }
 
                 let noun = if obj.noun.is_empty() { "_" } else { &obj.noun };
@@ -730,7 +736,7 @@ impl DaadCodeGenerator {
         let locs_with_names: Vec<_> = locations.iter().filter(|l| l.id > 0).collect();
         let n_locs = locs_with_names.len();
         for (i, loc) in locs_with_names.iter().enumerate() {
-            let escaped = loc.name.replace('"', "\\\"");
+            let escaped = Self::escape_text(&loc.name);
             code.push_str(&format!("/{} \"{}\"\n", 16 + i, escaped));
         }
         code.push('\n');

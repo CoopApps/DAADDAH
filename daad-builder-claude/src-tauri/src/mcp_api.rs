@@ -76,6 +76,10 @@ pub struct ObjectRequest {
     pub container_capacity: Option<u8>,
     #[serde(default = "default_icon")]
     pub icon: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub otx_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attributes: Option<Vec<u8>>,
 }
 
 fn default_true() -> bool {
@@ -170,6 +174,8 @@ pub struct RuleRequest {
     pub actions: Vec<Action>,
     #[serde(default = "default_true")]
     pub enabled: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub additional_triggers: Option<Vec<crate::types::VerbNounTrigger>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -505,8 +511,8 @@ async fn create_object(
     is_psi: req.is_psi,
     container_capacity: req.container_capacity,
     icon: req.icon,
-    otx_text: None,
-    attributes: None,
+    otx_text: req.otx_text,
+    attributes: req.attributes,
 };
 
         game.objects.push(object);

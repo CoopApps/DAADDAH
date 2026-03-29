@@ -67,7 +67,11 @@ export function normalizeGameState(data: unknown): DaadGame {
 
     // Flags array with special handling for system flags
     flags: normalizeFlags(game.flags),
-  };
+
+    // Preserve Phase 2 optional fields
+    systemMessages: game.systemMessages,
+    statusBarConfig: (game as any).statusBarConfig,
+  } as any;
 
   return normalizedGame;
 }

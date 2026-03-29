@@ -23,6 +23,9 @@ interface BackendGame {
     inkColor: number;
     showTurns: boolean;
     showLocationName: boolean;
+    rightContent?: string;
+    rightFlagId?: number;
+    rightLabel?: string;
   };
 }
 
