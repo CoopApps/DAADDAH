@@ -470,24 +470,33 @@ pub async fn compile_game(
     compilation_logs.push(format!("Platform: {}", platform_name));
     compilation_logs.push("=".repeat(60));
 
-    // Map platform names to DRC platform codes
+    // Map platform names to DRC target/subtarget codes
+    // DRF targets: ZX, CPC, C64, CP4, MSX, MSX2, PCW, PC, AMIGA, ST, HTML
+    // DRB targets: same list
     let (drc_platform, drc_mode) = match platform_name.as_str() {
         "msdos" => ("pc", "vga"),
+        "msdos_vga256" => ("pc", "vga256"),
         "msdos_ega" => ("pc", "ega"),
         "msdos_cga" => ("pc", "cga"),
-        "zx_spectrum_48k" => ("spectrum", "48k"),
-        "zx_spectrum_128k" => ("spectrum", "128k"),
+        "msdos_text" => ("pc", "text"),
+        "zx_spectrum_48k" => ("zx", "48k"),
+        "zx_spectrum_128k" => ("zx", "128k"),
+        "zx_spectrum_plus3" => ("zx", "plus3"),
+        "zx_spectrum_esxdos" => ("zx", "esxdos"),
+        "zx_spectrum_next" => ("zx", "next"),
+        "zx_spectrum_uno" => ("zx", "uno"),
         "c64" => ("c64", ""),
         "amstrad_cpc" => ("cpc", ""),
         "msx" => ("msx", ""),
         "amiga" => ("amiga", ""),
         "atari_st" => ("st", ""),
         "pcw" => ("pcw", ""),
-        "plus4" => ("plus4", ""),
+        "plus4" => ("cp4", ""),
+        "html" => ("html", ""),
         _ => {
             return Err(CommandError::Io(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
-                format!("Unknown platform: {}", platform_name),
+                format!("Unknown platform: {}. Valid: msdos, zx_spectrum_48k, zx_spectrum_128k, zx_spectrum_plus3, zx_spectrum_esxdos, zx_spectrum_next, zx_spectrum_uno, c64, amstrad_cpc, msx, amiga, atari_st, pcw, plus4, html", platform_name),
             )));
         }
     };
@@ -556,13 +565,17 @@ pub async fn compile_game(
 
     // Create platform-specific image directory
     let platform_suffix = match platform_name.as_str() {
-        "zx_spectrum_48k" | "zx_spectrum_128k" => "zx_spectrum",
+        "zx_spectrum_48k" | "zx_spectrum_128k" | "zx_spectrum_plus3"
+        | "zx_spectrum_esxdos" | "zx_spectrum_next" | "zx_spectrum_uno" => "zx_spectrum",
         "c64" => "c64",
+        "plus4" => "plus4",
         "amstrad_cpc" => "amstrad_cpc",
+        "pcw" => "pcw",
         "msx" => "msx",
         "amiga" => "amiga",
         "atari_st" => "atari_st",
-        "msdos" => "msdos",
+        "msdos" | "msdos_vga256" | "msdos_ega" | "msdos_cga" | "msdos_text" => "msdos",
+        "html" => "html",
         _ => "generic"
     };
 

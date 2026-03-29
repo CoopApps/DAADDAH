@@ -27,85 +27,140 @@ interface CompileResult {
 }
 
 const PLATFORMS: Platform[] = [
+  // ── MS-DOS / PC ──
+  {
+    id: 'msdos',
+    name: 'PCDAAD (VGA)',
+    extension: 'ddb',
+    description: 'MS-DOS via PCDAAD interpreter - VGA 320x200 256 colours',
+    icon: '💻',
+    family: 'modern'
+  },
+  {
+    id: 'msdos_vga256',
+    name: 'MS-DOS Classic (VGA256)',
+    extension: 'ddb',
+    description: 'Original DAAD DOS interpreter - VGA 320x200',
+    icon: '💻',
+    family: 'modern'
+  },
+  // ── ZX Spectrum family ──
   {
     id: 'zx_spectrum_48k',
     name: 'ZX Spectrum 48K',
-    extension: 'tap',
-    description: 'Sinclair ZX Spectrum 48K - TAP tape format',
+    extension: 'ddb',
+    description: 'Sinclair ZX Spectrum 48K',
     icon: '🎮',
     family: 'retro'
   },
   {
     id: 'zx_spectrum_128k',
     name: 'ZX Spectrum 128K',
-    extension: 'tap',
-    description: 'Sinclair ZX Spectrum 128K - TAP tape format',
+    extension: 'ddb',
+    description: 'Sinclair ZX Spectrum 128K',
     icon: '🎮',
     family: 'retro'
   },
   {
+    id: 'zx_spectrum_plus3',
+    name: 'ZX Spectrum +3',
+    extension: 'ddb',
+    description: 'Sinclair ZX Spectrum +3 (disk)',
+    icon: '🎮',
+    family: 'retro'
+  },
+  {
+    id: 'zx_spectrum_esxdos',
+    name: 'ZX Spectrum ESXDOS',
+    extension: 'ddb',
+    description: 'ZX Spectrum with ESXDOS (SD card)',
+    icon: '🎮',
+    family: 'retro'
+  },
+  {
+    id: 'zx_spectrum_next',
+    name: 'ZX Spectrum Next',
+    extension: 'ddb',
+    description: 'ZX Spectrum Next (modern FPGA)',
+    icon: '🎮',
+    family: 'retro'
+  },
+  {
+    id: 'zx_spectrum_uno',
+    name: 'ZX-Uno',
+    extension: 'ddb',
+    description: 'ZX-Uno (FPGA clone)',
+    icon: '🎮',
+    family: 'retro'
+  },
+  // ── Commodore ──
+  {
     id: 'c64',
     name: 'Commodore 64',
-    extension: 'prg',
-    description: 'Commodore 64 - PRG executable format',
+    extension: 'ddb',
+    description: 'Commodore 64',
     icon: '💾',
     family: 'retro'
   },
   {
+    id: 'plus4',
+    name: 'Commodore Plus/4',
+    extension: 'ddb',
+    description: 'Commodore Plus/4',
+    icon: '🎛️',
+    family: 'retro'
+  },
+  // ── Amstrad ──
+  {
     id: 'amstrad_cpc',
     name: 'Amstrad CPC',
-    extension: 'dsk',
-    description: 'Amstrad CPC - Disk image format',
+    extension: 'ddb',
+    description: 'Amstrad CPC',
     icon: '💿',
     family: 'retro'
   },
   {
+    id: 'pcw',
+    name: 'Amstrad PCW',
+    extension: 'ddb',
+    description: 'Amstrad PCW (text-only)',
+    icon: '📝',
+    family: 'retro'
+  },
+  // ── Other 8-bit ──
+  {
     id: 'msx',
     name: 'MSX',
-    extension: 'rom',
-    description: 'MSX - ROM cartridge format',
+    extension: 'ddb',
+    description: 'MSX home computer',
     icon: '🎰',
     family: 'retro'
   },
+  // ── 16-bit ──
   {
     id: 'amiga',
     name: 'Commodore Amiga',
-    extension: 'adf',
-    description: 'Amiga - ADF disk format',
+    extension: 'ddb',
+    description: 'Commodore Amiga',
     icon: '🖥️',
     family: 'modern'
   },
   {
     id: 'atari_st',
     name: 'Atari ST',
-    extension: 'st',
-    description: 'Atari ST - Disk image format',
+    extension: 'ddb',
+    description: 'Atari ST',
     icon: '🕹️',
     family: 'modern'
   },
+  // ── Web ──
   {
-    id: 'msdos',
-    name: 'MS-DOS',
-    extension: 'exe',
-    description: 'MS-DOS - Executable format',
-    icon: '💻',
+    id: 'html',
+    name: 'HTML (Web)',
+    extension: 'html',
+    description: 'Browser-playable HTML version',
+    icon: '🌐',
     family: 'modern'
-  },
-  {
-    id: 'pcw',
-    name: 'Amstrad PCW',
-    extension: 'pcw',
-    description: 'Amstrad PCW - Text-only format',
-    icon: '📝',
-    family: 'retro'
-  },
-  {
-    id: 'plus4',
-    name: 'Commodore Plus/4',
-    extension: 'prg',
-    description: 'Commodore Plus/4 - PRG format',
-    icon: '🎛️',
-    family: 'retro'
   }
 ];
 
