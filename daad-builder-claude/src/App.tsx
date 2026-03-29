@@ -476,7 +476,7 @@ function App() {
       case "debug":
         return <DebugPanel game={game} setGame={updateGame} />;
       case "graphics":
-        return <GraphicsPanel game={game} setGame={updateGame} />;
+        return <GraphicsPanel game={game} setGame={updateGame} onNavigateToPanel={(panel, itemId) => { setActivePanel(panel as any); if (itemId !== undefined) setSelectItemId(itemId); }} />;
       default:
         return null;
     }

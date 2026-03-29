@@ -423,6 +423,25 @@ export default function CompilePanel({ game }: CompilePanelProps) {
           )}
         </button>
 
+        {/* Preview DSF */}
+        <button
+          className="btn btn-secondary"
+          style={{ width: "100%", marginTop: 8, fontSize: 11, padding: "8px" }}
+          onClick={async () => {
+            try {
+              const backendGame = toBackendGame(game);
+              const dsf = await invoke<string>('export_daad', { game: backendGame });
+              setCompilationLogs(dsf.split('\n'));
+              setShowLogs(true);
+              setCompilationResult(`DSF preview: ${dsf.split('\n').length} lines`);
+            } catch (error) {
+              setCompilationError(String(error));
+            }
+          }}
+        >
+          Preview DSF Source Code
+        </button>
+
         {/* Info Note */}
         <div style={{
           marginTop: 12,

@@ -1120,13 +1120,13 @@ impl DaadCodeGenerator {
             code.push_str(">\n");
             code.push_str("_       _       WINAT 13 0\n");
             code.push_str("                WINDOW 1\n");
-            code.push_str("                WINSIZE 12 40\n\n");
+            code.push_str("                WINSIZE 12 COLS\n\n");
         } else {
             code.push_str("; Set text window below status bar (line 1).\n");
             code.push_str(">\n");
             code.push_str("_       _       WINDOW 1\n");
             code.push_str("                WINAT 1 0\n");
-            code.push_str("                WINSIZE 24 40\n\n");
+            code.push_str("                WINSIZE 24 COLS\n\n");
         }
 
         // Dark flag calculation
@@ -1149,7 +1149,7 @@ impl DaadCodeGenerator {
             code.push_str(">\n");
             code.push_str("_       _       WINDOW 1\n");
             code.push_str("                WINAT 0 0\n");
-            code.push_str("                WINSIZE 24 40\n");
+            code.push_str("                WINSIZE 24 COLS\n");
             code.push_str("                CLS\n");
             code.push_str("$pictureOK\n\n");
         }
@@ -1393,11 +1393,11 @@ impl DaadCodeGenerator {
         // PCDAAD: NUM_COLUMNS=40, so width 40 fills the screen
         code.push_str("                WINDOW 2\n");
         code.push_str("                WINAT 0 0\n");
-        code.push_str("                WINSIZE 1 40\n");
+        code.push_str("                WINSIZE 1 COLS\n");
         // Window 1 = text window (starts at line 1, below status bar)
         code.push_str("                WINDOW 1\n");
         code.push_str("                WINAT 1 0\n");
-        code.push_str("                WINSIZE 24 40\n");
+        code.push_str("                WINSIZE 24 COLS\n");
         // Show title screen (location 0 description)
         code.push_str("                WINDOW 1\n");
         code.push_str("                DESC 0\n");
@@ -1555,7 +1555,7 @@ impl DaadCodeGenerator {
             "score" => {
                 code.push_str("; Print score right-justified in status bar.\n\n");
                 code.push_str(">\n");
-                code.push_str("_       _       TAB 27\n");
+                code.push_str("_       _       TAB Turns_TAB\n");
                 let label = game.status_bar_config.as_ref()
                     .and_then(|c| c.right_label.as_deref())
                     .unwrap_or("Score: ");
@@ -1566,7 +1566,7 @@ impl DaadCodeGenerator {
             "custom" => {
                 code.push_str("; Print custom flag right-justified in status bar.\n\n");
                 code.push_str(">\n");
-                code.push_str("_       _       TAB 27\n");
+                code.push_str("_       _       TAB Turns_TAB\n");
                 let label = game.status_bar_config.as_ref()
                     .and_then(|c| c.right_label.as_deref())
                     .unwrap_or("");
@@ -1580,7 +1580,7 @@ impl DaadCodeGenerator {
                 // "turns" (default)
                 code.push_str("; Print turns counter right-justified in status bar.\n\n");
                 code.push_str(">\n");
-                code.push_str("_       _       TAB 27\n");
+                code.push_str("_       _       TAB Turns_TAB\n");
                 code.push_str(&format!("                MES {}\n", turns_msg));
                 code.push_str("                DPRINT Turns\n");
                 code.push_str("                WINDOW 1\n\n");

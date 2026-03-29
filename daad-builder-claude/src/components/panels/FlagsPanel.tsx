@@ -538,6 +538,19 @@ export default function FlagsPanel({ game, setGame, selectItemId }: FlagsPanelPr
                       setTimeout(() => setIdConflictMessage(null), STATUS_MESSAGE_DURATION);
                       return;
                     }
+                    if (newId < 64 && !isSystemFlag(newId)) {
+                      setIdConflictMessage(`Warning: Flag ${newId} is in the system range (0-63). Use 64-255 for game variables.`);
+                      setTimeout(() => setIdConflictMessage(null), STATUS_MESSAGE_DURATION * 2);
+                    }
+                    if (isSystemFlag(newId)) {
+                      const sf = getSystemFlag(newId);
+                      if (sf?.readonly) {
+                        setIdConflictMessage(`Flag ${newId} (${sf.name}) is read-only — managed by the DAAD interpreter!`);
+                        showToast(`Flag ${newId} is read-only!`, "error");
+                        setTimeout(() => setIdConflictMessage(null), STATUS_MESSAGE_DURATION);
+                        return;
+                      }
+                    }
                     setIdConflictMessage(null);
                     setGame((prev) => ({
                       ...prev,

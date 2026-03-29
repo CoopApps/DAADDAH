@@ -594,6 +594,34 @@ export default function ObjectsPanel({ game, setGame, selectItemId }: ObjectsPan
               </div>
             </div>
 
+            <div className="form-group">
+              <label className="form-label">
+                Display Name (OTX)
+                <span style={{ fontSize: 10, color: "var(--text-dim)", fontWeight: "normal", marginLeft: 6 }}>
+                  — shown by "I can also see:" listing
+                </span>
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                value={(selectedObj as any).otxText ?? ""}
+                placeholder={selectedObj.adjective ? `a ${selectedObj.adjective} ${selectedObj.noun}` : `a ${selectedObj.noun}`}
+                onChange={(e) =>
+                  setGame((prev) => ({
+                    ...prev,
+                    objects: prev.objects.map((obj) =>
+                      obj.id === selectedObj.id
+                        ? { ...obj, otxText: e.target.value || undefined }
+                        : obj
+                    ),
+                  }))
+                }
+              />
+              <div style={{ fontSize: 10, color: "var(--text-dim)", marginTop: 4 }}>
+                e.g. "the wooden ruler", "Louis Carlyle", "a broken glass". Leave blank to auto-generate.
+              </div>
+            </div>
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
               <div className="form-group">
                 <label className="form-label">Icon</label>
@@ -815,6 +843,43 @@ export default function ObjectsPanel({ game, setGame, selectItemId }: ObjectsPan
                   />
                   <span style={{ color: "var(--cyan-bright)", fontSize: 13 }}>PSI</span>
                 </label>
+              </div>
+            </div>
+
+            {/* User-defined attributes (16 bits for HASAT/HASNAT) */}
+            <div style={{ marginTop: 16 }}>
+              <label className="form-label">
+                Custom Attributes
+                <span style={{ fontSize: 10, color: "var(--text-dim)", fontWeight: "normal", marginLeft: 6 }}>
+                  — tested with HASAT/HASNAT condacts (bits 0-15)
+                </span>
+              </label>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+                {Array.from({ length: 16 }, (_, i) => {
+                  const attrs = (selectedObj as any).attributes as number[] | undefined;
+                  const isSet = attrs?.includes(i) ?? false;
+                  return (
+                    <label key={i} style={{ display: "flex", alignItems: "center", gap: 2, cursor: "pointer", fontSize: 10,
+                      padding: "2px 4px", background: isSet ? "rgba(0,255,255,0.15)" : "transparent",
+                      border: `1px solid ${isSet ? "var(--cyan-bright)" : "var(--border)"}`, borderRadius: 3 }}>
+                      <input type="checkbox" checked={isSet} style={{ width: 10, height: 10 }}
+                        onChange={(e) => {
+                          setGame(prev => ({
+                            ...prev,
+                            objects: prev.objects.map(obj => {
+                              if (obj.id !== selectedObj.id) return obj;
+                              const current = ((obj as any).attributes as number[] | undefined) || [];
+                              const newAttrs = e.target.checked
+                                ? [...current, i].sort()
+                                : current.filter(a => a !== i);
+                              return { ...obj, attributes: newAttrs.length > 0 ? newAttrs : undefined } as any;
+                            }),
+                          }));
+                        }} />
+                      {i}
+                    </label>
+                  );
+                })}
               </div>
             </div>
 
