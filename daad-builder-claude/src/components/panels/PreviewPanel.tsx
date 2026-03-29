@@ -524,6 +524,14 @@ export default function PreviewPanel({ game }: PreviewPanelProps) {
           <button className="btn btn-primary" onClick={resetGame}>
             Restart Game
           </button>
+          <button className="btn btn-secondary" onClick={() => saveGameState(0)}
+            title="Save game state to slot 0">
+            Save
+          </button>
+          <button className="btn btn-secondary" onClick={() => loadGameState(0)}
+            title="Load game state from slot 0">
+            Load
+          </button>
           <button
             className={isAutoWalking ? "btn btn-danger" : "btn btn-secondary"}
             onClick={autoWalkthrough}
