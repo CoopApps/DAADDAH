@@ -796,6 +796,188 @@ function executeAction(action: Action, context: EngineContext): void {
       break;
     }
 
+    case "DROPALL": {
+      // Drop all carried objects at current location
+      const newObjLocs = new Map(state.objectLocations);
+      for (const objId of state.inventory) {
+        newObjLocs.set(objId, { type: "at", locationId: state.currentLocation });
+      }
+      setState({ ...state, inventory: [], objectLocations: newObjLocs });
+      break;
+    }
+
+    case "PUTO": {
+      // Place current object at location
+      const locno = action.params.locno as number;
+      // In preview, PUTO works on the last referenced object — simplified
+      break;
+    }
+
+    case "PUTIN": {
+      // Put object 1 inside object 2 (container)
+      const objno1 = action.params.objno1 as number;
+      const objno2 = action.params.objno2 as number;
+      const newObjLocs = new Map(state.objectLocations);
+      // In DAAD, PUTIN places objno1 at the location number equal to objno2
+      newObjLocs.set(objno1, { type: "at", locationId: objno2 });
+      setState({
+        ...state,
+        inventory: state.inventory.filter(id => id !== objno1),
+        objectLocations: newObjLocs,
+      });
+      break;
+    }
+
+    case "TAKEOUT": {
+      // Take object 1 out of object 2 (container) into inventory
+      const objno1 = action.params.objno1 as number;
+      setState({ ...state, inventory: [...state.inventory, objno1] });
+      break;
+    }
+
+    case "COPYOO": {
+      // Copy object 1 location to object 2
+      const objno1 = action.params.objno1 as number;
+      const objno2 = action.params.objno2 as number;
+      const loc1 = state.objectLocations.get(objno1) || game.objects.find(o => o.id === objno1)?.location;
+      if (loc1) {
+        const newObjLocs = new Map(state.objectLocations);
+        newObjLocs.set(objno2, loc1 as any);
+        setState({ ...state, objectLocations: newObjLocs });
+      }
+      break;
+    }
+
+    case "COPYBF": {
+      // Copy byte to flag
+      const flagno = action.params.flagno as number;
+      const value = action.params.value as number;
+      const newFlags = new Map(state.flags);
+      newFlags.set(flagno, value & 0xFF);
+      setState({ ...state, flags: newFlags });
+      break;
+    }
+
+    case "SETCO": {
+      // Set current object — in preview, store in state for WHATO reference
+      break;
+    }
+
+    case "WEIGHT": {
+      // Store total carried weight in flag
+      const flagno = action.params.flagno as number;
+      let totalWeight = 0;
+      for (const objId of state.inventory) {
+        const obj = game.objects.find(o => o.id === objId);
+        if (obj) totalWeight += obj.weight;
+      }
+      const newFlags = new Map(state.flags);
+      newFlags.set(flagno, Math.min(255, totalWeight));
+      setState({ ...state, flags: newFlags });
+      break;
+    }
+
+    case "WEIGH": {
+      // Store specific object weight in flag
+      const objno = action.params.objno as number;
+      const flagno = action.params.flagno as number;
+      const obj = game.objects.find(o => o.id === objno);
+      const newFlags = new Map(state.flags);
+      newFlags.set(flagno, obj?.weight ?? 0);
+      setState({ ...state, flags: newFlags });
+      break;
+    }
+
+    case "AUTOW": {
+      // Auto-wear
+      const objno = action.params.objno as number;
+      const obj = game.objects.find(o => o.id === objno);
+      if (obj && state.inventory.includes(objno)) {
+        const newObjLocs = new Map(state.objectLocations);
+        newObjLocs.set(objno, { type: "worn" });
+        setState({ ...state, objectLocations: newObjLocs });
+        const name = (obj as any).otxText || obj.noun;
+        addOutput(`I'm now wearing ${name}.`);
+      }
+      break;
+    }
+
+    case "AUTOR": {
+      // Auto-remove
+      const objno = action.params.objno as number;
+      const obj = game.objects.find(o => o.id === objno);
+      if (obj) {
+        const newObjLocs = new Map(state.objectLocations);
+        newObjLocs.set(objno, { type: "at", locationId: state.currentLocation });
+        setState({ ...state, objectLocations: newObjLocs });
+        const name = (obj as any).otxText || obj.noun;
+        addOutput(`I've removed ${name}.`);
+      }
+      break;
+    }
+
+    case "AUTOP": {
+      // Auto-put object at location
+      const objno = action.params.objno as number;
+      const locno = action.params.locno as number;
+      const newObjLocs = new Map(state.objectLocations);
+      newObjLocs.set(objno, { type: "at", locationId: locno });
+      setState({
+        ...state,
+        inventory: state.inventory.filter(id => id !== objno),
+        objectLocations: newObjLocs,
+      });
+      break;
+    }
+
+    case "AUTOT": {
+      // Auto-takeout from container
+      const objno1 = action.params.objno1 as number;
+      setState({ ...state, inventory: [...state.inventory, objno1] });
+      break;
+    }
+
+    case "SYNONYM": {
+      // Replace current verb/noun — can't fully simulate in preview
+      break;
+    }
+
+    case "NEWTEXT": {
+      // Clear remaining input buffer — no-op in preview
+      break;
+    }
+
+    case "PARSE": {
+      // Request new input — no-op in preview (handled by PreviewPanel)
+      break;
+    }
+
+    case "GETKEY": {
+      // Wait for keypress — no-op in preview
+      break;
+    }
+
+    case "RAMSAVE": {
+      addOutput("[Game state saved to RAM]");
+      break;
+    }
+
+    case "RAMLOAD": {
+      addOutput("[Game state loaded from RAM]");
+      break;
+    }
+
+    case "XMES":
+    case "XMESSAGE": {
+      // Extended message — treat like MESSAGE with bank*256+mesno
+      const mesno = action.params.mesno as number;
+      if (mesno >= 0 && mesno < game.messages.length) {
+        addOutput(game.messages[mesno]);
+      }
+      break;
+    }
+
+    // Display-only, platform-specific, or hardware condacts — no-op in preview
     case "WINDOW":
     case "WINAT":
     case "WINSIZE":
@@ -822,20 +1004,9 @@ function executeAction(action: Action, context: EngineContext): void {
     case "XSPLITSCR":
     case "XUNDONE":
     case "XBEEP":
-    case "XMES":
-    case "XMESSAGE":
     case "XDATA":
     case "MOUSE":
     case "CALL":
-    case "DROPALL":
-    case "PUTO":
-    case "PUTIN":
-    case "TAKEOUT":
-    case "SETCO":
-    case "WEIGH":
-    case "WEIGHT":
-    case "COPYBF":
-    case "COPYOO":
     case "AUTOW":
     case "AUTOR":
     case "AUTOP":
