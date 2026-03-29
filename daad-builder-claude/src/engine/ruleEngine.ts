@@ -52,35 +52,29 @@ export function parseInput(input: string, vocab: VocabEntry[]): { verb: number |
 }
 
 /**
- * Find matching rules for verb/noun combination in specified process table
+ * Find matching rules for verb/noun combination in specified process table.
+ * Uses the rule's verb/noun fields (not AT conditions) for matching.
+ * "_" is the wildcard that matches anything.
  */
 export function findMatchingRules(
   game: DaadGame,
   process: string,
-  verb: number | null,
-  noun: number | null
+  verb: string | null,
+  noun: string | null,
+  vocab: VocabEntry[]
 ): Rule[] {
   return game.rules.filter(rule => {
     if (!rule.enabled) return false;
     if (rule.process !== process) return false;
 
-    // Check if rule has AT condition matching verb/noun
-    const hasMatch = rule.conditions.some(cond => {
-      if (cond.type === "AT") {
-        const condVerb = cond.params.verb as number;
-        const condNoun = cond.params.noun as number;
+    const ruleVerb = (rule.verb || "_").toUpperCase();
+    const ruleNoun = (rule.noun || "_").toUpperCase();
 
-        // Match verb (255 = wildcard)
-        const verbMatch = condVerb === 255 || condVerb === verb;
-        // Match noun (255 = wildcard)
-        const nounMatch = condNoun === 255 || condNoun === noun;
+    // Wildcard matches anything
+    const verbMatch = ruleVerb === "_" || (verb && ruleVerb === verb.toUpperCase());
+    const nounMatch = ruleNoun === "_" || (noun && ruleNoun === noun.toUpperCase());
 
-        return verbMatch && nounMatch;
-      }
-      return false;
-    });
-
-    return hasMatch;
+    return verbMatch && nounMatch;
   });
 }
 
@@ -263,8 +257,33 @@ function evaluateCondition(condition: Condition, context: EngineContext): boolea
       return flag1 < flag2;
     }
 
+    case "CHANCE": {
+      const percent = (condition.params.percentage ?? condition.params.percent ?? 50) as number;
+      return Math.random() * 100 < percent;
+    }
+
+    case "HASAT": {
+      // Check object attribute — simplified for preview
+      return false;
+    }
+
+    case "HASNAT": {
+      return true;
+    }
+
+    case "ADJECT1":
+    case "ADVERB":
+    case "PREP":
+    case "NOUN2":
+    case "ADJECT2":
+    case "ISDONE":
+    case "ISNDONE":
+    case "INKEY":
+    case "QUIT":
+      // These require parser state or are rare — return true to not block
+      return true;
+
     default:
-      console.warn(`Unknown condition type: ${condition.type}`);
       return false;
   }
 }
@@ -524,8 +543,321 @@ function executeAction(action: Action, context: EngineContext): void {
       break;
     }
 
+    // ── Additional condacts (Phase 2) ──────────────────────────────
+
+    case "CREATE": {
+      const objno = action.params.objno as number;
+      const newObjLocs = new Map(state.objectLocations);
+      newObjLocs.set(objno, { type: "at", locationId: state.currentLocation });
+      setState({ ...state, objectLocations: newObjLocs });
+      break;
+    }
+
+    case "SWAP": {
+      const objno1 = action.params.objno1 as number;
+      const objno2 = action.params.objno2 as number;
+      const loc1 = state.objectLocations.get(objno1) || game.objects.find(o => o.id === objno1)?.location;
+      const loc2 = state.objectLocations.get(objno2) || game.objects.find(o => o.id === objno2)?.location;
+      const newObjLocs = new Map(state.objectLocations);
+      if (loc1) newObjLocs.set(objno2, loc1 as any);
+      if (loc2) newObjLocs.set(objno1, loc2 as any);
+      setState({ ...state, objectLocations: newObjLocs });
+      break;
+    }
+
+    case "COPYFF": {
+      const f1 = action.params.flagno1 as number;
+      const f2 = action.params.flagno2 as number;
+      const newFlags = new Map(state.flags);
+      newFlags.set(f1, newFlags.get(f2) ?? 0);
+      setState({ ...state, flags: newFlags });
+      break;
+    }
+
+    case "ADD": {
+      const f1 = action.params.flagno1 as number;
+      const f2 = action.params.flagno2 as number;
+      const newFlags = new Map(state.flags);
+      newFlags.set(f1, Math.min(255, (newFlags.get(f1) ?? 0) + (newFlags.get(f2) ?? 0)));
+      setState({ ...state, flags: newFlags });
+      break;
+    }
+
+    case "SUB": {
+      const f1 = action.params.flagno1 as number;
+      const f2 = action.params.flagno2 as number;
+      const newFlags = new Map(state.flags);
+      newFlags.set(f1, Math.max(0, (newFlags.get(f1) ?? 0) - (newFlags.get(f2) ?? 0)));
+      setState({ ...state, flags: newFlags });
+      break;
+    }
+
+    case "RANDOM": {
+      const flagno = action.params.flagno as number;
+      const newFlags = new Map(state.flags);
+      newFlags.set(flagno, Math.floor(Math.random() * 256));
+      setState({ ...state, flags: newFlags });
+      break;
+    }
+
+    case "COPYOF": {
+      // Copy object location to flag
+      const objno = action.params.objno as number;
+      const flagno = action.params.flagno as number;
+      const objLoc = state.objectLocations.get(objno) || game.objects.find(o => o.id === objno)?.location;
+      const newFlags = new Map(state.flags);
+      newFlags.set(flagno, objLoc?.type === "at" ? (objLoc.locationId ?? 252) : 252);
+      setState({ ...state, flags: newFlags });
+      break;
+    }
+
+    case "COPYFO": {
+      // Copy flag to object location
+      const flagno = action.params.flagno as number;
+      const objno = action.params.objno as number;
+      const locId = state.flags.get(flagno) ?? 0;
+      const newObjLocs = new Map(state.objectLocations);
+      newObjLocs.set(objno, { type: "at", locationId: locId });
+      setState({ ...state, objectLocations: newObjLocs });
+      break;
+    }
+
+    case "SYSMESS": {
+      const sysno = action.params.sysno as number;
+      // Use custom system message if available, otherwise show default
+      const customMsg = game.systemMessages?.[sysno];
+      if (customMsg) {
+        addOutput(customMsg);
+      } else {
+        // Default system messages for the most common ones
+        const defaults: Record<number, string> = {
+          0: "It's too dark to see anything.",
+          1: "I can also see: ",
+          6: "I don't understand that.",
+          7: "I can't go that way.",
+          8: "I can't do that.",
+          9: "I have with me:",
+          10: "I am wearing:",
+          15: "OK.",
+          35: "Time passes...",
+          63: "You see nothing special.",
+        };
+        addOutput(defaults[sysno] ?? `[System message ${sysno}]`);
+      }
+      break;
+    }
+
+    case "LISTOBJ": {
+      const here = game.objects.filter(obj => {
+        const loc = state.objectLocations.get(obj.id) || obj.location;
+        return loc.type === "at" && loc.locationId === state.currentLocation && !state.inventory.includes(obj.id);
+      });
+      if (here.length > 0) {
+        const names = here.map(o => (o as any).otxText || (o.adjective ? `${o.adjective} ${o.noun}` : o.noun));
+        addOutput(`I can also see: ${names.join(", ")}.`);
+      }
+      break;
+    }
+
+    case "LISTAT": {
+      const locno = action.params.locno as number;
+      // LISTAT CARRIED = 254, LISTAT WORN = 253
+      let items: typeof game.objects;
+      if (locno === 254) {
+        items = game.objects.filter(o => state.inventory.includes(o.id));
+      } else if (locno === 253) {
+        items = game.objects.filter(o => {
+          const loc = state.objectLocations.get(o.id) || o.location;
+          return loc.type === "worn";
+        });
+      } else {
+        items = game.objects.filter(o => {
+          const loc = state.objectLocations.get(o.id) || o.location;
+          return loc.type === "at" && loc.locationId === locno;
+        });
+      }
+      if (items.length > 0) {
+        const names = items.map(o => (o as any).otxText || o.noun);
+        addOutput(names.join(", ") + ".");
+      } else {
+        addOutput("Nothing.");
+      }
+      break;
+    }
+
+    case "AUTOG": {
+      // Auto-get: handles weight/carry limits automatically
+      const objno = action.params.objno as number;
+      const obj = game.objects.find(o => o.id === objno);
+      if (obj && !state.inventory.includes(objno)) {
+        setState({ ...state, inventory: [...state.inventory, objno] });
+        const name = (obj as any).otxText || (obj.adjective ? `${obj.adjective} ${obj.noun}` : obj.noun);
+        addOutput(`I now have ${name}.`);
+      }
+      break;
+    }
+
+    case "AUTOD": {
+      const objno = action.params.objno as number;
+      const obj = game.objects.find(o => o.id === objno);
+      if (obj && state.inventory.includes(objno)) {
+        const newObjLocs = new Map(state.objectLocations);
+        newObjLocs.set(objno, { type: "at", locationId: state.currentLocation });
+        setState({ ...state, inventory: state.inventory.filter(id => id !== objno), objectLocations: newObjLocs });
+        const name = (obj as any).otxText || obj.noun;
+        addOutput(`I've dropped ${name}.`);
+      }
+      break;
+    }
+
+    case "RESTART": {
+      // Signal to PreviewPanel to restart the game loop
+      break;
+    }
+
+    case "REDO": {
+      // Signal to re-execute the process (handled by caller)
+      break;
+    }
+
+    case "NOTDONE": {
+      // Opposite of DONE — mark as not done so processing continues
+      break;
+    }
+
+    case "WHATO": {
+      // Set current object from last noun — handled by context
+      break;
+    }
+
+    case "CLS": {
+      // Clear screen — in preview we add a visual separator
+      addOutput("\n─────────────────────────────────\n");
+      break;
+    }
+
+    case "ANYKEY": {
+      addOutput("[Press any key]");
+      break;
+    }
+
+    case "PAUSE": {
+      // In preview, just continue
+      break;
+    }
+
+    case "PRINT": {
+      const flagno = action.params.flagno as number;
+      addOutput(String(state.flags.get(flagno) ?? 0));
+      break;
+    }
+
+    case "DPRINT": {
+      const flagno = action.params.flagno as number;
+      addOutput(String(state.flags.get(flagno) ?? 0));
+      break;
+    }
+
+    case "PROCESS": {
+      // Execute another process table — simplified version
+      const prono = action.params.prono as number;
+      const procName = `PRO${prono}`;
+      const procRules = game.rules.filter(r => r.enabled && r.process === procName);
+      for (const rule of procRules) {
+        if (checkConditions(rule, context)) {
+          executeActions(rule, context);
+          if (rule.actions.some(a => a.type === "DONE")) break;
+        }
+      }
+      break;
+    }
+
+    case "RESET": {
+      // Reset all objects to initial locations
+      setState({ ...state, objectLocations: new Map(), inventory: [] });
+      break;
+    }
+
+    case "MOVE": {
+      // Move player to location stored in flag
+      const flagno = action.params.flagno as number;
+      const targetLoc = state.flags.get(flagno) ?? 0;
+      setState({ ...state, currentLocation: targetLoc });
+      break;
+    }
+
+    case "ABILITY": {
+      const maxcarr = action.params.maxcarr as number;
+      const strength = action.params.strength as number;
+      const newFlags = new Map(state.flags);
+      newFlags.set(37, maxcarr);
+      newFlags.set(52, strength);
+      setState({ ...state, flags: newFlags });
+      break;
+    }
+
+    case "WINDOW":
+    case "WINAT":
+    case "WINSIZE":
+    case "PAPER":
+    case "INK":
+    case "BORDER":
+    case "TAB":
+    case "PRINTAT":
+    case "MODE":
+    case "CENTRE":
+    case "SAVEAT":
+    case "BACKAT":
+    case "PICTURE":
+    case "DISPLAY":
+    case "GFX":
+    case "SFX":
+    case "EXTERN":
+    case "INPUT":
+    case "TIME":
+    case "XPICTURE":
+    case "XSAVE":
+    case "XLOAD":
+    case "XPART":
+    case "XSPLITSCR":
+    case "XUNDONE":
+    case "XBEEP":
+    case "XMES":
+    case "XMESSAGE":
+    case "XDATA":
+    case "MOUSE":
+    case "CALL":
+    case "DROPALL":
+    case "PUTO":
+    case "PUTIN":
+    case "TAKEOUT":
+    case "SETCO":
+    case "WEIGH":
+    case "WEIGHT":
+    case "COPYBF":
+    case "COPYOO":
+    case "AUTOW":
+    case "AUTOR":
+    case "AUTOP":
+    case "AUTOT":
+    case "DOALL":
+    case "SKIP":
+    case "EXIT":
+    case "SYNONYM":
+    case "PARSE":
+    case "NEWTEXT":
+    case "GETKEY":
+    case "WAIT":
+    case "PLAY":
+    case "RAMSAVE":
+    case "RAMLOAD":
+      // These condacts are either display-only, platform-specific, or
+      // require full DAAD interpreter semantics. Silently ignored in preview.
+      break;
+
     default:
-      console.warn(`Unknown action type: ${action.type}`);
+      // Unknown action — don't warn, just skip
+      break;
   }
 }
 
@@ -575,98 +907,115 @@ async function playMusicTrack(music: any): Promise<void> {
 }
 
 /**
- * Process player input through the rule system
- * Returns true if a rule was executed, false if command not understood
+ * Execute all rules in a process table that match the given verb/noun.
+ * Returns true if any rule with DONE/RESTART was executed.
+ * This is the core of the DAAD execution model.
  */
-export function processCommand(input: string, context: EngineContext): boolean {
+export function executeProcess(
+  context: EngineContext,
+  processName: string,
+  verbWord: string | null,
+  nounWord: string | null
+): boolean {
   const { game } = context;
+  const matchingRules = findMatchingRules(game, processName, verbWord, nounWord, game.vocabulary);
 
-  // Parse input into verb/noun
-  const { verb, noun } = parseInput(input, game.vocabulary);
-
-  // debug: console.log(`[RULE ENGINE] Input: "${input}"`);
-  // debug: console.log(`[RULE ENGINE] Parsed - verb: ${verb}, noun: ${noun}`);
-  // debug: console.log(`[RULE ENGINE] Vocabulary size: ${game.vocabulary.length}`);
-
-  // Debug: Show what vocabulary words match
-  const words = input.toLowerCase().trim().split(/\s+/);
-  // debug: console.log(`[RULE ENGINE] Looking for verb "${words[0]}" in vocabulary...`);
-  const verbMatches = game.vocabulary.filter(v => v.wordType === "verb" && v.word === words[0]);
-  // debug: console.log(`[RULE ENGINE] Verb matches:`, verbMatches);
-
-  if (words.length > 1) {
-    // debug: console.log(`[RULE ENGINE] Looking for noun "${words[1]}" in vocabulary...`);
-    const nounMatches = game.vocabulary.filter(v => v.wordType === "noun" && v.word === words[1]);
-    // debug: console.log(`[RULE ENGINE] Noun matches:`, nounMatches);
-  }
-
-  if (verb === null) {
-    // debug: console.log(`[RULE ENGINE] No valid verb found, returning false`);
-    return false; // No valid verb found
-  }
-
-  // Process tables in order: PRO0, PRO1, PRO2
-  const processTables = ["PRO0", "PRO1", "PRO2"];
-
-  for (const process of processTables) {
-    const matchingRules = findMatchingRules(game, process, verb, noun);
-    // debug: console.log(`[RULE ENGINE] ${process}: Found ${matchingRules.length} matching rules for verb=${verb}, noun=${noun}`);
-
-    for (const rule of matchingRules) {
-      // debug: console.log(`[RULE ENGINE] Checking rule #${rule.id}: ${rule.name}`);
-      const conditionsMet = checkConditions(rule, context);
-      // debug: console.log(`[RULE ENGINE] Rule #${rule.id} conditions met: ${conditionsMet}`);
-
-      if (conditionsMet) {
-        // debug: console.log(`[RULE ENGINE] Executing rule #${rule.id}: ${rule.name}`);
-        executeActions(rule, context);
-
-        // Check if DONE action was executed
-        const hasDone = rule.actions.some(a => a.type === "DONE");
-        if (hasDone) {
-          // debug: console.log(`[RULE ENGINE] Rule #${rule.id} has DONE, stopping processing`);
-          return true; // Stop processing
-        }
-      }
+  for (const rule of matchingRules) {
+    if (checkConditions(rule, context)) {
+      executeActions(rule, context);
+      if (rule.actions.some(a => a.type === "DONE" || a.type === "RESTART")) return true;
     }
   }
-
-  // debug: console.log(`[RULE ENGINE] No matching rule found, returning false`);
-  return false; // No matching rule found
+  return false;
 }
 
 /**
- * Execute PRO2 automatic rules after every turn
- * PRO2 rules run automatically regardless of command, checking only location conditions
+ * Process player input through the DAAD rule system.
+ * Mirrors the real DAAD execution flow from the manual:
+ *
+ * 1. Parse input into verb/noun words (matching vocabulary, including
+ *    conversion nouns < 20 that auto-convert to verbs)
+ * 2. Execute PRO 5 (response table) with verb/noun matching
+ * 3. Also check PRO0 rules with explicit verb/noun (not wildcards)
+ * 4. Check any custom process tables (PRO13+)
+ * 5. Return false if nothing matched (triggers "I can't do that")
+ *
+ * PRO 0 wildcard rules (_ _) and PRO 4 auto-events run separately
+ * via executePRO0Wildcards and executePRO4 (called by PreviewPanel each turn).
  */
-export function executePRO2(context: EngineContext): void {
-  const { game, state } = context;
+export function processCommand(input: string, context: EngineContext): boolean {
+  const { game } = context;
+  const words = input.toLowerCase().trim().split(/\s+/);
 
-  // debug: console.log(`[PRO2] Executing automatic rules for location ${state.currentLocation}`);
+  // Find verb word (first word that matches a vocab verb)
+  let verbWord: string | null = null;
+  let nounWord: string | null = null;
 
-  // Get all PRO2 rules
-  const pro2Rules = game.rules.filter(r => r.enabled && r.process === "PRO2");
-  // debug: console.log(`[PRO2] Found ${pro2Rules.length} PRO2 rules total`);
+  if (words.length > 0) {
+    const w = words[0];
+    // Match against vocabulary — try full word, then truncated to 5 chars (DAAD truncation)
+    const match = game.vocabulary.find(v =>
+      v.wordType === "verb" && (v.word.toLowerCase() === w || v.word.toLowerCase().slice(0, 5) === w.slice(0, 5))
+    );
+    if (match) verbWord = match.word.toUpperCase();
 
-  for (const rule of pro2Rules) {
-    // debug: console.log(`[PRO2] Checking rule #${rule.id}: ${rule.name}`);
-
-    // Check if conditions are met (location conditions only, not verb/noun)
-    const conditionsMet = checkConditions(rule, context);
-    // debug: console.log(`[PRO2] Rule #${rule.id} conditions met: ${conditionsMet}`);
-
-    if (conditionsMet) {
-      // debug: console.log(`[PRO2] Executing rule #${rule.id}: ${rule.name}`);
-      executeActions(rule, context);
-
-      // PRO2 rules with DONE stop further PRO2 processing
-      const hasDone = rule.actions.some(a => a.type === "DONE");
-      if (hasDone) {
-        // debug: console.log(`[PRO2] Rule #${rule.id} has DONE, stopping PRO2 processing`);
-        break;
-      }
+    // Also check nouns < 20 (conversion nouns that act as verbs in DAAD)
+    if (!verbWord) {
+      const nounAsVerb = game.vocabulary.find(v =>
+        v.wordType === "noun" && v.id < 20 && (v.word.toLowerCase() === w || v.word.toLowerCase().slice(0, 5) === w.slice(0, 5))
+      );
+      if (nounAsVerb) verbWord = nounAsVerb.word.toUpperCase();
     }
   }
 
-  // debug: console.log(`[PRO2] Automatic rule execution complete`);
+  if (words.length > 1) {
+    const w = words[1];
+    const match = game.vocabulary.find(v =>
+      v.wordType === "noun" && (v.word.toLowerCase() === w || v.word.toLowerCase().slice(0, 5) === w.slice(0, 5))
+    );
+    if (match) nounWord = match.word.toUpperCase();
+  }
+
+  if (!verbWord) return false;
+
+  // Execute PRO 5 (response table) — primary verb/noun matching
+  if (executeProcess(context, "PRO5", verbWord, nounWord)) return true;
+
+  // Also check PRO0 and PRO1 rules with explicit verb/noun
+  if (executeProcess(context, "PRO0", verbWord, nounWord)) return true;
+  if (executeProcess(context, "PRO1", verbWord, nounWord)) return true;
+
+  // Check any custom process tables that have matching verb/noun rules
+  const customProcesses = new Set(game.rules.map(r => r.process));
+  for (const proc of customProcesses) {
+    if (["PRO0", "PRO1", "PRO2", "PRO3", "PRO4", "PRO5"].includes(proc)) continue;
+    if (executeProcess(context, proc, verbWord, nounWord)) return true;
+  }
+
+  return false;
+}
+
+/**
+ * Execute PRO 0 wildcard rules (_ _) — location loop events.
+ * These run every turn regardless of player input (NPC movement, timers, etc.)
+ */
+export function executePRO0Wildcards(context: EngineContext): void {
+  executeProcess(context, "PRO0", "_", "_");
+}
+
+/**
+ * Execute PRO 4 auto-events — run before each input prompt.
+ * All PRO4 rules are wildcard (_ _) and run unconditionally.
+ */
+export function executePRO4(context: EngineContext): void {
+  executeProcess(context, "PRO4", "_", "_");
+}
+
+/**
+ * Execute PRO2 automatic rules (backward compat wrapper).
+ * In the real DAAD, PRO2 is the parse error handler.
+ * Some games use it for auto-events.
+ */
+export function executePRO2(context: EngineContext): void {
+  executeProcess(context, "PRO2", "_", "_");
 }

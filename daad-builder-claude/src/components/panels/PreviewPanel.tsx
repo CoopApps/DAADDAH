@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { DaadGame } from "../../types/daad";
-import { processCommand, executePRO2, GameState, EngineContext } from "../../engine/ruleEngine";
+import { processCommand, executePRO2, executePRO0Wildcards, executePRO4, GameState, EngineContext } from "../../engine/ruleEngine";
 import { DEFAULT_AUTO_WALK_SPEED } from "../../utils/constants";
 import { PlatformId, PLATFORMS, PLATFORM_LIST } from "../../types/platforms";
 
