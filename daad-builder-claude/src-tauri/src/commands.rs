@@ -570,27 +570,63 @@ pub async fn compile_game(
     std::fs::create_dir_all(&images_dir)?;
 
     // Export images for locations that have them
+    let mut image_count_exported = 0;
     for loc in &game.locations {
         if let Some(image) = &loc.image {
             match ImageConverter::decode_base64(&image.source_data) {
                 Ok(img) => {
-                    let (image_data, ext) = match platform_suffix {
-                        "zx_spectrum" => (ImageConverter::to_zx_spectrum(&img, image.height), "scr"),
-                        "c64" => (ImageConverter::to_c64(&img, image.height), "prg"),
-                        "amstrad_cpc" => (ImageConverter::to_amstrad_cpc_mode0(&img, image.height), "bin"),
-                        "msx" => (ImageConverter::to_msx(&img, image.height), "sc2"),
-                        "amiga" => (ImageConverter::to_amiga(&img, image.height), "iff"),
-                        "atari_st" => (ImageConverter::to_atari_st(&img, image.height), "neo"),
-                        "msdos" => (ImageConverter::to_msdos_vga(&img, image.height), "vga"),
+                    // For PCDAAD (msdos): output as PCX files named {locId:03d}.PCX
+                    // placed alongside the DDB in the output directory.
+                    // PCDAAD loads PICTURE N from file "{N:03d}.PCX".
+                    // For other platforms: use platform-specific format in images subdir.
+                    let (image_data, filename) = match platform_suffix {
+                        "msdos" => {
+                            let pcx = ImageConverter::to_pcx(&img, image.height);
+                            let name = format!("{:03}.PCX", loc.id);
+                            (pcx, name)
+                        },
+                        "zx_spectrum" => (ImageConverter::to_zx_spectrum(&img, image.height),
+                            format!("{}_loc{}.scr", base_name, loc.id)),
+                        "c64" => (ImageConverter::to_c64(&img, image.height),
+                            format!("{}_loc{}.prg", base_name, loc.id)),
+                        "amstrad_cpc" => (ImageConverter::to_amstrad_cpc_mode0(&img, image.height),
+                            format!("{}_loc{}.bin", base_name, loc.id)),
+                        "msx" => (ImageConverter::to_msx(&img, image.height),
+                            format!("{}_loc{}.sc2", base_name, loc.id)),
+                        "amiga" => (ImageConverter::to_amiga(&img, image.height),
+                            format!("{}_loc{}.iff", base_name, loc.id)),
+                        "atari_st" => (ImageConverter::to_atari_st(&img, image.height),
+                            format!("{}_loc{}.neo", base_name, loc.id)),
                         _ => continue,
                     };
 
-                    let image_file = images_dir.join(format!("{}_loc{}.{}", base_name, loc.id, ext));
-                    std::fs::write(&image_file, image_data)?;
+                    // PCDAAD images go alongside the DDB; others go to images subdir
+                    let image_path = if platform_suffix == "msdos" {
+                        base_dir.join(&filename)
+                    } else {
+                        images_dir.join(&filename)
+                    };
+                    std::fs::write(&image_path, image_data)?;
+                    image_count_exported += 1;
+                    compilation_logs.push(format!("  Image: {} ({} bytes)", image_path.display(),
+                        std::fs::metadata(&image_path).map(|m| m.len()).unwrap_or(0)));
                 }
                 Err(e) => {
-                    eprintln!("Warning: Failed to decode image for location {}: {}", loc.id, e);
+                    compilation_logs.push(format!("  ⚠ Image error for location {}: {}", loc.id, e));
                 }
+            }
+        }
+    }
+
+    // Copy font file for PCDAAD
+    if platform_suffix == "msdos" {
+        let daadready_check = find_daadready_dir();
+        if let Ok(ref dr) = daadready_check {
+            let font_src = dr.join("ASSETS").join("CHARSET").join("MSDOS.FNT");
+            let font_dst = base_dir.join("DAAD.FNT");
+            if font_src.exists() && !font_dst.exists() {
+                std::fs::copy(&font_src, &font_dst)?;
+                compilation_logs.push(format!("  Font: {} copied", font_dst.display()));
             }
         }
     }
