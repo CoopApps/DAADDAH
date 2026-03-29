@@ -1859,6 +1859,74 @@ pub async fn start_api_server(
         .and(with_app_handle(app_handle.clone()))
         .and_then(update_game_settings);
 
+    // Export DSF endpoint
+    let export_dsf_route = warp::path!("api" / "export" / "dsf")
+        .and(warp::get())
+        .and(with_state(state.clone()))
+        .and_then(|state: SharedGameState| async move {
+            let game_lock = state.lock();
+            if let Some(game) = game_lock.as_ref() {
+                let (dsf, logs) = crate::codegen::DaadCodeGenerator::generate_verbose(game);
+                let errors = crate::codegen::DaadCodeGenerator::validate_dsf(&dsf);
+                Ok::<_, Infallible>(warp::reply::json(&serde_json::json!({
+                    "success": true,
+                    "dsf": dsf,
+                    "lines": dsf.lines().count(),
+                    "errors": errors,
+                    "logs": logs,
+                })))
+            } else {
+                Ok(warp::reply::json(&ApiResponse {
+                    success: false,
+                    message: "No game loaded".to_string(),
+                    id: None,
+                }))
+            }
+        });
+
+    // Validate game endpoint
+    let validate_game_route = warp::path!("api" / "validate")
+        .and(warp::get())
+        .and(with_state(state.clone()))
+        .and_then(|state: SharedGameState| async move {
+            let game_lock = state.lock();
+            if let Some(game) = game_lock.as_ref() {
+                let (dsf, _) = crate::codegen::DaadCodeGenerator::generate_verbose(game);
+                let dsf_errors = crate::codegen::DaadCodeGenerator::validate_dsf(&dsf);
+                let mut issues = Vec::new();
+                // Basic game validation
+                if game.locations.is_empty() {
+                    issues.push("No locations defined".to_string());
+                }
+                if game.objects.is_empty() {
+                    issues.push("No objects defined".to_string());
+                }
+                if game.rules.is_empty() {
+                    issues.push("No rules defined".to_string());
+                }
+                if game.vocabulary.is_empty() {
+                    issues.push("No vocabulary defined".to_string());
+                }
+                issues.extend(dsf_errors);
+                Ok::<_, Infallible>(warp::reply::json(&serde_json::json!({
+                    "success": true,
+                    "issues": issues,
+                    "issue_count": issues.len(),
+                    "locations": game.locations.len(),
+                    "objects": game.objects.len(),
+                    "rules": game.rules.len(),
+                    "messages": game.messages.len(),
+                    "vocabulary": game.vocabulary.len(),
+                })))
+            } else {
+                Ok(warp::reply::json(&ApiResponse {
+                    success: false,
+                    message: "No game loaded".to_string(),
+                    id: None,
+                }))
+            }
+        });
+
     // Combine all routes
     let routes = health
         .or(create_location_route)
@@ -1896,6 +1964,8 @@ pub async fn start_api_server(
         .or(list_music_route)
         .or(get_game_route)
         .or(update_game_settings_route)
+        .or(export_dsf_route)
+        .or(validate_game_route)
         .with(cors);
 
     println!("DAAD Builder MCP API server starting on http://127.0.0.1:3042");

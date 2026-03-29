@@ -555,6 +555,18 @@ class DAADBuilderServer {
           },
         },
 
+        // ==================== EXPORT & VALIDATE ====================
+        {
+          name: 'export_dsf',
+          description: 'Generate DSF source code from the current game. Returns the full DSF text, line count, and any validation errors.',
+          inputSchema: { type: 'object', properties: {} },
+        },
+        {
+          name: 'validate_game',
+          description: 'Validate the current game for issues (missing data, broken references, DSF syntax errors). Returns issue list and game statistics.',
+          inputSchema: { type: 'object', properties: {} },
+        },
+
         // ==================== GAME SETTINGS (EXTENDED) ====================
         {
           name: 'update_game_settings',
@@ -1120,6 +1132,34 @@ class DAADBuilderServer {
                 text: `❌ ${result.message}`,
               }],
             };
+          }
+
+          // ==================== EXPORT & VALIDATE ====================
+          case 'export_dsf': {
+            const result = await this.callAppAPI('/export/dsf', 'GET');
+            if (result.success) {
+              return {
+                content: [{
+                  type: 'text',
+                  text: `DSF generated: ${result.lines} lines, ${result.errors.length} error(s)\n\n${result.errors.length > 0 ? 'Errors:\n' + result.errors.join('\n') + '\n\n' : ''}${result.dsf}`,
+                }],
+              };
+            }
+            return { content: [{ type: 'text', text: `❌ ${result.message}` }] };
+          }
+
+          case 'validate_game': {
+            const result = await this.callAppAPI('/validate', 'GET');
+            if (result.success) {
+              const summary = `Game: ${result.locations} locations, ${result.objects} objects, ${result.rules} rules, ${result.messages} messages, ${result.vocabulary} vocabulary`;
+              const issues = result.issues.length > 0
+                ? `\n\nIssues (${result.issue_count}):\n${result.issues.map((i, idx) => `  ${idx + 1}. ${i}`).join('\n')}`
+                : '\n\n✅ No issues found!';
+              return {
+                content: [{ type: 'text', text: summary + issues }],
+              };
+            }
+            return { content: [{ type: 'text', text: `❌ ${result.message}` }] };
           }
 
           // ==================== GAME SETTINGS (EXTENDED) ====================
