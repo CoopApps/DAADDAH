@@ -143,6 +143,8 @@ class DAADBuilderServer {
               is_wearable: { type: 'boolean', description: 'Can be worn', default: false },
               is_takeable: { type: 'boolean', description: 'Can be picked up', default: true },
               is_light_source: { type: 'boolean', description: 'Provides light in dark rooms', default: false },
+              otx_text: { type: 'string', description: 'Display name for LISTOBJ (e.g. "the wooden ruler"). Auto-generated if absent.' },
+              attributes: { type: 'array', items: { type: 'number' }, description: 'Attribute bit indices (0-15) for HASAT/HASNAT condacts' },
             },
             required: ['name', 'description', 'noun'],
           },
@@ -163,6 +165,8 @@ class DAADBuilderServer {
               is_wearable: { type: 'boolean', description: 'Is wearable (optional)' },
               is_takeable: { type: 'boolean', description: 'Is takeable (optional)' },
               is_light_source: { type: 'boolean', description: 'Is light source (optional)' },
+              otx_text: { type: 'string', description: 'Display name for LISTOBJ (optional)' },
+              attributes: { type: 'array', items: { type: 'number' }, description: 'Attribute bit indices (0-15) (optional)' },
             },
             required: ['id'],
           },
@@ -310,25 +314,26 @@ class DAADBuilderServer {
         // ==================== RULE OPERATIONS ====================
         {
           name: 'create_rule',
-          description: 'Create a game rule with conditions and actions.',
+          description: 'Create a game rule with conditions and actions. PRO5 = response table (verb/noun commands), PRO0 = per-turn events, PRO4 = auto-events (timers). PRO13-255 are custom tables.',
           inputSchema: {
             type: 'object',
             properties: {
               name: { type: 'string', description: 'Rule name' },
               process: {
                 type: 'string',
-                description: 'Process table',
-                enum: ['PRO0', 'PRO1', 'PRO2', 'PRO3'],
-                default: 'PRO1',
+                description: 'Process table (PRO0-PRO255). PRO5=responses, PRO0=per-turn, PRO4=auto-events',
+                default: 'PRO5',
               },
+              verb: { type: 'string', description: 'Verb to match (e.g. "EXAMINE", "GET"). Use "_" for wildcard.' },
+              noun: { type: 'string', description: 'Noun to match (e.g. "KEY", "DOOR"). Use "_" for wildcard.' },
               conditions: {
                 type: 'array',
-                description: 'Conditions to check (optional)',
+                description: 'Conditions to check. Each has type (e.g. AT, PRESENT, ZERO, NOTZERO, EQ, GT, LT, CARRIED, WORN, CHANCE) and params object.',
                 items: {
                   type: 'object',
                   properties: {
-                    type: { type: 'string', description: 'Condition type (e.g., AT, CARRIED, ZERO)' },
-                    params: { type: 'object', description: 'Condition parameters' },
+                    type: { type: 'string', description: 'Condition type (e.g., AT, CARRIED, ZERO, PRESENT, ABSENT, EQ, GT, LT, CHANCE)' },
+                    params: { type: 'object', description: 'Condition parameters (e.g. {locno: 5}, {objno: 2}, {flagno: 64, value: 1})' },
                   },
                   required: ['type', 'params'],
                 },
@@ -336,12 +341,13 @@ class DAADBuilderServer {
               },
               actions: {
                 type: 'array',
-                description: 'Actions to perform (optional)',
+                description: 'Actions to perform. Each has type and params. Use text field for inline MESSAGE text.',
                 items: {
                   type: 'object',
                   properties: {
-                    type: { type: 'string', description: 'Action type (e.g., MESSAGE, GOTO, DESC)' },
-                    params: { type: 'object', description: 'Action parameters' },
+                    type: { type: 'string', description: 'Action type (e.g., MESSAGE, GOTO, SET, CLEAR, LET, PLUS, PLACE, CREATE, DESTROY, GET, DROP, DONE, END, RESTART, PROCESS, DESC, SYSMESS)' },
+                    params: { type: 'object', description: 'Action parameters (e.g. {mesno: 0}, {locno: 5}, {flagno: 64}, {objno: 2})' },
+                    text: { type: 'string', description: 'Inline message text for MESSAGE/MES actions (optional, replaces mesno)' },
                   },
                   required: ['type', 'params'],
                 },
@@ -546,6 +552,39 @@ class DAADBuilderServer {
               id: { type: 'number', description: 'Rule ID' },
             },
             required: ['id'],
+          },
+        },
+
+        // ==================== GAME SETTINGS (EXTENDED) ====================
+        {
+          name: 'update_game_settings',
+          description: 'Update game metadata (title, author, version, intro text, part number, system messages, status bar config).',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              title: { type: 'string', description: 'Game title (optional)' },
+              author: { type: 'string', description: 'Author name (optional)' },
+              version: { type: 'string', description: 'Version string (optional)' },
+              intro_text: { type: 'string', description: 'Intro text (optional)' },
+              part_number: { type: 'number', description: 'Part number (optional)' },
+              system_messages: {
+                type: 'object',
+                description: 'Custom system messages (STX overrides). Key = message index (0-64), value = custom text. Example: {"0": "You cannot see!", "7": "No way to go there."}',
+              },
+              status_bar_config: {
+                type: 'object',
+                description: 'Status bar configuration',
+                properties: {
+                  paper_color: { type: 'number', description: 'Background color 0-15 (default: 4=red)' },
+                  ink_color: { type: 'number', description: 'Text color 0-15 (default: 15=white)' },
+                  show_turns: { type: 'boolean', description: 'Show turns counter' },
+                  show_location_name: { type: 'boolean', description: 'Show location name' },
+                  right_content: { type: 'string', description: '"turns", "score", "custom", or "none"' },
+                  right_flag_id: { type: 'number', description: 'Flag ID for score/custom display' },
+                  right_label: { type: 'string', description: 'Label text e.g. "Score: "' },
+                },
+              },
+            },
           },
         },
       ],
@@ -821,7 +860,9 @@ class DAADBuilderServer {
           case 'create_rule': {
             const result = await this.callAppAPI('/rule', 'POST', {
               name: args.name,
-              process: args.process || 'PRO1',
+              process: args.process || 'PRO5',
+              verb: args.verb || '_',
+              noun: args.noun || '_',
               conditions: args.conditions || [],
               actions: args.actions || [],
               enabled: args.enabled !== undefined ? args.enabled : true,
@@ -1077,6 +1118,28 @@ class DAADBuilderServer {
               content: [{
                 type: 'text',
                 text: `❌ ${result.message}`,
+              }],
+            };
+          }
+
+          // ==================== GAME SETTINGS (EXTENDED) ====================
+          case 'update_game_settings': {
+            const body = {};
+            if (args.title !== undefined) body.title = args.title;
+            if (args.author !== undefined) body.author = args.author;
+            if (args.version !== undefined) body.version = args.version;
+            if (args.intro_text !== undefined) body.intro_text = args.intro_text;
+            if (args.part_number !== undefined) body.part_number = args.part_number;
+            if (args.system_messages !== undefined) body.system_messages = args.system_messages;
+            if (args.status_bar_config !== undefined) body.status_bar_config = args.status_bar_config;
+            const result = await this.callAppAPI('/game/settings', 'PUT', body);
+            const updated = Object.keys(body).join(', ') || 'nothing';
+            return {
+              content: [{
+                type: 'text',
+                text: result.success
+                  ? `✅ Game settings updated: ${updated}`
+                  : `❌ ${result.message}`,
               }],
             };
           }

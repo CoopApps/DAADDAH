@@ -242,6 +242,12 @@ pub struct GameSettingsRequest {
     pub version: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub intro_text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub part_number: Option<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub system_messages: Option<std::collections::HashMap<u8, String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status_bar_config: Option<crate::types::StatusBarConfig>,
 }
 
 // ============================================================================
@@ -1558,6 +1564,15 @@ async fn update_game_settings(
         }
         if let Some(intro_text) = req.intro_text {
             game.intro_text = Some(intro_text);
+        }
+        if let Some(part_number) = req.part_number {
+            game.part_number = part_number;
+        }
+        if let Some(system_messages) = req.system_messages {
+            game.system_messages = Some(system_messages);
+        }
+        if let Some(status_bar_config) = req.status_bar_config {
+            game.status_bar_config = Some(status_bar_config);
         }
 
         emit_game_updated(&app_handle, game);
