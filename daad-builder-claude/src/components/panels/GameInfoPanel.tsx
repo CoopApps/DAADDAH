@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { DaadGame } from "../../types/daad";
+import { DaadGame, StatusBarConfig } from "../../types/daad";
+import { SYSTEM_MESSAGES } from "../../data/systemMessages";
 
 interface GameInfoPanelProps {
   game: DaadGame;
@@ -7,11 +8,51 @@ interface GameInfoPanelProps {
   onNavigateToPanel?: (panel: string) => void;
 }
 
+const DAAD_COLORS = [
+  { name: "Black", hex: "#000000" }, { name: "Blue", hex: "#0000AA" },
+  { name: "Green", hex: "#00AA00" }, { name: "Cyan", hex: "#00AAAA" },
+  { name: "Red", hex: "#AA0000" }, { name: "Magenta", hex: "#AA00AA" },
+  { name: "Brown", hex: "#AA5500" }, { name: "Light Gray", hex: "#AAAAAA" },
+  { name: "Dark Gray", hex: "#555555" }, { name: "Light Blue", hex: "#5555FF" },
+  { name: "Light Green", hex: "#55FF55" }, { name: "Light Cyan", hex: "#55FFFF" },
+  { name: "Light Red", hex: "#FF5555" }, { name: "Light Magenta", hex: "#FF55FF" },
+  { name: "Yellow", hex: "#FFFF55" }, { name: "White", hex: "#FFFFFF" },
+];
+
 export default function GameInfoPanel({ game, setGame, onNavigateToPanel }: GameInfoPanelProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showStatusBar, setShowStatusBar] = useState(false);
+  const [showSystemMessages, setShowSystemMessages] = useState(false);
+  const [stxFilter, setStxFilter] = useState<string>("all");
 
   const updateField = (field: keyof DaadGame, value: string | number) => {
     setGame((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updateStatusBar = (updates: Partial<StatusBarConfig>) => {
+    setGame((prev) => ({
+      ...prev,
+      statusBarConfig: {
+        paperColor: prev.statusBarConfig?.paperColor ?? 4,
+        inkColor: prev.statusBarConfig?.inkColor ?? 15,
+        showTurns: prev.statusBarConfig?.showTurns ?? true,
+        showLocationName: prev.statusBarConfig?.showLocationName ?? true,
+        ...updates,
+      },
+    }));
+  };
+
+  const updateSystemMessage = (index: number, text: string) => {
+    setGame((prev) => {
+      const msgs = { ...(prev.systemMessages || {}) };
+      const defaultMsg = SYSTEM_MESSAGES.find(s => s.id === index);
+      if (text === "" || text === defaultMsg?.defaultText) {
+        delete msgs[index];
+      } else {
+        msgs[index] = text;
+      }
+      return { ...prev, systemMessages: Object.keys(msgs).length > 0 ? msgs : undefined };
+    });
   };
 
   const updateFlag = (flagId: number, value: number) => {
@@ -270,6 +311,118 @@ export default function GameInfoPanel({ game, setGame, onNavigateToPanel }: Game
                 onChange={(e) => updateField("version", e.target.value)}
                 placeholder="1.0"
               />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Status Bar Configuration */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <button
+          onClick={() => setShowStatusBar(!showStatusBar)}
+          style={{ background: "none", border: "none", cursor: "pointer", width: "100%", textAlign: "left", padding: 0, color: "var(--amber-bright)", fontSize: 14, fontWeight: 600 }}
+        >
+          {showStatusBar ? "▼" : "▶"} Status Bar
+        </button>
+        {showStatusBar && (
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+              <div>
+                <label className="form-label" style={{ fontSize: 11 }}>Background Color</label>
+                <div style={{ display: "flex", gap: 2, flexWrap: "wrap", maxWidth: 200 }}>
+                  {DAAD_COLORS.map((c, i) => (
+                    <div key={i} title={`${i}: ${c.name}`}
+                      onClick={() => updateStatusBar({ paperColor: i })}
+                      style={{
+                        width: 20, height: 20, background: c.hex, cursor: "pointer",
+                        border: (game.statusBarConfig?.paperColor ?? 4) === i ? "2px solid var(--green-bright)" : "1px solid #333",
+                      }} />
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="form-label" style={{ fontSize: 11 }}>Text Color</label>
+                <div style={{ display: "flex", gap: 2, flexWrap: "wrap", maxWidth: 200 }}>
+                  {DAAD_COLORS.map((c, i) => (
+                    <div key={i} title={`${i}: ${c.name}`}
+                      onClick={() => updateStatusBar({ inkColor: i })}
+                      style={{
+                        width: 20, height: 20, background: c.hex, cursor: "pointer",
+                        border: (game.statusBarConfig?.inkColor ?? 15) === i ? "2px solid var(--green-bright)" : "1px solid #333",
+                      }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 16 }}>
+              <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 12, cursor: "pointer" }}>
+                <input type="checkbox" checked={game.statusBarConfig?.showLocationName ?? true}
+                  onChange={e => updateStatusBar({ showLocationName: e.target.checked })} />
+                Show location name
+              </label>
+              <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 12, cursor: "pointer" }}>
+                <input type="checkbox" checked={game.statusBarConfig?.showTurns ?? true}
+                  onChange={e => updateStatusBar({ showTurns: e.target.checked })} />
+                Show turns counter
+              </label>
+            </div>
+            <div style={{
+              padding: "4px 8px", fontSize: 12, fontFamily: "monospace",
+              background: DAAD_COLORS[game.statusBarConfig?.paperColor ?? 4].hex,
+              color: DAAD_COLORS[game.statusBarConfig?.inkColor ?? 15].hex,
+            }}>
+              Study{(game.statusBarConfig?.showTurns ?? true) ? "                    Turns: 0" : ""}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* System Messages (STX) */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <button
+          onClick={() => setShowSystemMessages(!showSystemMessages)}
+          style={{ background: "none", border: "none", cursor: "pointer", width: "100%", textAlign: "left", padding: 0, color: "var(--cyan-bright)", fontSize: 14, fontWeight: 600 }}
+        >
+          {showSystemMessages ? "▼" : "▶"} System Messages ({Object.keys(game.systemMessages || {}).length} overrides)
+        </button>
+        {showSystemMessages && (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <select className="form-input form-select" style={{ fontSize: 11, flex: 1 }}
+                value={stxFilter} onChange={e => setStxFilter(e.target.value)}>
+                <option value="all">All Categories</option>
+                <option value="responses">Responses</option>
+                <option value="errors">Errors</option>
+                <option value="descriptions">Descriptions</option>
+                <option value="prompts">Prompts</option>
+              </select>
+              {Object.keys(game.systemMessages || {}).length > 0 && (
+                <button className="btn btn-danger" style={{ fontSize: 10, padding: "4px 8px" }}
+                  onClick={() => setGame(prev => ({ ...prev, systemMessages: undefined }))}>
+                  Reset All
+                </button>
+              )}
+            </div>
+            <div style={{ maxHeight: 400, overflow: "auto", display: "flex", flexDirection: "column", gap: 4 }}>
+              {SYSTEM_MESSAGES
+                .filter(m => stxFilter === "all" || m.category === stxFilter)
+                .map(msg => (
+                  <div key={msg.id} style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 11 }}>
+                    <span style={{ color: "var(--text-dim)", minWidth: 24, textAlign: "right" }}>
+                      {msg.id}
+                    </span>
+                    <span style={{ color: "var(--amber-bright)", minWidth: 100, fontSize: 10 }} title={msg.description}>
+                      {msg.name}
+                    </span>
+                    <input
+                      className="form-input"
+                      style={{ flex: 1, fontSize: 11, fontFamily: "monospace" }}
+                      value={game.systemMessages?.[msg.id] ?? ""}
+                      placeholder={msg.defaultText}
+                      onChange={e => updateSystemMessage(msg.id, e.target.value)}
+                    />
+                  </div>
+                ))}
             </div>
           </div>
         )}

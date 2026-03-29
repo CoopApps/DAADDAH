@@ -775,6 +775,11 @@ export default function MusicPanel({ game, setGame, selectItemId }: MusicPanelPr
                     />
                   </div>
 
+                  {/* XPLAY usage hint */}
+                  <div style={{ padding: "6px 10px", background: "rgba(0,255,255,0.08)", border: "1px solid rgba(0,255,255,0.2)", borderRadius: 4, fontSize: 10, color: "var(--cyan-bright)", marginBottom: 8 }}>
+                    To play this track in-game, add an <strong>XPLAY</strong> action to a rule with parameter <strong>{selectedMusic.id}</strong>
+                  </div>
+
                   <div className="form-group">
                     <label className="form-label">Tempo (BPM)</label>
                     <input

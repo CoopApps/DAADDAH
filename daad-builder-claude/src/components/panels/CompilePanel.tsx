@@ -214,9 +214,11 @@ export default function CompilePanel({ game }: CompilePanelProps) {
         outputPath: filePath
       });
 
-      setCompilationResult(
-        `Compiled to ${result.output_path} (${result.file_size.toLocaleString()} bytes)`
-      );
+      let resultMsg = `Compiled to ${result.output_path} (${result.file_size.toLocaleString()} bytes)`;
+      if (result.image_count > 0) {
+        resultMsg += `\nExported ${result.image_count} location image(s)`;
+      }
+      setCompilationResult(resultMsg);
       setCompilationLogs(result.logs || []);
     } catch (error) {
       setCompilationError(String(error));

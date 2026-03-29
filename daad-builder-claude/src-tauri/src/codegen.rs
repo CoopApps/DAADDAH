@@ -1498,23 +1498,42 @@ impl DaadCodeGenerator {
         code.push_str("; Update status bar (WINDOW 2, defined in PRO 6 init).\n\n");
         code.push_str(">\n");
         code.push_str("_       _       WINDOW 2\n");
-        code.push_str("                PAPER 4\n");  // Red background (matching Rabenstein)
-        code.push_str("                INK 15\n");   // White text
+        let sb_paper = game.status_bar_config.as_ref().map_or(4, |c| c.paper_color);
+        let sb_ink = game.status_bar_config.as_ref().map_or(15, |c| c.ink_color);
+        code.push_str(&format!("                PAPER {}\n", sb_paper));
+        code.push_str(&format!("                INK {}\n", sb_ink));
         code.push_str("                CLS\n\n");
-        code.push_str("; If dark, print darkness label + turns.\n");
+        let show_loc = game.status_bar_config.as_ref().map_or(true, |c| c.show_location_name);
+        let show_turns = game.status_bar_config.as_ref().map_or(true, |c| c.show_turns);
+
+        code.push_str("; If dark, print darkness label.\n");
         code.push_str(">\n");
         code.push_str("_       _       NOTZERO DarkF\n");
         code.push_str(&format!("                MES {}\n", dark_msg));
-        code.push_str("                PROCESS 12\n");
-        code.push_str("                DONE\n\n");
-        code.push_str("; Print location name + turns for current location.\n");
-        for loc in &game.locations {
-            if loc.id == 0 { continue; }
-            let msg_idx = loc_name_msg_offset + (loc.id as usize - 1);
-            code.push_str(">\n");
-            code.push_str(&format!("_       _       AT {}\n", loc.id));
-            code.push_str(&format!("                MES {}\n", msg_idx));
+        if show_turns {
             code.push_str("                PROCESS 12\n");
+        }
+        code.push_str("                DONE\n\n");
+
+        if show_loc {
+            code.push_str("; Print location name for current location.\n");
+            for loc in &game.locations {
+                if loc.id == 0 { continue; }
+                let msg_idx = loc_name_msg_offset + (loc.id as usize - 1);
+                code.push_str(">\n");
+                code.push_str(&format!("_       _       AT {}\n", loc.id));
+                code.push_str(&format!("                MES {}\n", msg_idx));
+                if show_turns {
+                    code.push_str("                PROCESS 12\n");
+                } else {
+                    code.push_str("                WINDOW 1\n");
+                }
+                code.push_str("                DONE\n\n");
+            }
+        } else if show_turns {
+            // No location name but still show turns
+            code.push_str(">\n");
+            code.push_str("_       _       PROCESS 12\n");
             code.push_str("                DONE\n\n");
         }
 

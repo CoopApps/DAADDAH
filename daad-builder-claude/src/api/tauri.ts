@@ -17,6 +17,13 @@ interface BackendGame {
   messages: string[];
   vocabulary: BackendVocabEntry[];
   music: BackendMusic[];
+  systemMessages?: Record<number, string>;
+  statusBarConfig?: {
+    paperColor: number;
+    inkColor: number;
+    showTurns: boolean;
+    showLocationName: boolean;
+  };
 }
 
 interface BackendLocation {
@@ -64,6 +71,7 @@ interface BackendObject {
   containerCapacity?: number;
   icon: string;
   otxText?: string;
+  attributes?: number[];
 }
 
 interface BackendRule {
@@ -75,6 +83,7 @@ interface BackendRule {
   actions: unknown[];
   verb?: string;
   noun?: string;
+  additionalTriggers?: Array<{ verb: string; noun: string }>;
 }
 
 interface BackendFlag {
@@ -169,16 +178,27 @@ export function toBackendGame(game: DaadGame): BackendGame {
       containerCapacity: obj.containerCapacity,
       icon: obj.icon,
       otxText: (obj as any).otxText,
+      attributes: obj.attributes,
     })),
     rules: game.rules.map((rule) => ({
       id: rule.id,
       name: rule.name,
       process: rule.process || "PRO5",
       enabled: rule.enabled !== false,
-      conditions: rule.conditions || [],
-      actions: rule.actions || [],
+      conditions: (rule.conditions || []).map((c) => ({
+        type: c.type,
+        params: c.params || {},
+        ...(c.indirect ? { indirect: c.indirect } : {}),
+      })),
+      actions: (rule.actions || []).map((a) => ({
+        type: a.type,
+        params: a.params || {},
+        ...(a.indirect ? { indirect: a.indirect } : {}),
+        ...(a.text != null ? { text: a.text } : {}),
+      })),
       verb: rule.verb,
       noun: rule.noun,
+      additionalTriggers: rule.additionalTriggers,
     })),
     flags: game.flags.map((flag) => ({
       id: flag.id,
@@ -205,6 +225,8 @@ export function toBackendGame(game: DaadGame): BackendGame {
         dotted: note.dotted,
       })),
     })),
+    systemMessages: game.systemMessages,
+    statusBarConfig: (game as any).statusBarConfig,
   };
 }
 
@@ -283,29 +305,27 @@ export function toFrontendGame(backend: BackendGame): DaadGame {
       isPSI: obj.isPSI,
       containerCapacity: obj.containerCapacity,
       otxText: obj.otxText,
+      attributes: obj.attributes,
     })),
     rules: backend.rules.map((rule) => ({
       id: rule.id,
       name: rule.name,
-      process:
-        (rule.process as
-          | "PRO0"
-          | "PRO1"
-          | "PRO2"
-          | "PRO3"
-          | "PRO4"
-          | "PRO5") || "PRO0",
+      process: rule.process || "PRO0",
       enabled: rule.enabled,
       conditions: (rule.conditions || []).map((cond: any) => ({
         type: cond.type,
         params: cond.params || {},
+        ...(cond.indirect ? { indirect: cond.indirect } : {}),
       })),
       actions: (rule.actions || []).map((action: any) => ({
         type: action.type,
         params: action.params || {},
+        ...(action.indirect ? { indirect: action.indirect } : {}),
+        ...(action.text != null ? { text: action.text } : {}),
       })),
       verb: rule.verb,
       noun: rule.noun,
+      additionalTriggers: rule.additionalTriggers,
     })),
     flags: backend.flags.map((flag) => ({
       id: flag.id,
@@ -352,7 +372,9 @@ export function toFrontendGame(backend: BackendGame): DaadGame {
         dotted: note.dotted,
       })),
     })),
-  };
+    systemMessages: backend.systemMessages,
+    statusBarConfig: (backend as any).statusBarConfig,
+  } as any;
 
   return normalizeGameState(game);
 }

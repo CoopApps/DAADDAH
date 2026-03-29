@@ -228,6 +228,16 @@ pub struct VerbNounTrigger {
     pub noun: String,
 }
 
+/// Status bar configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StatusBarConfig {
+    pub paper_color: u8,
+    pub ink_color: u8,
+    pub show_turns: bool,
+    pub show_location_name: bool,
+}
+
 /// DAAD's process tables
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub enum ProcessTable {

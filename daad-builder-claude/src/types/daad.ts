@@ -256,6 +256,22 @@ export interface DaadGame {
    * Unset indices use the default English text from blank_en.dsf.
    */
   systemMessages?: Record<number, string>;
+  /**
+   * Status bar configuration. Controls the appearance and content
+   * of the status bar at the top of the screen (WINDOW 2 in DAAD).
+   */
+  statusBarConfig?: StatusBarConfig;
+}
+
+export interface StatusBarConfig {
+  /** DAAD PAPER color 0-15 for status bar background. Default: 4 (red) */
+  paperColor: number;
+  /** DAAD INK color 0-15 for status bar text. Default: 15 (white) */
+  inkColor: number;
+  /** Show turns counter on the right side. Default: true */
+  showTurns: boolean;
+  /** Show location name on the left side. Default: true */
+  showLocationName: boolean;
 }
 
 export type PanelType =

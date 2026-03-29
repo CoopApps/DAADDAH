@@ -24,6 +24,9 @@ pub struct DaadGame {
     /// Unset indices use default English text from blank_en.dsf.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub system_messages: Option<std::collections::HashMap<u8, String>>,
+    /// Status bar configuration.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status_bar_config: Option<StatusBarConfig>,
 }
 
 impl Default for DaadGame {
@@ -77,6 +80,7 @@ impl Default for DaadGame {
                 },
             ],
             system_messages: None,
+            status_bar_config: None,
         }
     }
 }
