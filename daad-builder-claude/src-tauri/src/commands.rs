@@ -210,14 +210,11 @@ fn validate_drc_requirements(game: &DaadGame) -> Result<(), CommandError> {
         )));
     }
 
-    // Check vocabulary word length (max 5 characters)
+    // Check vocabulary word length (max 5 characters) — warning only, DRC truncates automatically
     for vocab in &game.vocabulary {
         if vocab.word.len() > 5 {
-            eprintln!(
-                "Warning: Vocabulary word '{}' exceeds 5-character limit and will be truncated to '{}'",
-                vocab.word,
-                &vocab.word[0..5]
-            );
+            // Note: this is a warning, not an error. DRC handles truncation.
+            // The warning is surfaced via compilation_logs in compile_game().
         }
     }
 
@@ -507,6 +504,13 @@ pub async fn compile_game(
     let (code, dsf_logs) = DaadCodeGenerator::generate_verbose(&game);
     compilation_logs.extend(dsf_logs);
 
+    // Surface vocabulary truncation warnings
+    for vocab in &game.vocabulary {
+        if vocab.word.len() > 5 {
+            compilation_logs.push(format!("  ⚠ Vocabulary: '{}' will be truncated to '{}' (DAAD 5-char limit)",
+                vocab.word, &vocab.word[0..5]));
+        }
+    }
     compilation_logs.push(String::new());
 
     // Validate DSF before writing — catch all syntax errors at once
