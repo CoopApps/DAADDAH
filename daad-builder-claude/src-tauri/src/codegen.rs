@@ -1255,7 +1255,8 @@ impl DaadCodeGenerator {
         code.push_str(">\n");
         code.push_str("_       _       NEWLINE\n");
         code.push_str("                ZERO DarkF\n");
-        code.push_str("                LISTOBJ\n\n");
+        code.push_str("                LISTOBJ\n");
+        code.push_str("                NEWLINE\n\n");
 
         // ── PRO 4: Status table (auto-events before input) ─────────────────
         code.push_str("/PRO 4\n\n");
