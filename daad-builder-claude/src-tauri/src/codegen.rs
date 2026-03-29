@@ -1405,7 +1405,11 @@ impl DaadCodeGenerator {
         code.push_str("                WINDOW 1\n");
         code.push_str("                WINAT 1 0\n");
         code.push_str("                WINSIZE 24 COLS\n");
-        // Show title screen (location 0 description)
+        // Show title screen — try to load picture 0 (title image)
+        code.push_str("                WINDOW 0\n");
+        code.push_str("                PICTURE 0\n");
+        code.push_str("                DISPLAY 0\n");
+        // Show title text below picture (or full screen if no picture)
         code.push_str("                WINDOW 1\n");
         code.push_str("                DESC 0\n");
         code.push_str("                ANYKEY\n");

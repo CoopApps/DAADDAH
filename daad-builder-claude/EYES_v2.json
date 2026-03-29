@@ -981,6 +981,59 @@
       "isPSI": true,
       "otxText": "the shopman",
       "id": 23
+    },
+    {
+      "id": 24,
+      "noun": "greato",
+      "adjective": "",
+      "icon": "",
+      "description": "Mr Greatorex, Carrados's secretary. A precise, efficient man who reads the morning papers and manages correspondence. He places no interpretation on what he observes — only reports.",
+      "weight": 20,
+      "location": {
+        "type": "limbo"
+      },
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": true,
+      "otxText": "Mr Greatorex"
+    },
+    {
+      "id": 25,
+      "noun": "bronze",
+      "adjective": "",
+      "icon": "",
+      "description": "A collection of Greek and Roman bronzes, arranged on a side table. Each piece is known to your fingers — the weight, the patina, the particular warmth of genuine antiquity versus the cold precision of forgery. You are one of the foremost authorities on numismatic forgeries in England.",
+      "weight": 20,
+      "location": {
+        "type": "at",
+        "locationId": 1
+      },
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": false,
+      "otxText": "a collection of bronzes"
+    },
+    {
+      "id": 26,
+      "noun": "cigar",
+      "adjective": "",
+      "icon": "",
+      "description": "A cedar box of cigars — the most desirable and unobtainable variety, procured through connections that Carlyle has never quite understood. The smoke is rich, complex, and entirely unlike the crude cologne that has occupied your attention these past days.",
+      "weight": 1,
+      "location": {
+        "type": "at",
+        "locationId": 1
+      },
+      "isContainer": false,
+      "isWearable": false,
+      "isTakeable": false,
+      "isLightSource": false,
+      "isPSI": false,
+      "otxText": "a cigar box"
     }
   ],
   "rules": [
@@ -1619,53 +1672,6 @@
         }
       ],
       "id": 25
-    },
-    {
-      "name": "Evening Herald arrives",
-      "process": "PRO0",
-      "verb": "_",
-      "noun": "_",
-      "enabled": true,
-      "conditions": [
-        {
-          "type": "AT",
-          "params": {
-            "locno": 1
-          }
-        },
-        {
-          "type": "NOTZERO",
-          "params": {
-            "flagno": 66
-          }
-        },
-        {
-          "type": "ZERO",
-          "params": {
-            "flagno": 81
-          }
-        }
-      ],
-      "actions": [
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "Parkinson brings in the Evening Herald. 'The financial pages, sir,' he says quietly."
-        },
-        {
-          "type": "CREATE",
-          "params": {
-            "objno": 19
-          }
-        },
-        {
-          "type": "SET",
-          "params": {
-            "flagno": 81
-          }
-        }
-      ],
-      "id": 26
     },
     {
       "name": "Day 2 begins",
@@ -2331,6 +2337,40 @@
         }
       ],
       "id": 44
+    },
+    {
+      "id": 365,
+      "name": "TALK Greatorex",
+      "process": "PRO5",
+      "verb": "talk",
+      "noun": "greato",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 24
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 103,
+            "value": 24
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You address Greatorex."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
     },
     {
       "name": "TALK END",
@@ -10797,6 +10837,1104 @@
           }
         }
       ]
+    },
+    {
+      "name": "Day 1 objectives complete",
+      "process": "PRO4",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 66
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 78
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 75
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 91
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 133
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 133
+          }
+        }
+      ],
+      "id": 343
+    },
+    {
+      "name": "Day 2 objectives complete",
+      "process": "PRO4",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 71
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 95
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 68
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 134
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 134
+          }
+        }
+      ],
+      "id": 344
+    },
+    {
+      "name": "Day 1 auto-return from car 5",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 5
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 133
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 130
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns towards home. The evening is drawing in. There is much to think about."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 345
+    },
+    {
+      "name": "Day 1 auto-return from car 8",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 8
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 133
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 130
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns towards home. The evening is drawing in. There is much to think about."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 346
+    },
+    {
+      "name": "Day 1 auto-return from car 12",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 12
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 133
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 130
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns towards home. The evening is drawing in. There is much to think about."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 347
+    },
+    {
+      "name": "Day 1 auto-return from car 15",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 15
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 133
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 130
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns towards home. The evening is drawing in. There is much to think about."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 348
+    },
+    {
+      "name": "Day 1 auto-return from car 19",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 19
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 133
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 130
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns towards home. The evening is drawing in. There is much to think about."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 349
+    },
+    {
+      "name": "Day 1 auto-return from car 21",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 21
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 133
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 130
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns towards home. The evening is drawing in. There is much to think about."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 350
+    },
+    {
+      "name": "Day 1 auto-return from car 23",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 23
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 133
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 130
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns towards home. The evening is drawing in. There is much to think about."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 351
+    },
+    {
+      "name": "Day 2 auto-return from car 5",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 5
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 134
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 131
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns for home. The documents from Mead's workshop are heavy in your pocket. Tomorrow will be decisive."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 352
+    },
+    {
+      "name": "Day 2 auto-return from car 8",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 8
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 134
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 131
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns for home. The documents from Mead's workshop are heavy in your pocket. Tomorrow will be decisive."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 353
+    },
+    {
+      "name": "Day 2 auto-return from car 12",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 12
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 134
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 131
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns for home. The documents from Mead's workshop are heavy in your pocket. Tomorrow will be decisive."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 354
+    },
+    {
+      "name": "Day 2 auto-return from car 15",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 15
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 134
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 131
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns for home. The documents from Mead's workshop are heavy in your pocket. Tomorrow will be decisive."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 355
+    },
+    {
+      "name": "Day 2 auto-return from car 19",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 19
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 134
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 131
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns for home. The documents from Mead's workshop are heavy in your pocket. Tomorrow will be decisive."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 356
+    },
+    {
+      "name": "Day 2 auto-return from car 21",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 21
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 134
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 131
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns for home. The documents from Mead's workshop are heavy in your pocket. Tomorrow will be decisive."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 357
+    },
+    {
+      "name": "Day 2 auto-return from car 23",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 23
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 134
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 131
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson.' The motor car turns for home. The documents from Mead's workshop are heavy in your pocket. Tomorrow will be decisive."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "id": 358
+    },
+    {
+      "name": "Evening 1 scene",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 133
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 130
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "CREATE",
+          "params": {
+            "objno": 19
+          }
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 130
+          }
+        },
+        {
+          "type": "CREATE",
+          "params": {
+            "objno": 24
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The study is warm after the December cold. Parkinson has laid dinner. The electric lamps blaze at full power — your characteristic touch of irony, visitors are told. You settle into your armchair and reach for the bronzes on the side table. Your fingers find the small Donatello — the one that isn't a Donatello, though it took you three years to prove it."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Greatorex,' you say. Your secretary appears at the door. 'The Evening Herald, sir. I have marked the financial pages.' 'Read me the railway stocks.' Greatorex reads. The Central and Suburban Deferred fell nine points. 'Now read me the three days before the crash.' A steady rise. Someone was buying."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Carlyle sets down his glass. 'The cologne, Max. You mentioned a cologne.' 'The same cologne. At Hutchins's kitchen, where a visitor came three weeks ago. At the signal box, where someone tampered with the lamp. I will find it again before this is finished.' You light a cigar. The smoke rises, clean and honest — nothing like the scent you are hunting."
+        }
+      ],
+      "id": 359
+    },
+    {
+      "name": "Evening 2 scene",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 134
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 131
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 131
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Dinner is quiet. Parkinson serves and withdraws. Carlyle eats without tasting. The letter from Mead's workshop lies between you on the table — Pendleton's handwriting, Pendleton's threats, Pendleton's cologne."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'The man was terrified, Max,' Carlyle says at last. 'Mead. When he saw what you were carrying out of that workshop, his face...' He stops. 'I have seen guilty men. Mead is not guilty. He is a man who was given an impossible choice and chose silence.' 'And twenty-seven people died for that silence,' you say. 'Not for his silence. For Pendleton's greed.'"
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You reach for the Donatello again. The bronze is cool and familiar. 'Tomorrow I need Pendleton out of his flat. Invite him to luncheon at your club.' 'And while I keep him at table?' 'Parkinson and I will visit Curzon Street.' Carlyle is quiet for a moment. 'Max. If you are caught in a man's private rooms—' 'Then you will defend me admirably in court, Louis.' You smile. Carlyle does not."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You smoke the last of your cigar and listen to the fire settle. Tomorrow will be decisive. You turn the bronze in your hands — the false Donatello, the forgery that took three years to expose. Some deceptions require patience."
+        }
+      ],
+      "id": 360
+    },
+    {
+      "name": "EXAMINE BRONZE",
+      "process": "PRO5",
+      "verb": "exami",
+      "noun": "bronze",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Your fingers move across the collection. Greek, Roman, Renaissance. Each piece has a story your hands can read — weight, patina, the temperature of the metal. The small Donatello is your favourite. It isn't a Donatello, of course. It took you three years to prove it. You are one of the foremost authorities on numismatic forgeries in England."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ],
+      "id": 361
+    },
+    {
+      "name": "EXAMINE CIGAR",
+      "process": "PRO5",
+      "verb": "exami",
+      "noun": "cigar",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The most desirable and unobtainable cigars in London, procured through connections that Carlyle has never quite understood and Parkinson has never questioned. The cedar box is warm to the touch. The smell is rich and complex — nothing at all like the cologne you are hunting."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ],
+      "id": 362
+    },
+    {
+      "name": "SMOKE CIGAR",
+      "process": "PRO5",
+      "verb": "smoke",
+      "noun": "cigar",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You select a cigar by touch, cut it precisely, and light it. The smoke rises. For a moment the world narrows to this — the warmth of the armchair, the crackle of the fire, the particular quality of tobacco that costs more than most men earn in a week. You think better when you smoke."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ],
+      "id": 363
+    },
+    {
+      "name": "EXAMINE GREATOREX",
+      "process": "PRO5",
+      "verb": "exami",
+      "noun": "greato",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 24
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Mr Greatorex, your secretary. A precise and efficient man who arrives at ten each morning and reads you the papers. He marks what you want to hear and you clear off the morning news in no time. He reports what he observes without placing his own interpretation on it — a quality you value above all others in a secretary."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ],
+      "id": 364
+    },
+    {
+      "name": "Evening 3 / pre-hearing",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 99
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 100
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 132
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 3
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 132
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The fire has burned low. Greatorex has gone home. Parkinson moves quietly in the house, performing the small rituals of closing up. You sit in your armchair with the Donatello in one hand and a cigar in the other."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The evidence is spread across your desk. You have touched each piece a dozen times today: the glass, cut to four and seven-eighths inches. The ruler with its worn mark. The order slip from Long Acre. The stock certificates. The letter threatening Mead. And threading through all of it, like a signature in perfume — the cologne."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Carlyle appears in the doorway. 'The hearing reconvenes at ten tomorrow, Max. Will you be ready?' 'I have been ready since I smelled that cologne in Hutchins's kitchen,' you say. 'Everything since then has been confirmation.' Carlyle pours two brandies. 'To justice,' he says. 'To evidence,' you reply."
+        }
+      ],
+      "id": 366
+    },
+    {
+      "name": "Greatorex leaves when you leave study",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "NOTAT",
+          "params": {
+            "locno": 1
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 24
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "PLACE",
+          "params": {
+            "objno": 24,
+            "locno": 252
+          }
+        }
+      ],
+      "id": 367
     }
   ],
   "flags": [
@@ -11122,6 +12260,36 @@
       "id": 123,
       "name": "described_office",
       "description": "Carlyle described office on arrival",
+      "initialValue": 0
+    },
+    {
+      "id": 130,
+      "name": "evening1_done",
+      "description": "Day 1 evening scene played",
+      "initialValue": 0
+    },
+    {
+      "id": 131,
+      "name": "evening2_done",
+      "description": "Day 2 evening scene played",
+      "initialValue": 0
+    },
+    {
+      "id": 132,
+      "name": "evening3_done",
+      "description": "Day 3 evening / pre-hearing scene played",
+      "initialValue": 0
+    },
+    {
+      "id": 133,
+      "name": "day1_complete",
+      "description": "All day 1 objectives met",
+      "initialValue": 0
+    },
+    {
+      "id": 134,
+      "name": "day2_complete",
+      "description": "All day 2 objectives met",
       "initialValue": 0
     }
   ],
@@ -11741,6 +12909,26 @@
       "word": "end",
       "wordType": "noun",
       "id": 121
+    },
+    {
+      "word": "greato",
+      "wordType": "noun",
+      "id": 122
+    },
+    {
+      "word": "bronze",
+      "wordType": "noun",
+      "id": 123
+    },
+    {
+      "word": "cigar",
+      "wordType": "noun",
+      "id": 124
+    },
+    {
+      "word": "smoke",
+      "wordType": "verb",
+      "id": 125
     }
   ],
   "music": []
