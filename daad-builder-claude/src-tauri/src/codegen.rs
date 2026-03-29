@@ -381,7 +381,7 @@ impl DaadCodeGenerator {
     fn generate_ctl_section() -> String {
         // Full CTL matching Rabenstein/working DSF for PC target
         let mut code = String::from("/CTL\n_\n");
-        code.push_str("#define Turns_TAB 27\n");
+        code.push_str("#define Turns_TAB \"COLS-13\"\n");
         code.push_str("\n");
         code.push_str("#define NOTCREATED 252\n");
         code.push_str("#define TRUE 1\n");
@@ -1524,26 +1524,20 @@ impl DaadCodeGenerator {
         code.push_str("                DONE\n\n");
 
         if show_loc {
-            code.push_str("; Print location name for current location.\n");
+            // Location entries — NO DONE, fall through (matching Rabenstein)
+            code.push_str("; Print location name at status line.\n");
             for loc in &game.locations {
                 if loc.id == 0 { continue; }
                 let msg_idx = loc_name_msg_offset + (loc.id as usize - 1);
                 code.push_str(">\n");
                 code.push_str(&format!("_       _       AT {}\n", loc.id));
-                code.push_str(&format!("                MES {}\n", msg_idx));
-                if show_turns {
-                    code.push_str("                PROCESS 12\n");
-                } else {
-                    code.push_str("                WINDOW 1\n");
-                }
-                code.push_str("                DONE\n\n");
+                code.push_str(&format!("                MES {}\n\n", msg_idx));
             }
-        } else if show_turns {
-            // No location name but still show turns
-            code.push_str(">\n");
-            code.push_str("_       _       PROCESS 12\n");
-            code.push_str("                DONE\n\n");
         }
+
+        // PROCESS 12 at the end — prints turns and switches back to WINDOW 1
+        code.push_str(">\n");
+        code.push_str("_       _       PROCESS 12\n\n");
 
         // ── PRO 12: Print right-side status bar content ─────────────────
         code.push_str("/PRO 12\n\n");
@@ -1585,11 +1579,15 @@ impl DaadCodeGenerator {
                 code.push_str("                WINDOW 1\n\n");
             },
             _ => {
-                // "turns" (default)
-                code.push_str("; Print turns counter right-justified in status bar.\n\n");
+                // "turns" (default) — matching Rabenstein PRO 12 exactly
+                // Entry 1: TAB positioning (with text-mode fallback)
                 code.push_str(">\n");
                 code.push_str("_       _       TAB Turns_TAB\n");
-                code.push_str(&format!("                MES {}\n", turns_msg));
+                code.push_str("                LT 29 128\n");
+                code.push_str("                TAB 67\n\n");
+                // Entry 2: print label + value, switch back to text window
+                code.push_str(">\n");
+                code.push_str(&format!("_       _       MES {}\n", turns_msg));
                 code.push_str("                DPRINT Turns\n");
                 code.push_str("                WINDOW 1\n\n");
             },
