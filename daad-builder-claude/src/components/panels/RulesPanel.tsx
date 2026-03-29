@@ -50,6 +50,8 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
   const [selectedRule, setSelectedRule] = useState<number | null>(null);
   const [processFilter, setProcessFilter] = useState<ProcessTable | "all">("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [batchMode, setBatchMode] = useState(false);
+  const [batchSelected, setBatchSelected] = useState<Set<number>>(new Set());
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [showConditions, setShowConditions] = useState(true);
   const [showActions, setShowActions] = useState(true);
@@ -440,11 +442,55 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
           })()}
         </select>
 
-        <div style={{ fontSize: 12, fontWeight: 600, color: "var(--green-bright)" }}>
-          RULES ({filteredRules.length}/{(game.rules || []).length})
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--green-bright)" }}>
+            RULES ({filteredRules.length}/{(game.rules || []).length})
+          </div>
+          <button className="btn btn-secondary" style={{ fontSize: 9, padding: "3px 6px" }}
+            onClick={() => { setBatchMode(!batchMode); setBatchSelected(new Set()); }}>
+            {batchMode ? "✓ Batch" : "☐ Batch"}
+          </button>
         </div>
 
-        {canDrag && (game.rules || []).length > 1 && (
+        {/* Batch actions */}
+        {batchMode && batchSelected.size > 0 && (
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", padding: 6, background: "rgba(0,255,255,0.06)", borderRadius: 4, fontSize: 10 }}>
+            <span style={{ color: "var(--cyan-bright)", marginRight: 4 }}>{batchSelected.size} selected:</span>
+            <button className="btn btn-secondary" style={{ fontSize: 9, padding: "2px 6px" }}
+              onClick={() => {
+                setGame(prev => ({ ...prev, rules: prev.rules.map(r => batchSelected.has(r.id) ? { ...r, enabled: true } : r) }));
+              }}>Enable</button>
+            <button className="btn btn-secondary" style={{ fontSize: 9, padding: "2px 6px" }}
+              onClick={() => {
+                setGame(prev => ({ ...prev, rules: prev.rules.map(r => batchSelected.has(r.id) ? { ...r, enabled: false } : r) }));
+              }}>Disable</button>
+            <select className="form-input form-select" style={{ fontSize: 9, width: 90, padding: "2px 4px" }}
+              defaultValue=""
+              onChange={e => {
+                if (!e.target.value) return;
+                setGame(prev => ({ ...prev, rules: prev.rules.map(r => batchSelected.has(r.id) ? { ...r, process: e.target.value } : r) }));
+                e.target.value = "";
+              }}>
+              <option value="">Move to…</option>
+              <option value="PRO0">PRO 0</option>
+              <option value="PRO4">PRO 4</option>
+              <option value="PRO5">PRO 5</option>
+            </select>
+            <button className="btn btn-danger" style={{ fontSize: 9, padding: "2px 6px" }}
+              onClick={() => {
+                if (confirm(`Delete ${batchSelected.size} rules?`)) {
+                  setGame(prev => ({ ...prev, rules: prev.rules.filter(r => !batchSelected.has(r.id)) }));
+                  setBatchSelected(new Set());
+                }
+              }}>Delete</button>
+            <button className="btn" style={{ fontSize: 9, padding: "2px 6px" }}
+              onClick={() => setBatchSelected(new Set(filteredRules.map(r => r.id)))}>All</button>
+            <button className="btn" style={{ fontSize: 9, padding: "2px 6px" }}
+              onClick={() => setBatchSelected(new Set())}>None</button>
+          </div>
+        )}
+
+        {canDrag && (game.rules || []).length > 1 && !batchMode && (
           <div style={{
             fontSize: 10, color: "var(--text-dim)", padding: 8,
             background: "rgba(0,255,65,0.05)", border: "1px solid rgba(0,255,65,0.2)", borderRadius: 4,
@@ -487,7 +533,17 @@ export default function RulesPanel({ game, setGame, selectItemId }: RulesPanelPr
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  {canDrag && (
+                  {batchMode && (
+                    <input type="checkbox" checked={batchSelected.has(rule.id)}
+                      onChange={e => {
+                        const next = new Set(batchSelected);
+                        if (e.target.checked) next.add(rule.id); else next.delete(rule.id);
+                        setBatchSelected(next);
+                      }}
+                      onClick={e => e.stopPropagation()}
+                      style={{ width: 14, height: 14 }} />
+                  )}
+                  {canDrag && !batchMode && (
                     <span style={{ color: "var(--text-dim)", fontSize: 16 }} title="Drag to reorder">⋮⋮</span>
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
