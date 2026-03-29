@@ -47,13 +47,13 @@ export function checkObjectUsage(game: DaadGame, objectId: number): UsageInfo {
     details.push(`${objectsInside.length} object(s) inside this container`);
   }
 
-  // Check rules referencing this object
+  // Check rules referencing this object (with specific rule names)
   const rulesWithObject = game.rules.filter(rule =>
-    rule.conditions.some(c => c.params.objno === objectId) ||
-    rule.actions.some(a => a.params.objno === objectId)
+    rule.conditions.some(c => c.params.objno === objectId || c.params.objno1 === objectId || c.params.objno2 === objectId) ||
+    rule.actions.some(a => a.params.objno === objectId || a.params.objno1 === objectId || a.params.objno2 === objectId)
   );
-  if (rulesWithObject.length > 0) {
-    details.push(`${rulesWithObject.length} rule(s)`);
+  for (const rule of rulesWithObject) {
+    details.push(`Rule #${rule.id} "${rule.name}"`);
   }
 
   return { total: details.length, details };
@@ -62,13 +62,26 @@ export function checkObjectUsage(game: DaadGame, objectId: number): UsageInfo {
 export function checkFlagUsage(game: DaadGame, flagId: number): UsageInfo {
   const details: string[] = [];
 
-  // Check rules referencing this flag
+  // Check rules referencing this flag (in conditions and actions)
   const rulesWithFlag = game.rules.filter(rule =>
-    rule.conditions.some(c => c.params.flagno === flagId) ||
-    rule.actions.some(a => a.params.flagno === flagId)
+    rule.conditions.some(c =>
+      c.params.flagno === flagId || c.params.flagno1 === flagId || c.params.flagno2 === flagId
+    ) ||
+    rule.actions.some(a =>
+      a.params.flagno === flagId || a.params.flagno1 === flagId || a.params.flagno2 === flagId || a.params.value === flagId
+    )
   );
   if (rulesWithFlag.length > 0) {
-    details.push(`${rulesWithFlag.length} rule(s)`);
+    for (const rule of rulesWithFlag) {
+      const inCond = rule.conditions.some(c => c.params.flagno === flagId || c.params.flagno1 === flagId || c.params.flagno2 === flagId);
+      const inAct = rule.actions.some(a => a.params.flagno === flagId || a.params.flagno1 === flagId || a.params.flagno2 === flagId);
+      details.push(`Rule #${rule.id} "${rule.name}" (${inCond ? "condition" : ""}${inCond && inAct ? " + " : ""}${inAct ? "action" : ""})`);
+    }
+  }
+
+  // Check status bar config
+  if (game.statusBarConfig?.rightFlagId === flagId) {
+    details.push("Status bar (right side display)");
   }
 
   return { total: details.length, details };
