@@ -381,7 +381,7 @@ impl DaadCodeGenerator {
     fn generate_ctl_section() -> String {
         // Full CTL matching Rabenstein/working DSF for PC target
         let mut code = String::from("/CTL\n_\n");
-        code.push_str("#define Turns_TAB \"COLS-13\"\n");
+        code.push_str("#define Turns_TAB 27\n");
         code.push_str("\n");
         code.push_str("#define NOTCREATED 252\n");
         code.push_str("#define TRUE 1\n");
@@ -1126,13 +1126,13 @@ impl DaadCodeGenerator {
             code.push_str(">\n");
             code.push_str("_       _       WINAT 13 0\n");
             code.push_str("                WINDOW 1\n");
-            code.push_str("                WINSIZE 12 COLS\n\n");
+            code.push_str("                WINSIZE 12 40\n\n");
         } else {
             code.push_str("; Set text window below status bar (line 1).\n");
             code.push_str(">\n");
             code.push_str("_       _       WINDOW 1\n");
             code.push_str("                WINAT 1 0\n");
-            code.push_str("                WINSIZE 24 COLS\n\n");
+            code.push_str("                WINSIZE 24 40\n\n");
         }
 
         // Dark flag calculation
@@ -1390,31 +1390,25 @@ impl DaadCodeGenerator {
         code.push_str("/PRO 6\n\n");
         code.push_str("; Initialization process. Called from PRO 0 at location 0.\n\n");
 
-        // Window 0 = full screen for title/graphics
+        // Init: set up all windows, show title + intro
         code.push_str(">\n");
         code.push_str("_       _       WINDOW 0\n");
         code.push_str("                WINAT 0 0\n");
-        code.push_str("                WINSIZE 25 128\n");
+        code.push_str("                WINSIZE 25 40\n");
         code.push_str("                CLS\n");
-        // Window 2 = status bar (line 0, 1 row, full width)
-        // PCDAAD: NUM_COLUMNS=40, so width 40 fills the screen
+        // Status bar: WINDOW 2, line 0, 1 row, 40 cols
         code.push_str("                WINDOW 2\n");
         code.push_str("                WINAT 0 0\n");
-        code.push_str("                WINSIZE 1 COLS\n");
-        // Window 1 = text window (starts at line 1, below status bar)
+        code.push_str("                WINSIZE 1 40\n");
+        // Text window: WINDOW 1, line 1 (below status), 24 rows, 40 cols
         code.push_str("                WINDOW 1\n");
         code.push_str("                WINAT 1 0\n");
-        code.push_str("                WINSIZE 24 COLS\n");
-        // Show title screen — try to load picture 0 (title image)
-        code.push_str("                WINDOW 0\n");
-        code.push_str("                PICTURE 0\n");
-        code.push_str("                DISPLAY 0\n");
-        // Show title text below picture (or full screen if no picture)
-        code.push_str("                WINDOW 1\n");
+        code.push_str("                WINSIZE 24 40\n");
+        // Title screen
         code.push_str("                DESC 0\n");
         code.push_str("                ANYKEY\n");
         code.push_str("                CLS\n");
-        // Show intro text
+        // Intro text
         code.push_str(&format!("                MESSAGE {}\n", intro_msg));
         code.push_str("                ANYKEY\n");
         code.push_str("                CLS\n");
@@ -1507,8 +1501,11 @@ impl DaadCodeGenerator {
         // ── PRO 11: Status line ────────────────────────────────────────────
         code.push_str("/PRO 11\n\n");
         code.push_str("; Update status bar (WINDOW 2, defined in PRO 6 init).\n\n");
+        // Reset WINDOW 2 position every time (PCDAAD may not persist from init)
         code.push_str(">\n");
         code.push_str("_       _       WINDOW 2\n");
+        code.push_str("                WINAT 0 0\n");
+        code.push_str("                WINSIZE 1 40\n");
         let sb_paper = game.status_bar_config.as_ref().map_or(4, |c| c.paper_color);
         let sb_ink = game.status_bar_config.as_ref().map_or(15, |c| c.ink_color);
         code.push_str(&format!("                PAPER {}\n", sb_paper));
