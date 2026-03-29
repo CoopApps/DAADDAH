@@ -1120,13 +1120,13 @@ impl DaadCodeGenerator {
             code.push_str(">\n");
             code.push_str("_       _       WINAT 13 0\n");
             code.push_str("                WINDOW 1\n");
-            code.push_str("                WINSIZE 12 128\n\n");
+            code.push_str("                WINSIZE 12 40\n\n");
         } else {
             code.push_str("; Set text window below status bar (line 1).\n");
             code.push_str(">\n");
             code.push_str("_       _       WINDOW 1\n");
             code.push_str("                WINAT 1 0\n");
-            code.push_str("                WINSIZE 24 128\n\n");
+            code.push_str("                WINSIZE 24 40\n\n");
         }
 
         // Dark flag calculation
@@ -1149,7 +1149,7 @@ impl DaadCodeGenerator {
             code.push_str(">\n");
             code.push_str("_       _       WINDOW 1\n");
             code.push_str("                WINAT 0 0\n");
-            code.push_str("                WINSIZE 25 127\n");
+            code.push_str("                WINSIZE 24 40\n");
             code.push_str("                CLS\n");
             code.push_str("$pictureOK\n\n");
         }
@@ -1390,13 +1390,14 @@ impl DaadCodeGenerator {
         code.push_str("                WINSIZE 25 128\n");
         code.push_str("                CLS\n");
         // Window 2 = status bar (line 0, 1 row, full width)
+        // PCDAAD: NUM_COLUMNS=40, so width 40 fills the screen
         code.push_str("                WINDOW 2\n");
         code.push_str("                WINAT 0 0\n");
-        code.push_str("                WINSIZE 1 128\n");
+        code.push_str("                WINSIZE 1 40\n");
         // Window 1 = text window (starts at line 1, below status bar)
         code.push_str("                WINDOW 1\n");
         code.push_str("                WINAT 1 0\n");
-        code.push_str("                WINSIZE 24 128\n");
+        code.push_str("                WINSIZE 24 40\n");
         // Show title screen (location 0 description)
         code.push_str("                WINDOW 1\n");
         code.push_str("                DESC 0\n");
@@ -1520,8 +1521,10 @@ impl DaadCodeGenerator {
         // ── PRO 12: Print turns counter on right side of status bar ──────
         code.push_str("/PRO 12\n\n");
         code.push_str("; Print turns counter right-justified in status bar.\n\n");
+        // PCDAAD uses 40 columns (320px / 8px font), not 80
+        // TAB to column 27 = 40 - 13 chars for "Turns: NNN"
         code.push_str(">\n");
-        code.push_str("_       _       TAB 67\n");
+        code.push_str("_       _       TAB 27\n");
         code.push_str(&format!("                MES {}\n", turns_msg));
         code.push_str("                DPRINT Turns\n");
         code.push_str("                WINDOW 1\n\n");
