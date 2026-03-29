@@ -45,7 +45,7 @@ export default function PreviewPanelCanvas({ game }: PreviewPanelProps) {
 
     const timeoutId = setTimeout(() => {
       const [nextCommand, ...remainingCommands] = autoWalkQueue;
-      console.log(`[AUTO-WALKTHROUGH] Executing: "${nextCommand}" (${remainingCommands.length} remaining)`);
+      // debug: console.log(`[AUTO-WALKTHROUGH] Executing: "${nextCommand}" (${remainingCommands.length} remaining)`);
 
       handleCommand(nextCommand);
       setAutoWalkQueue(remainingCommands);

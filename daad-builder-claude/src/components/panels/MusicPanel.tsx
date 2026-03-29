@@ -166,36 +166,36 @@ export default function MusicPanel({ game, setGame, selectItemId }: MusicPanelPr
       return;
     }
 
-    console.log('[MusicPanel] Playing track:', track.name, 'Notes:', track.notes.length);
+    // debug: console.log('[MusicPanel] Playing track:', track.name, 'Notes:', track.notes.length);
 
     // Ensure audio context exists and is running
     if (!audioContextRef.current) {
       audioContextRef.current = new AudioContext();
-      console.log('[MusicPanel] Created audio context');
+      // debug: console.log('[MusicPanel] Created audio context');
     }
 
     // Resume audio context (browsers require user interaction)
     if (audioContextRef.current.state === 'suspended') {
       await audioContextRef.current.resume();
-      console.log('[MusicPanel] Resumed audio context');
+      // debug: console.log('[MusicPanel] Resumed audio context');
     }
 
-    console.log('[MusicPanel] Audio context state:', audioContextRef.current.state);
+    // debug: console.log('[MusicPanel] Audio context state:', audioContextRef.current.state);
 
     stopPreviewRef.current = false;
     setPreviewingTrackId(track.id);
 
     const beatDuration = 60 / track.tempo;
 
-    console.log('[MusicPanel] Starting note loop, beatDuration:', beatDuration, 'notes:', track.notes.length);
+    // debug: console.log('[MusicPanel] Starting note loop, beatDuration:', beatDuration, 'notes:', track.notes.length);
 
     for (let i = 0; i < track.notes.length; i++) {
       const note = track.notes[i];
-      console.log(`[MusicPanel] Playing note ${i + 1}/${track.notes.length}:`, note.note, note.octave);
+      // debug: console.log(`[MusicPanel] Playing note ${i + 1}/${track.notes.length}:`, note.note, note.octave);
 
       // Check if we should stop
       if (stopPreviewRef.current) {
-        console.log('[MusicPanel] Stopped by user');
+        // debug: console.log('[MusicPanel] Stopped by user');
         break;
       }
 
@@ -353,7 +353,7 @@ export default function MusicPanel({ game, setGame, selectItemId }: MusicPanelPr
     const gainNode = ctx.createGain();
 
     const frequency = NOTE_FREQUENCIES[`${note}${octave}`];
-    console.log(`[playNote] Note: ${note}${octave}, Frequency: ${frequency}, Duration: ${duration}`);
+    // debug: console.log(`[playNote] Note: ${note}${octave}, Frequency: ${frequency}, Duration: ${duration}`);
 
     if (!frequency) {
       console.warn(`[playNote] No frequency found for ${note}${octave}`);
@@ -370,7 +370,7 @@ export default function MusicPanel({ game, setGame, selectItemId }: MusicPanelPr
     oscillator.connect(gainNode);
     gainNode.connect(ctx.destination);
 
-    console.log(`[playNote] Starting oscillator at ${ctx.currentTime}, stopping at ${ctx.currentTime + duration}`);
+    // debug: console.log(`[playNote] Starting oscillator at ${ctx.currentTime}, stopping at ${ctx.currentTime + duration}`);
     oscillator.start(ctx.currentTime);
     oscillator.stop(ctx.currentTime + duration);
   };

@@ -53,9 +53,9 @@ export default function MergePanel({ game, setGame }: MergePanelProps) {
     }
 
     try {
-      console.log("Attempting to parse JSON...");
+      // debug: console.log("Attempting to parse JSON...");
       const data = JSON.parse(jsonInput);
-      console.log("JSON parsed successfully:", data);
+      // debug: console.log("JSON parsed successfully:", data);
 
       const log: string[] = [];
 
@@ -74,7 +74,7 @@ export default function MergePanel({ game, setGame }: MergePanelProps) {
         return;
       }
 
-      console.log("Starting merge...");
+      // debug: console.log("Starting merge...");
 
       // Merge top-level properties
       if (data.title !== undefined) {
@@ -100,7 +100,7 @@ export default function MergePanel({ game, setGame }: MergePanelProps) {
 
       // Merge locations
       if (data.locations && Array.isArray(data.locations)) {
-        console.log(`Merging ${data.locations.length} locations...`);
+        // debug: console.log(`Merging ${data.locations.length} locations...`);
         if (!game.locations) game.locations = [];
         data.locations.forEach((loc: any) => {
           const existingIndex = game.locations.findIndex(l => l.id === loc.id);
@@ -116,7 +116,7 @@ export default function MergePanel({ game, setGame }: MergePanelProps) {
 
       // Merge objects
       if (data.objects && Array.isArray(data.objects)) {
-        console.log(`Merging ${data.objects.length} objects...`);
+        // debug: console.log(`Merging ${data.objects.length} objects...`);
         if (!game.objects) game.objects = [];
         data.objects.forEach((obj: any) => {
           const existingIndex = game.objects.findIndex(o => o.id === obj.id);
@@ -132,7 +132,7 @@ export default function MergePanel({ game, setGame }: MergePanelProps) {
 
       // Merge rules/responses
       if (data.rules && Array.isArray(data.rules)) {
-        console.log(`Merging ${data.rules.length} rules...`);
+        // debug: console.log(`Merging ${data.rules.length} rules...`);
         if (!game.rules) game.rules = [];
         data.rules.forEach((rule: any) => {
           const existingIndex = game.rules.findIndex(r => r.id === rule.id);
@@ -148,7 +148,7 @@ export default function MergePanel({ game, setGame }: MergePanelProps) {
 
       // Merge vocabulary
       if (data.vocabulary && Array.isArray(data.vocabulary)) {
-        console.log(`Merging ${data.vocabulary.length} vocabulary...`);
+        // debug: console.log(`Merging ${data.vocabulary.length} vocabulary...`);
         if (!game.vocabulary) game.vocabulary = [];
         data.vocabulary.forEach((vocab: any) => {
           // Match by word AND wordType (not by ID, since IDs can overlap between types)
@@ -167,7 +167,7 @@ export default function MergePanel({ game, setGame }: MergePanelProps) {
 
       // Merge flags
       if (data.flags && Array.isArray(data.flags)) {
-        console.log(`Merging ${data.flags.length} flags...`);
+        // debug: console.log(`Merging ${data.flags.length} flags...`);
         if (!game.flags) game.flags = [];
         data.flags.forEach((flag: any) => {
           const existingIndex = game.flags.findIndex(f => f.id === flag.id);
@@ -183,7 +183,7 @@ export default function MergePanel({ game, setGame }: MergePanelProps) {
 
       // Merge messages
       if (data.messages && Array.isArray(data.messages)) {
-        console.log(`Merging ${data.messages.length} messages...`);
+        // debug: console.log(`Merging ${data.messages.length} messages...`);
         if (!game.messages) game.messages = [];
         data.messages.forEach((msg: string, index: number) => {
           if (index < (game.messages || []).length) {
@@ -198,7 +198,7 @@ export default function MergePanel({ game, setGame }: MergePanelProps) {
 
       // Merge music
       if (data.music && Array.isArray(data.music)) {
-        console.log(`Merging ${data.music.length} music...`);
+        // debug: console.log(`Merging ${data.music.length} music...`);
         if (!game.music) game.music = [];
         data.music.forEach((track: any) => {
           const existingIndex = game.music.findIndex(m => m.id === track.id);
@@ -212,11 +212,11 @@ export default function MergePanel({ game, setGame }: MergePanelProps) {
         });
       }
 
-      console.log("Merge complete, updating game state...");
+      // debug: console.log("Merge complete, updating game state...");
       setGame({ ...game });
       setMergeLog(log);
       setJsonInput("");
-      console.log("Done!");
+      // debug: console.log("Done!");
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);

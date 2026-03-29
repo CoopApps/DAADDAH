@@ -301,7 +301,7 @@ function executeAction(action: Action, context: EngineContext): void {
       // Update state AND context immediately so subsequent actions see the new location
       state.currentLocation = locno;
       setState({ ...state, currentLocation: locno });
-      console.log(`[GOTO] Moved to location ${locno}`);
+      // debug: console.log(`[GOTO] Moved to location ${locno}`);
       break;
     }
 
@@ -380,7 +380,7 @@ function executeAction(action: Action, context: EngineContext): void {
           objectLocations: newObjectLocations,
           inventory: state.inventory.filter(id => id !== objno)
         });
-        console.log(`[PLACE] Moved object ${objno} to location ${locno}`);
+        // debug: console.log(`[PLACE] Moved object ${objno} to location ${locno}`);
       }
       break;
     }
@@ -584,24 +584,24 @@ export function processCommand(input: string, context: EngineContext): boolean {
   // Parse input into verb/noun
   const { verb, noun } = parseInput(input, game.vocabulary);
 
-  console.log(`[RULE ENGINE] Input: "${input}"`);
-  console.log(`[RULE ENGINE] Parsed - verb: ${verb}, noun: ${noun}`);
-  console.log(`[RULE ENGINE] Vocabulary size: ${game.vocabulary.length}`);
+  // debug: console.log(`[RULE ENGINE] Input: "${input}"`);
+  // debug: console.log(`[RULE ENGINE] Parsed - verb: ${verb}, noun: ${noun}`);
+  // debug: console.log(`[RULE ENGINE] Vocabulary size: ${game.vocabulary.length}`);
 
   // Debug: Show what vocabulary words match
   const words = input.toLowerCase().trim().split(/\s+/);
-  console.log(`[RULE ENGINE] Looking for verb "${words[0]}" in vocabulary...`);
+  // debug: console.log(`[RULE ENGINE] Looking for verb "${words[0]}" in vocabulary...`);
   const verbMatches = game.vocabulary.filter(v => v.wordType === "verb" && v.word === words[0]);
-  console.log(`[RULE ENGINE] Verb matches:`, verbMatches);
+  // debug: console.log(`[RULE ENGINE] Verb matches:`, verbMatches);
 
   if (words.length > 1) {
-    console.log(`[RULE ENGINE] Looking for noun "${words[1]}" in vocabulary...`);
+    // debug: console.log(`[RULE ENGINE] Looking for noun "${words[1]}" in vocabulary...`);
     const nounMatches = game.vocabulary.filter(v => v.wordType === "noun" && v.word === words[1]);
-    console.log(`[RULE ENGINE] Noun matches:`, nounMatches);
+    // debug: console.log(`[RULE ENGINE] Noun matches:`, nounMatches);
   }
 
   if (verb === null) {
-    console.log(`[RULE ENGINE] No valid verb found, returning false`);
+    // debug: console.log(`[RULE ENGINE] No valid verb found, returning false`);
     return false; // No valid verb found
   }
 
@@ -610,28 +610,28 @@ export function processCommand(input: string, context: EngineContext): boolean {
 
   for (const process of processTables) {
     const matchingRules = findMatchingRules(game, process, verb, noun);
-    console.log(`[RULE ENGINE] ${process}: Found ${matchingRules.length} matching rules for verb=${verb}, noun=${noun}`);
+    // debug: console.log(`[RULE ENGINE] ${process}: Found ${matchingRules.length} matching rules for verb=${verb}, noun=${noun}`);
 
     for (const rule of matchingRules) {
-      console.log(`[RULE ENGINE] Checking rule #${rule.id}: ${rule.name}`);
+      // debug: console.log(`[RULE ENGINE] Checking rule #${rule.id}: ${rule.name}`);
       const conditionsMet = checkConditions(rule, context);
-      console.log(`[RULE ENGINE] Rule #${rule.id} conditions met: ${conditionsMet}`);
+      // debug: console.log(`[RULE ENGINE] Rule #${rule.id} conditions met: ${conditionsMet}`);
 
       if (conditionsMet) {
-        console.log(`[RULE ENGINE] Executing rule #${rule.id}: ${rule.name}`);
+        // debug: console.log(`[RULE ENGINE] Executing rule #${rule.id}: ${rule.name}`);
         executeActions(rule, context);
 
         // Check if DONE action was executed
         const hasDone = rule.actions.some(a => a.type === "DONE");
         if (hasDone) {
-          console.log(`[RULE ENGINE] Rule #${rule.id} has DONE, stopping processing`);
+          // debug: console.log(`[RULE ENGINE] Rule #${rule.id} has DONE, stopping processing`);
           return true; // Stop processing
         }
       }
     }
   }
 
-  console.log(`[RULE ENGINE] No matching rule found, returning false`);
+  // debug: console.log(`[RULE ENGINE] No matching rule found, returning false`);
   return false; // No matching rule found
 }
 
@@ -642,31 +642,31 @@ export function processCommand(input: string, context: EngineContext): boolean {
 export function executePRO2(context: EngineContext): void {
   const { game, state } = context;
 
-  console.log(`[PRO2] Executing automatic rules for location ${state.currentLocation}`);
+  // debug: console.log(`[PRO2] Executing automatic rules for location ${state.currentLocation}`);
 
   // Get all PRO2 rules
   const pro2Rules = game.rules.filter(r => r.enabled && r.process === "PRO2");
-  console.log(`[PRO2] Found ${pro2Rules.length} PRO2 rules total`);
+  // debug: console.log(`[PRO2] Found ${pro2Rules.length} PRO2 rules total`);
 
   for (const rule of pro2Rules) {
-    console.log(`[PRO2] Checking rule #${rule.id}: ${rule.name}`);
+    // debug: console.log(`[PRO2] Checking rule #${rule.id}: ${rule.name}`);
 
     // Check if conditions are met (location conditions only, not verb/noun)
     const conditionsMet = checkConditions(rule, context);
-    console.log(`[PRO2] Rule #${rule.id} conditions met: ${conditionsMet}`);
+    // debug: console.log(`[PRO2] Rule #${rule.id} conditions met: ${conditionsMet}`);
 
     if (conditionsMet) {
-      console.log(`[PRO2] Executing rule #${rule.id}: ${rule.name}`);
+      // debug: console.log(`[PRO2] Executing rule #${rule.id}: ${rule.name}`);
       executeActions(rule, context);
 
       // PRO2 rules with DONE stop further PRO2 processing
       const hasDone = rule.actions.some(a => a.type === "DONE");
       if (hasDone) {
-        console.log(`[PRO2] Rule #${rule.id} has DONE, stopping PRO2 processing`);
+        // debug: console.log(`[PRO2] Rule #${rule.id} has DONE, stopping PRO2 processing`);
         break;
       }
     }
   }
 
-  console.log(`[PRO2] Automatic rule execution complete`);
+  // debug: console.log(`[PRO2] Automatic rule execution complete`);
 }

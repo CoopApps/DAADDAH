@@ -351,16 +351,144 @@ export function validateGame(game: DaadGame): ValidationIssue[] {
     if (obj.location.type === "limbo") {
       const hasPlacementRule = game.rules.some(rule =>
         rule.actions.some(action =>
-          action.type === "PLACE" && action.params.objno === obj.id
+          (action.type === "PLACE" || action.type === "CREATE") && action.params.objno === obj.id
         )
       );
       if (!hasPlacementRule) {
         issues.push({
           severity: "warning",
           category: "Orphaned Content",
-          message: `Object "${obj.description}" is in limbo and has no rules to place it`,
+          message: `Object "${obj.noun}" (ID: ${obj.id}) is in limbo with no PLACE/CREATE rule to reveal it`,
           panel: "objects",
           itemId: obj.id,
+        });
+      }
+    }
+  });
+
+  // Check for unused messages (defined but never referenced)
+  const usedMessages = new Set<number>();
+  game.rules.forEach((rule) => {
+    rule.actions.forEach((action) => {
+      if ((action.type === "MESSAGE" || action.type === "MES") && action.params.mesno !== undefined) {
+        usedMessages.add(Number(action.params.mesno));
+      }
+    });
+  });
+  game.messages.forEach((msg, idx) => {
+    if (!usedMessages.has(idx) && msg.trim() !== "") {
+      issues.push({
+        severity: "info",
+        category: "Unused Content",
+        message: `Message #${idx} is defined but not referenced by any rule`,
+        panel: "messages",
+        itemId: idx,
+      });
+    }
+  });
+
+  // Check for one-way exits (A→B exists but B→A doesn't)
+  game.locations.forEach((loc) => {
+    Object.entries(loc.exits).forEach(([dir, targetId]) => {
+      if (targetId === null) return;
+      const targetLoc = game.locations.find(l => l.id === targetId);
+      if (!targetLoc) return;
+      const hasReturn = Object.values(targetLoc.exits).some(id => id === loc.id);
+      if (!hasReturn) {
+        issues.push({
+          severity: "info",
+          category: "One-Way Exit",
+          message: `${loc.name} → ${targetLoc.name} (${dir}) has no return path`,
+          panel: "locations",
+          itemId: loc.id,
+        });
+      }
+    });
+  });
+
+  // Check for dark rooms without any light source object
+  const hasLightSource = game.objects.some(obj => obj.isLightSource);
+  const hasDarkRooms = game.locations.some(loc => loc.isDark);
+  if (hasDarkRooms && !hasLightSource) {
+    issues.push({
+      severity: "warning",
+      category: "Game Logic",
+      message: "Game has dark rooms but no light source object (Object 0 should be a light source)",
+      panel: "objects",
+    });
+  }
+
+  // Check for container objects that clash with location IDs
+  game.objects.forEach((obj) => {
+    if (obj.isContainer && game.locations.some(l => l.id === obj.id)) {
+      issues.push({
+        severity: "warning",
+        category: "Container Conflict",
+        message: `Container object "${obj.noun}" (ID: ${obj.id}) clashes with location ID ${obj.id}. DAAD reserves location N for container N's contents.`,
+        panel: "objects",
+        itemId: obj.id,
+      });
+    }
+  });
+
+  // Check for vocabulary conflicts (duplicate word + type combinations)
+  const vocabKeys = new Map<string, number[]>();
+  game.vocabulary.forEach((v) => {
+    const key = `${v.word.toLowerCase().slice(0, 5)}_${v.wordType}`;
+    if (!vocabKeys.has(key)) vocabKeys.set(key, []);
+    vocabKeys.get(key)!.push(v.id);
+  });
+  vocabKeys.forEach((ids, key) => {
+    if (ids.length > 1 && new Set(ids).size > 1) {
+      issues.push({
+        severity: "warning",
+        category: "Vocabulary Conflict",
+        message: `Word "${key.split("_")[0]}" has conflicting IDs: ${[...new Set(ids)].join(", ")}`,
+        panel: "vocabulary",
+      });
+    }
+  });
+
+  // Check for empty location descriptions
+  game.locations.forEach((loc) => {
+    if (loc.id > 0 && (!loc.description || loc.description.trim() === "")) {
+      issues.push({
+        severity: "warning",
+        category: "Incomplete Data",
+        message: `Location "${loc.name}" has no description`,
+        panel: "locations",
+        itemId: loc.id,
+      });
+    }
+  });
+
+  // Check for rules with no actions
+  game.rules.forEach((rule) => {
+    if (rule.enabled && rule.actions.length === 0) {
+      issues.push({
+        severity: "warning",
+        category: "Empty Rule",
+        message: `Rule "${rule.name}" has no actions — it will do nothing`,
+        panel: "rules",
+        itemId: rule.id,
+      });
+    }
+  });
+
+  // Check for missing DONE in response rules (PRO5)
+  game.rules.forEach((rule) => {
+    if (rule.enabled && (rule.process === "PRO5" || rule.process === "PRO0") &&
+        rule.verb !== "_" && rule.actions.length > 0) {
+      const lastAction = rule.actions[rule.actions.length - 1];
+      if (lastAction.type !== "DONE" && lastAction.type !== "NOTDONE" &&
+          lastAction.type !== "RESTART" && lastAction.type !== "END" &&
+          lastAction.type !== "REDO" && lastAction.type !== "OK") {
+        issues.push({
+          severity: "info",
+          category: "Missing DONE",
+          message: `Rule "${rule.name}" doesn't end with DONE/RESTART/END — execution will fall through to the next rule`,
+          panel: "rules",
+          itemId: rule.id,
         });
       }
     }

@@ -96,12 +96,12 @@ export default function CharactersPanel({ game, setGame, selectItemId }: Charact
   };
 
   const createNewCharacter = () => {
-    console.log("[CharactersPanel] createNewCharacter called");
-    console.log("[CharactersPanel] game.objects:", game.objects);
+    // debug: console.log("[CharactersPanel] createNewCharacter called");
+    // debug: console.log("[CharactersPanel] game.objects:", game.objects);
 
     // Use next available ID in objects array (consecutive)
     const newId = game.objects?.length || 0;
-    console.log("[CharactersPanel] newId:", newId);
+    // debug: console.log("[CharactersPanel] newId:", newId);
 
     const newChar: GameObject = {
       id: newId,
@@ -118,11 +118,11 @@ export default function CharactersPanel({ game, setGame, selectItemId }: Charact
       isPSI: true,
     };
 
-    console.log("[CharactersPanel] Creating character:", newChar);
+    // debug: console.log("[CharactersPanel] Creating character:", newChar);
     setGame(prev => ({ ...prev, objects: [...(prev.objects || []), newChar] }));
     setSelectedCharId(newId);
     showToast(`Character ${newId} created`, "success");
-    console.log("[CharactersPanel] Character creation complete");
+    // debug: console.log("[CharactersPanel] Character creation complete");
   };
 
   const initiateDelete = (character: GameObject) => {
