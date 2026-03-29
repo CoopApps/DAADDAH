@@ -757,6 +757,25 @@ pub async fn compile_game(
 
     compilation_logs.push("  ✓ DRB compilation successful".to_string());
 
+    // Step 5: Copy DAAD.FNT for PCDAAD (if not already done by image pipeline)
+    if platform_suffix == "msdos" {
+        let font_src = daadready_path.join("ASSETS").join("CHARSET").join("MSDOS.FNT");
+        let font_dst_ddb = std::path::Path::new(&ddb_path).parent()
+            .unwrap_or(std::path::Path::new(".")).join("DAAD.FNT");
+        if font_src.exists() && !font_dst_ddb.exists() {
+            if let Ok(_) = std::fs::copy(&font_src, &font_dst_ddb) {
+                compilation_logs.push(format!("  Font: {} copied", font_dst_ddb.display()));
+            }
+        }
+        // Also rename DDB to DAAD.DDB for PCDAAD
+        let daad_ddb = std::path::Path::new(&ddb_path).parent()
+            .unwrap_or(std::path::Path::new(".")).join("DAAD.DDB");
+        if ddb_path != daad_ddb.to_string_lossy() {
+            let _ = std::fs::copy(&ddb_path, &daad_ddb);
+            compilation_logs.push(format!("  Also copied as: {}", daad_ddb.display()));
+        }
+    }
+
     // Get file size
     let file_size = std::fs::metadata(&ddb_path)
         .map(|m| m.len())
