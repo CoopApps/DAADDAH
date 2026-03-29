@@ -272,6 +272,12 @@ export interface StatusBarConfig {
   showTurns: boolean;
   /** Show location name on the left side. Default: true */
   showLocationName: boolean;
+  /** What to show on the right side: "turns", "score", "custom", or "none". Default: "turns" */
+  rightContent?: "turns" | "score" | "custom" | "none";
+  /** Flag ID to display when rightContent is "score" or "custom". Default: 30 (Score) */
+  rightFlagId?: number;
+  /** Label for the right side content. Default: "Turns: " or "Score: " */
+  rightLabel?: string;
 }
 
 export type PanelType =

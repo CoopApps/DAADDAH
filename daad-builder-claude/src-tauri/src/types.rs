@@ -236,6 +236,15 @@ pub struct StatusBarConfig {
     pub ink_color: u8,
     pub show_turns: bool,
     pub show_location_name: bool,
+    /// What to show on the right: "turns", "score", "custom", "none"
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub right_content: Option<String>,
+    /// Flag ID for score/custom display
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub right_flag_id: Option<u8>,
+    /// Label text for right content (e.g. "Score: ", "Time: ")
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub right_label: Option<String>,
 }
 
 /// DAAD's process tables

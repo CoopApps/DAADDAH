@@ -1537,16 +1537,55 @@ impl DaadCodeGenerator {
             code.push_str("                DONE\n\n");
         }
 
-        // ── PRO 12: Print turns counter on right side of status bar ──────
+        // ── PRO 12: Print right-side status bar content ─────────────────
         code.push_str("/PRO 12\n\n");
-        code.push_str("; Print turns counter right-justified in status bar.\n\n");
-        // PCDAAD uses 40 columns (320px / 8px font), not 80
-        // TAB to column 27 = 40 - 13 chars for "Turns: NNN"
-        code.push_str(">\n");
-        code.push_str("_       _       TAB 27\n");
-        code.push_str(&format!("                MES {}\n", turns_msg));
-        code.push_str("                DPRINT Turns\n");
-        code.push_str("                WINDOW 1\n\n");
+        let right_content = game.status_bar_config.as_ref()
+            .and_then(|c| c.right_content.as_deref())
+            .unwrap_or("turns");
+        let right_flag = game.status_bar_config.as_ref()
+            .and_then(|c| c.right_flag_id)
+            .unwrap_or(if right_content == "score" { 30 } else { 31 }); // Score=flag 30, Turns=flag 31
+
+        match right_content {
+            "none" => {
+                // No right content, just switch back to text window
+                code.push_str(">\n");
+                code.push_str("_       _       WINDOW 1\n\n");
+            },
+            "score" => {
+                code.push_str("; Print score right-justified in status bar.\n\n");
+                code.push_str(">\n");
+                code.push_str("_       _       TAB 27\n");
+                let label = game.status_bar_config.as_ref()
+                    .and_then(|c| c.right_label.as_deref())
+                    .unwrap_or("Score: ");
+                code.push_str(&format!("                MESSAGE \"{}\"\n", Self::escape_text(label)));
+                code.push_str(&format!("                DPRINT {}\n", right_flag));
+                code.push_str("                WINDOW 1\n\n");
+            },
+            "custom" => {
+                code.push_str("; Print custom flag right-justified in status bar.\n\n");
+                code.push_str(">\n");
+                code.push_str("_       _       TAB 27\n");
+                let label = game.status_bar_config.as_ref()
+                    .and_then(|c| c.right_label.as_deref())
+                    .unwrap_or("");
+                if !label.is_empty() {
+                    code.push_str(&format!("                MESSAGE \"{}\"\n", Self::escape_text(label)));
+                }
+                code.push_str(&format!("                DPRINT {}\n", right_flag));
+                code.push_str("                WINDOW 1\n\n");
+            },
+            _ => {
+                // "turns" (default)
+                code.push_str("; Print turns counter right-justified in status bar.\n\n");
+                code.push_str(">\n");
+                code.push_str("_       _       TAB 27\n");
+                code.push_str(&format!("                MES {}\n", turns_msg));
+                code.push_str("                DPRINT Turns\n");
+                code.push_str("                WINDOW 1\n\n");
+            },
+        }
 
         // ── User-defined process tables (PRO 13+) ───────────────────────────
         // Collect all process table numbers used by rules that aren't handled above

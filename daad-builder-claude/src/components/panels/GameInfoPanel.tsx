@@ -354,24 +354,61 @@ export default function GameInfoPanel({ game, setGame, onNavigateToPanel }: Game
                 </div>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 16 }}>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-end" }}>
               <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 12, cursor: "pointer" }}>
                 <input type="checkbox" checked={game.statusBarConfig?.showLocationName ?? true}
                   onChange={e => updateStatusBar({ showLocationName: e.target.checked })} />
                 Show location name
               </label>
-              <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 12, cursor: "pointer" }}>
-                <input type="checkbox" checked={game.statusBarConfig?.showTurns ?? true}
-                  onChange={e => updateStatusBar({ showTurns: e.target.checked })} />
-                Show turns counter
-              </label>
+              <div>
+                <label className="form-label" style={{ fontSize: 10, margin: 0 }}>Right Side</label>
+                <select className="form-input form-select" style={{ fontSize: 11, width: 130 }}
+                  value={game.statusBarConfig?.rightContent ?? "turns"}
+                  onChange={e => {
+                    const val = e.target.value;
+                    updateStatusBar({
+                      rightContent: val as any,
+                      showTurns: val === "turns",
+                      rightLabel: val === "score" ? "Score: " : val === "turns" ? "Turns: " : game.statusBarConfig?.rightLabel,
+                    });
+                  }}>
+                  <option value="turns">Turns</option>
+                  <option value="score">Score</option>
+                  <option value="custom">Custom Flag</option>
+                  <option value="none">None</option>
+                </select>
+              </div>
+              {(game.statusBarConfig?.rightContent === "custom" || game.statusBarConfig?.rightContent === "score") && (
+                <div style={{ display: "flex", gap: 4 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 10, margin: 0 }}>Label</label>
+                    <input className="form-input" style={{ fontSize: 11, width: 70 }}
+                      value={game.statusBarConfig?.rightLabel ?? (game.statusBarConfig?.rightContent === "score" ? "Score: " : "")}
+                      onChange={e => updateStatusBar({ rightLabel: e.target.value })} />
+                  </div>
+                  {game.statusBarConfig?.rightContent === "custom" && (
+                    <div>
+                      <label className="form-label" style={{ fontSize: 10, margin: 0 }}>Flag</label>
+                      <input className="form-input" type="number" style={{ fontSize: 11, width: 50 }}
+                        value={game.statusBarConfig?.rightFlagId ?? 30} min={0} max={255}
+                        onChange={e => updateStatusBar({ rightFlagId: parseInt(e.target.value) || 30 })} />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div style={{
-              padding: "4px 8px", fontSize: 12, fontFamily: "monospace",
+              padding: "4px 8px", fontSize: 12, fontFamily: "monospace", marginTop: 8,
               background: DAAD_COLORS[game.statusBarConfig?.paperColor ?? 4].hex,
               color: DAAD_COLORS[game.statusBarConfig?.inkColor ?? 15].hex,
             }}>
-              Study{(game.statusBarConfig?.showTurns ?? true) ? "                    Turns: 0" : ""}
+              {(game.statusBarConfig?.showLocationName ?? true) ? "Study" : ""}
+              {(() => {
+                const rc = game.statusBarConfig?.rightContent ?? "turns";
+                if (rc === "none") return "";
+                const label = game.statusBarConfig?.rightLabel ?? (rc === "score" ? "Score: " : "Turns: ");
+                return "                    " + label + "0";
+              })()}
             </div>
           </div>
         )}
