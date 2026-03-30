@@ -3,12 +3,12 @@
   "title": "The Eyes of Max Carrados",
   "author": "Based on Ernest Bramah",
   "version": "1.0",
-  "introText": "London, 1914. You are Max Carrados, the blind detective whose other senses have grown extraordinarily acute through forty years of use.\n\nA telegram has arrived. A railway signalman named Hutchins is accused of causing a fatal accident at Knight's Cross Station. He swears the signal showed clear — but twenty-seven people are dead and the inquiry convenes tomorrow.\n\nSomething is wrong with this case. The sighted investigators have missed what only you can find.\n\nYour friend Louis Carlyle sits opposite, the case papers rustling in his hands. The familiar smell of old books and beeswax fills the room.\n",
+  "introText": "London, December 1914.\n\nYou are Max Carrados -- blind, wealthy, and possessed of senses that forty years of darkness have sharpened beyond anything the sighted can imagine. You read print by touch. You identify forgeries by weight and patina. You smoke the most unobtainable cigars in London and solve the cases that defeat everyone else.\n\nYour friend Louis Carlyle sits opposite you in the study at The Turrets. He has been turning the same page for ten minutes. His left shoe creaks -- he is carrying papers. He smells of railway soot.\n\n\"Louis,\" you say, \"you have a mystery somewhere about you. I know it by your step.\"\n\nHe sets a telegram on the desk. A railway signalman named Hutchins stands accused of causing a fatal crash at Knight's Cross Station. Twenty-seven dead. The signal showed clear, Hutchins swears. The inquiry convenes tomorrow.\n\nThe sighted investigators have found nothing. Perhaps it is time for a blind man to look.",
   "locations": [
     {
       "id": 0,
       "name": "Title Screen",
-      "description": "     The Eyes of Max Carrados\n     Based on Ernest Bramah\n     London, 1914\n\n     A DAAD Adventure\n\n",
+      "description": "     The Eyes of Max Carrados\n     Based on Ernest Bramah\n     London, December 1914\n\n     Part One: The Knight's Cross Signal Problem\n\n     A DAAD Text Adventure\n",
       "isDark": false,
       "exits": {
         "north": null,
@@ -30,7 +30,7 @@
     {
       "id": 1,
       "name": "Carrados's Study",
-      "description": "The leather of your armchair is warm beneath your hands — shaped precisely to you after forty years of use. The room comes to you through its signature: old books, beeswax polish, the cooling residue of last night's fire. The electric lamps are running at full power; you feel their warmth on your face as always. Carlyle's breathing tells you he is agitated. He has been turning the same page for ten minutes.",
+      "description": "The study at The Turrets. The electric lamps blaze at full power -- your characteristic touch of irony, you have been told. The leather of your armchair is warm beneath your hands, shaped to you after forty years. Old books line the walls. The fire crackles softly. Carlyle sits opposite, papers rustling. The front door is to the south.",
       "isDark": false,
       "exits": {
         "north": null,
@@ -253,7 +253,7 @@
       "description": "The cold hits you as you step onto the platform — a different kind of cold than the city, rawer and damp. The rails hum faintly with the vibration of a distant train running somewhere on the network. Creosote and engine smoke have soaked into the very wood beneath your feet. The signal box is east of here. You have been in a hundred signal boxes. You know exactly what to search for in this one.",
       "isDark": false,
       "exits": {
-        "north": null,
+        "north": 17,
         "south": null,
         "east": 13,
         "west": null,
@@ -386,7 +386,7 @@
       "isDark": false,
       "exits": {
         "north": null,
-        "south": null,
+        "south": 11,
         "east": 18,
         "west": null,
         "northeast": null,
@@ -403,7 +403,7 @@
     },
     {
       "id": 18,
-      "name": "Miss Chubb's Room",
+      "name": "The Lodger's Room",
       "description": "A fair-sized room on the first floor. The window faces north -- you can feel the draught and hear the railway cutting below. The room has been cleaned but carries traces of its last occupant. The window frame has small screw-holes where something was recently mounted.",
       "isDark": false,
       "exits": {
@@ -583,8 +583,7 @@
       "icon": "🔍",
       "weight": 1,
       "location": {
-        "type": "at",
-        "locationId": 13
+        "type": "limbo"
       },
       "isContainer": false,
       "isWearable": false,
@@ -1687,12 +1686,6 @@
           }
         },
         {
-          "type": "NOTZERO",
-          "params": {
-            "flagno": 100
-          }
-        },
-        {
           "type": "EQ",
           "params": {
             "flagno": 93,
@@ -1701,6 +1694,19 @@
         }
       ],
       "actions": [
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 0
+          }
+        },
+        {
+          "type": "DESTROY",
+          "params": {
+            "objno": 19
+          }
+        },
         {
           "type": "LET",
           "params": {
@@ -1755,7 +1761,7 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson appears. 'I observed Curzon Street yesterday evening, sir. The daily woman departs at noon. The gentleman returns at approximately six-thirty. The flat is unoccupied between noon and half past six.'"
+          "text": "Parkinson appears. 'I observed Curzon Street yesterday evening, sir. The building has a porter -- he takes his dinner at half past twelve, gone for thirty minutes at most. The daily woman departs at noon. The gentleman returns at approximately six-thirty. Our window is the porter's dinner break.'"
         }
       ],
       "id": 28
@@ -1791,6 +1797,19 @@
         {
           "type": "LET",
           "params": {
+            "flagno": 138,
+            "value": 0
+          }
+        },
+        {
+          "type": "DESTROY",
+          "params": {
+            "objno": 19
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
             "flagno": 93,
             "value": 3
           }
@@ -1798,7 +1817,7 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "The third morning. Carlyle has already left to meet Pendleton for luncheon. Parkinson waits with the car."
+          "text": "The third morning. Carlyle is preparing for the luncheon. 'I will keep Pendleton occupied from noon,' he says. 'You and Parkinson will have Curzon Street to yourselves.' He straightens his tie. 'Do be careful, Max.'"
         }
       ],
       "id": 29
@@ -1868,148 +1887,6 @@
       "id": 31
     },
     {
-      "name": "Hearing - Ending A",
-      "process": "PRO0",
-      "verb": "_",
-      "noun": "_",
-      "enabled": true,
-      "conditions": [
-        {
-          "type": "AT",
-          "params": {
-            "locno": 24
-          }
-        },
-        {
-          "type": "EQ",
-          "params": {
-            "flagno": 102,
-            "value": 6
-          }
-        }
-      ],
-      "actions": [
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "The inquiry is brief. You present the evidence. The glass proves tampering. The ruler and order slip prove premeditation. The stock certificates prove motive. The letter proves conspiracy. And the cologne -- traced across London -- proves one man was at every scene."
-        },
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "Mead testifies, his voice unsteady. Pendleton threatened his family. The chairman nods slowly. 'The evidence is overwhelming.'"
-        },
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "Hutchins is cleared. His record restored. As you leave, his hand grips yours -- rough, callused, trembling. He says nothing. He does not need to."
-        },
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "In the motor car, Carlyle is quiet. Then: 'How did you know, Max?' You smile. 'I listened, Louis. The signal was clear. Someone simply made certain that clear looked like danger.' Carlyle: 'The blind detective sees what sighted men miss.'"
-        },
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "\n*** THE END ***\n\nEnding A: Full Justice\nPendleton convicted. Hutchins restored. Mead protected."
-        },
-        {
-          "type": "END",
-          "params": {}
-        }
-      ],
-      "id": 32
-    },
-    {
-      "name": "Hearing - Ending B",
-      "process": "PRO0",
-      "verb": "_",
-      "noun": "_",
-      "enabled": true,
-      "conditions": [
-        {
-          "type": "AT",
-          "params": {
-            "locno": 24
-          }
-        },
-        {
-          "type": "EQ",
-          "params": {
-            "flagno": 102,
-            "value": 3
-          }
-        }
-      ],
-      "actions": [
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "You present what you have. The glass proves tampering. But there are gaps. Pendleton's solicitor argues circumstance. The chairman frowns."
-        },
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "'Hutchins is cleared. Regarding Pendleton, the evidence is suggestive but this board recommends further police investigation.' Pendleton adjusts his cufflinks. He knows. You know. But knowing is not proving."
-        },
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "\n*** THE END ***\n\nEnding B: Partial Justice\nHutchins cleared. Pendleton referred but not convicted.\nYou needed more evidence."
-        },
-        {
-          "type": "END",
-          "params": {}
-        }
-      ],
-      "id": 33
-    },
-    {
-      "name": "Hearing - Ending C",
-      "process": "PRO0",
-      "verb": "_",
-      "noun": "_",
-      "enabled": true,
-      "conditions": [
-        {
-          "type": "AT",
-          "params": {
-            "locno": 24
-          }
-        },
-        {
-          "type": "EQ",
-          "params": {
-            "flagno": 102,
-            "value": 1
-          }
-        }
-      ],
-      "actions": [
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "The glass proves tampering. Hutchins is cleared. But the chairman looks at you. 'And the saboteur, Mr Carrados?' You have no answer that would stand in court."
-        },
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "Somewhere in the City, Pendleton orders another cigar. He knows. You know. But knowing is not proving."
-        },
-        {
-          "type": "MESSAGE",
-          "params": {},
-          "text": "\n*** THE END ***\n\nEnding C: Hollow Victory\nHutchins cleared. The saboteur walks free."
-        },
-        {
-          "type": "END",
-          "params": {}
-        }
-      ],
-      "id": 34
-    },
-    {
       "name": "Flat timer",
       "process": "PRO4",
       "verb": "_",
@@ -2020,6 +1897,12 @@
           "type": "AT",
           "params": {
             "locno": 22
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 97
           }
         }
       ],
@@ -2051,7 +1934,13 @@
           "type": "EQ",
           "params": {
             "flagno": 98,
-            "value": 12
+            "value": 7
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 97
           }
         }
       ],
@@ -2059,7 +1948,7 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Two sharp knocks on the door. Parkinson's voice, low: 'I would suggest we do not linger, sir.'"
+          "text": "Two sharp knocks. Parkinson: 'I can hear the porter's door below, sir. Minutes at most.'"
         }
       ],
       "id": 36
@@ -2081,7 +1970,13 @@
           "type": "GT",
           "params": {
             "flagno": 98,
-            "value": 15
+            "value": 9
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 97
           }
         }
       ],
@@ -2089,7 +1984,7 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Three rapid knocks. 'Sir! Someone on the stairs. We must go now.' You gather what you have and move quickly to the door. Parkinson is already leading you down the back staircase."
+          "text": "Three rapid knocks. 'The porter is on the stairs, sir. We must go now.' You gather what you have and move quickly to the door. Parkinson is already leading you down the back staircase."
         },
         {
           "type": "GOTO",
@@ -2722,19 +2617,20 @@
           "params": {
             "objno": 19
           }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
         }
       ],
       "actions": [
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Carlyle reads the financial pages. Railway Deferred fell nine points. Someone bought before and sold at the peak. 'Harold Pendleton,' Carlyle says. 'A stockbroker. I heard his name at my club.'"
-        },
-        {
-          "type": "SET",
-          "params": {
-            "flagno": 65
-          }
+          "text": "The Evening Herald. Greatorex has marked the financial pages. The Central and Suburban Deferred fell nine points on the day of the crash. Three days before, they were rising steadily. Someone was buying. And now you know his name."
         },
         {
           "type": "DONE",
@@ -2773,7 +2669,7 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Carlyle describes the scene. 'A high blank wall on one side. On the other -- houses. The signal would be visible from upper floors.' He pauses. 'If someone wanted to study this signal, they would need a room with a view of it.'"
+          "text": "Carlyle describes the scene. 'A high blank wall on one side. But on the other -- houses. Substantial places, the kind that let rooms by the week. They overlook the railway line directly. Someone in one of those rooms could watch this signal box for hours.' He pauses. 'They are just north of the platform, Max. We could walk there.'"
         },
         {
           "type": "SET",
@@ -2804,6 +2700,12 @@
           "params": {
             "locno": 22
           }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 97
+          }
         }
       ],
       "actions": [
@@ -2822,6 +2724,84 @@
         }
       ],
       "id": 58
+    },
+    {
+      "id": 368,
+      "name": "LOOK study first time",
+      "process": "PRO5",
+      "verb": "look",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 5
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 135
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Carlyle,' you say, 'describe what you can.'\n\nHe clears his throat. 'Your study, Max. Unchanged as ever. Electric lamps blazing. Bronzes on the side table. The telegram is on the desk. The Morning Herald beside it -- I have been marking the financial pages.' He pauses. 'You will want to read both.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 135
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 383,
+      "name": "LOOK Signal Row",
+      "process": "PRO5",
+      "verb": "look",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 17
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 5
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Carlyle: 'Boarding houses, the lot of them. The kind that let rooms by the week. That one has a card in the window -- Miss Chubb, Rooms to Let.' He pauses. 'North-facing windows, Max. They look directly over the railway cutting.'"
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
     },
     {
       "name": "LOOK with Carlyle",
@@ -3311,6 +3291,12 @@
           "params": {
             "locno": 22
           }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 97
+          }
         }
       ],
       "actions": [
@@ -3327,24 +3313,31 @@
       "id": 72
     },
     {
-      "name": "SMELL generic",
+      "id": 369,
+      "name": "SMELL study",
       "process": "PRO5",
       "verb": "smell",
       "noun": "_",
       "enabled": true,
-      "conditions": [],
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
       "actions": [
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "You breathe in carefully. Nothing unusual draws your attention."
+          "text": "Old books. Beeswax polish. The cooling residue of last night's fire. The electric lamps give off a particular warmth you can feel on your face. And beneath it all, Carlyle's nervousness -- the faint sharpness of perspiration that a man about to ask a favour cannot quite conceal."
         },
         {
           "type": "DONE",
           "params": {}
         }
-      ],
-      "id": 73
+      ]
     },
     {
       "name": "EAST blocked by Mead",
@@ -4519,7 +4512,7 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "'I made enquiries. Pendleton keeps rooms at 23 Curzon Street, Mayfair. Lives alone. Daily woman leaves at noon.'"
+          "text": "'I checked the directories at my club after dinner,' Carlyle says. 'Pendleton keeps rooms at 23 Curzon Street, Mayfair. Lives alone. A daily woman comes in the mornings.'"
         },
         {
           "type": "SET",
@@ -5370,11 +5363,9 @@
           "text": "'We have him, Max.' You lay it out: the glass, the ruler, the order slip, the certificates, the letter, and the cologne at every scene. Pendleton collapses. 'I want my solicitor.' Carlyle: 'The police are already on their way.'"
         },
         {
-          "type": "LET",
-          "params": {
-            "flagno": 102,
-            "value": 6
-          }
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Pendleton is escorted from the building. The hearing reconvenes the next morning at the Board of Trade."
         },
         {
           "type": "GOTO",
@@ -5414,6 +5405,12 @@
             "flagno": 80,
             "value": 1
           }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 77
+          }
         }
       ],
       "actions": [
@@ -5423,11 +5420,9 @@
           "text": "'It may be enough,' Carlyle says quietly. 'It may not. We have gaps.' You make your decision."
         },
         {
-          "type": "LET",
-          "params": {
-            "flagno": 102,
-            "value": 3
-          }
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The hearing reconvenes the next morning. You present what you have."
         },
         {
           "type": "GOTO",
@@ -5469,11 +5464,9 @@
           "text": "Carlyle: 'We can prove tampering but we can't prove he did it. We need more.'"
         },
         {
-          "type": "LET",
-          "params": {
-            "flagno": 102,
-            "value": 1
-          }
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The hearing reconvenes the next morning."
         },
         {
           "type": "GOTO",
@@ -5517,12 +5510,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson pulls into the traffic. 'Tell me about Hutchins,' you say. Carlyle opens the file. 'Forty-three years old. Fifteen years on the Knight's Cross route without incident. His supervisor calls him meticulous.' 'And yet,' you say. 'And yet,' Carlyle agrees."
+          "text": "Parkinson pulls into the traffic. Carlyle opens the inquiry file. '107 Klondyke Street, Holloway. Hutchins is forty-three. Fifteen years on the Knight's Cross route without a single incident. His supervisor calls him the most meticulous driver on the line.'#n#n'And yet twenty-seven people are dead,' you say.#n#n'The signal showed clear, he says. Every witness confirms the signal was green.' Carlyle turns a page. 'The inquiry board does not believe him.'#n#n'The inquiry board is looking at a dead signal,' you say. 'I want to hear what a living man has to say.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 110
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -5563,6 +5563,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates the familiar route to Holloway. The streets narrow, the air thickens with coal smoke."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -5607,12 +5614,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson pulls into the traffic. 'Tell me about Hutchins,' you say. Carlyle opens the file. 'Forty-three years old. Fifteen years on the Knight's Cross route without incident. His supervisor calls him meticulous.' 'And yet,' you say. 'And yet,' Carlyle agrees."
+          "text": "Parkinson pulls into the traffic. Carlyle opens the inquiry file. '107 Klondyke Street, Holloway. Hutchins is forty-three. Fifteen years on the Knight's Cross route without a single incident. His supervisor calls him the most meticulous driver on the line.'#n#n'And yet twenty-seven people are dead,' you say.#n#n'The signal showed clear, he says. Every witness confirms the signal was green.' Carlyle turns a page. 'The inquiry board does not believe him.'#n#n'The inquiry board is looking at a dead signal,' you say. 'I want to hear what a living man has to say.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 110
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -5653,6 +5667,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates the familiar route to Holloway. The streets narrow, the air thickens with coal smoke."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -5697,12 +5718,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson pulls into the traffic. 'Tell me about Hutchins,' you say. Carlyle opens the file. 'Forty-three years old. Fifteen years on the Knight's Cross route without incident. His supervisor calls him meticulous.' 'And yet,' you say. 'And yet,' Carlyle agrees."
+          "text": "Parkinson pulls into the traffic. Carlyle opens the inquiry file. '107 Klondyke Street, Holloway. Hutchins is forty-three. Fifteen years on the Knight's Cross route without a single incident. His supervisor calls him the most meticulous driver on the line.'#n#n'And yet twenty-seven people are dead,' you say.#n#n'The signal showed clear, he says. Every witness confirms the signal was green.' Carlyle turns a page. 'The inquiry board does not believe him.'#n#n'The inquiry board is looking at a dead signal,' you say. 'I want to hear what a living man has to say.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 110
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -5743,6 +5771,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates the familiar route to Holloway. The streets narrow, the air thickens with coal smoke."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -5787,12 +5822,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson pulls into the traffic. 'Tell me about Hutchins,' you say. Carlyle opens the file. 'Forty-three years old. Fifteen years on the Knight's Cross route without incident. His supervisor calls him meticulous.' 'And yet,' you say. 'And yet,' Carlyle agrees."
+          "text": "Parkinson pulls into the traffic. Carlyle opens the inquiry file. '107 Klondyke Street, Holloway. Hutchins is forty-three. Fifteen years on the Knight's Cross route without a single incident. His supervisor calls him the most meticulous driver on the line.'#n#n'And yet twenty-seven people are dead,' you say.#n#n'The signal showed clear, he says. Every witness confirms the signal was green.' Carlyle turns a page. 'The inquiry board does not believe him.'#n#n'The inquiry board is looking at a dead signal,' you say. 'I want to hear what a living man has to say.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 110
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -5833,6 +5875,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates the familiar route to Holloway. The streets narrow, the air thickens with coal smoke."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -5877,12 +5926,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson pulls into the traffic. 'Tell me about Hutchins,' you say. Carlyle opens the file. 'Forty-three years old. Fifteen years on the Knight's Cross route without incident. His supervisor calls him meticulous.' 'And yet,' you say. 'And yet,' Carlyle agrees."
+          "text": "Parkinson pulls into the traffic. Carlyle opens the inquiry file. '107 Klondyke Street, Holloway. Hutchins is forty-three. Fifteen years on the Knight's Cross route without a single incident. His supervisor calls him the most meticulous driver on the line.'#n#n'And yet twenty-seven people are dead,' you say.#n#n'The signal showed clear, he says. Every witness confirms the signal was green.' Carlyle turns a page. 'The inquiry board does not believe him.'#n#n'The inquiry board is looking at a dead signal,' you say. 'I want to hear what a living man has to say.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 110
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -5923,6 +5979,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates the familiar route to Holloway. The streets narrow, the air thickens with coal smoke."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -5967,12 +6030,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson pulls into the traffic. 'Tell me about Hutchins,' you say. Carlyle opens the file. 'Forty-three years old. Fifteen years on the Knight's Cross route without incident. His supervisor calls him meticulous.' 'And yet,' you say. 'And yet,' Carlyle agrees."
+          "text": "Parkinson pulls into the traffic. Carlyle opens the inquiry file. '107 Klondyke Street, Holloway. Hutchins is forty-three. Fifteen years on the Knight's Cross route without a single incident. His supervisor calls him the most meticulous driver on the line.'#n#n'And yet twenty-seven people are dead,' you say.#n#n'The signal showed clear, he says. Every witness confirms the signal was green.' Carlyle turns a page. 'The inquiry board does not believe him.'#n#n'The inquiry board is looking at a dead signal,' you say. 'I want to hear what a living man has to say.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 110
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -6013,6 +6083,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates the familiar route to Holloway. The streets narrow, the air thickens with coal smoke."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6057,12 +6134,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson pulls into the traffic. 'Tell me about Hutchins,' you say. Carlyle opens the file. 'Forty-three years old. Fifteen years on the Knight's Cross route without incident. His supervisor calls him meticulous.' 'And yet,' you say. 'And yet,' Carlyle agrees."
+          "text": "Parkinson pulls into the traffic. Carlyle opens the inquiry file. '107 Klondyke Street, Holloway. Hutchins is forty-three. Fifteen years on the Knight's Cross route without a single incident. His supervisor calls him the most meticulous driver on the line.'#n#n'And yet twenty-seven people are dead,' you say.#n#n'The signal showed clear, he says. Every witness confirms the signal was green.' Carlyle turns a page. 'The inquiry board does not believe him.'#n#n'The inquiry board is looking at a dead signal,' you say. 'I want to hear what a living man has to say.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 110
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -6103,6 +6187,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates the familiar route to Holloway. The streets narrow, the air thickens with coal smoke."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6156,6 +6247,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 12
@@ -6193,6 +6291,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Woundy Station. The smell of railway — coal smoke, hot metal, creosote."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6246,6 +6351,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 12
@@ -6283,6 +6395,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Woundy Station. The smell of railway — coal smoke, hot metal, creosote."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6336,6 +6455,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 12
@@ -6373,6 +6499,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Woundy Station. The smell of railway — coal smoke, hot metal, creosote."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6426,6 +6559,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 12
@@ -6463,6 +6603,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Woundy Station. The smell of railway — coal smoke, hot metal, creosote."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6516,6 +6663,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 12
@@ -6553,6 +6707,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Woundy Station. The smell of railway — coal smoke, hot metal, creosote."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6606,6 +6767,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 12
@@ -6643,6 +6811,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Woundy Station. The smell of railway — coal smoke, hot metal, creosote."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6696,6 +6871,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 12
@@ -6733,6 +6915,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Woundy Station. The smell of railway — coal smoke, hot metal, creosote."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6777,12 +6966,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "The motor car moves through quieter streets. 'Mead had access,' Carlyle says, 'and his pulse changed when I mentioned a certain name.' 'Suspicion is not evidence,' you reply. 'Evidence is what we are going to find.'"
+          "text": "The motor car moves through quieter streets. 'Mead,' you say. 'The guard on duty the night of the crash. Hutchins says he lives in Hampton.' 'Suspicion is not evidence, Max.' 'No. But silence is interesting. A man who says nothing when he should say everything -- that is worth a visit.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 112
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -6823,6 +7019,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Hampton. The air is greener here, away from the city."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6867,12 +7070,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "The motor car moves through quieter streets. 'Mead had access,' Carlyle says, 'and his pulse changed when I mentioned a certain name.' 'Suspicion is not evidence,' you reply. 'Evidence is what we are going to find.'"
+          "text": "The motor car moves through quieter streets. 'Mead,' you say. 'The guard on duty the night of the crash. Hutchins says he lives in Hampton.' 'Suspicion is not evidence, Max.' 'No. But silence is interesting. A man who says nothing when he should say everything -- that is worth a visit.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 112
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -6913,6 +7123,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Hampton. The air is greener here, away from the city."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -6957,12 +7174,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "The motor car moves through quieter streets. 'Mead had access,' Carlyle says, 'and his pulse changed when I mentioned a certain name.' 'Suspicion is not evidence,' you reply. 'Evidence is what we are going to find.'"
+          "text": "The motor car moves through quieter streets. 'Mead,' you say. 'The guard on duty the night of the crash. Hutchins says he lives in Hampton.' 'Suspicion is not evidence, Max.' 'No. But silence is interesting. A man who says nothing when he should say everything -- that is worth a visit.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 112
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -7003,6 +7227,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Hampton. The air is greener here, away from the city."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7047,12 +7278,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "The motor car moves through quieter streets. 'Mead had access,' Carlyle says, 'and his pulse changed when I mentioned a certain name.' 'Suspicion is not evidence,' you reply. 'Evidence is what we are going to find.'"
+          "text": "The motor car moves through quieter streets. 'Mead,' you say. 'The guard on duty the night of the crash. Hutchins says he lives in Hampton.' 'Suspicion is not evidence, Max.' 'No. But silence is interesting. A man who says nothing when he should say everything -- that is worth a visit.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 112
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -7093,6 +7331,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Hampton. The air is greener here, away from the city."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7137,12 +7382,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "The motor car moves through quieter streets. 'Mead had access,' Carlyle says, 'and his pulse changed when I mentioned a certain name.' 'Suspicion is not evidence,' you reply. 'Evidence is what we are going to find.'"
+          "text": "The motor car moves through quieter streets. 'Mead,' you say. 'The guard on duty the night of the crash. Hutchins says he lives in Hampton.' 'Suspicion is not evidence, Max.' 'No. But silence is interesting. A man who says nothing when he should say everything -- that is worth a visit.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 112
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -7183,6 +7435,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Hampton. The air is greener here, away from the city."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7227,12 +7486,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "The motor car moves through quieter streets. 'Mead had access,' Carlyle says, 'and his pulse changed when I mentioned a certain name.' 'Suspicion is not evidence,' you reply. 'Evidence is what we are going to find.'"
+          "text": "The motor car moves through quieter streets. 'Mead,' you say. 'The guard on duty the night of the crash. Hutchins says he lives in Hampton.' 'Suspicion is not evidence, Max.' 'No. But silence is interesting. A man who says nothing when he should say everything -- that is worth a visit.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 112
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -7273,6 +7539,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Hampton. The air is greener here, away from the city."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7317,12 +7590,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "The motor car moves through quieter streets. 'Mead had access,' Carlyle says, 'and his pulse changed when I mentioned a certain name.' 'Suspicion is not evidence,' you reply. 'Evidence is what we are going to find.'"
+          "text": "The motor car moves through quieter streets. 'Mead,' you say. 'The guard on duty the night of the crash. Hutchins says he lives in Hampton.' 'Suspicion is not evidence, Max.' 'No. But silence is interesting. A man who says nothing when he should say everything -- that is worth a visit.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 112
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -7363,6 +7643,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Hampton. The air is greener here, away from the city."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7416,6 +7703,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 15
@@ -7453,6 +7747,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to the City. The traffic thickens with commerce."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7506,6 +7807,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 15
@@ -7543,6 +7851,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to the City. The traffic thickens with commerce."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7596,6 +7911,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 15
@@ -7633,6 +7955,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to the City. The traffic thickens with commerce."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7686,6 +8015,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 15
@@ -7723,6 +8059,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to the City. The traffic thickens with commerce."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7776,6 +8119,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 15
@@ -7813,6 +8163,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to the City. The traffic thickens with commerce."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7866,6 +8223,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 15
@@ -7903,6 +8267,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to the City. The traffic thickens with commerce."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -7956,6 +8327,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 15
@@ -7995,6 +8373,13 @@
           "text": "Parkinson drives to the City. The traffic thickens with commerce."
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 15
@@ -8026,6 +8411,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives back to Richmond. The city softens around you."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8061,6 +8453,13 @@
           "text": "Parkinson drives back to Richmond. The city softens around you."
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 3
@@ -8092,6 +8491,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives back to Richmond. The city softens around you."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8127,6 +8533,13 @@
           "text": "Parkinson drives back to Richmond. The city softens around you."
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 3
@@ -8158,6 +8571,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives back to Richmond. The city softens around you."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8193,6 +8613,13 @@
           "text": "Parkinson drives back to Richmond. The city softens around you."
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 3
@@ -8224,6 +8651,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives back to Richmond. The city softens around you."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8268,12 +8702,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal — to measure it, to plan — they would need a room with a view.' Carlyle nods. 'It's barely a quarter mile from the station.'"
+          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal -- to measure it, to plan -- they would need a room with a view.' Carlyle: 'Signal Row. I noted the street name from the platform. Boarding houses, the lot of them.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 114
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -8314,6 +8755,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Signal Row. The railway cutting hums beneath the houses."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8358,12 +8806,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal — to measure it, to plan — they would need a room with a view.' Carlyle nods. 'It's barely a quarter mile from the station.'"
+          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal -- to measure it, to plan -- they would need a room with a view.' Carlyle: 'Signal Row. I noted the street name from the platform. Boarding houses, the lot of them.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 114
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -8404,6 +8859,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Signal Row. The railway cutting hums beneath the houses."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8448,12 +8910,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal — to measure it, to plan — they would need a room with a view.' Carlyle nods. 'It's barely a quarter mile from the station.'"
+          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal -- to measure it, to plan -- they would need a room with a view.' Carlyle: 'Signal Row. I noted the street name from the platform. Boarding houses, the lot of them.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 114
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -8494,6 +8963,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Signal Row. The railway cutting hums beneath the houses."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8538,12 +9014,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal — to measure it, to plan — they would need a room with a view.' Carlyle nods. 'It's barely a quarter mile from the station.'"
+          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal -- to measure it, to plan -- they would need a room with a view.' Carlyle: 'Signal Row. I noted the street name from the platform. Boarding houses, the lot of them.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 114
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -8584,6 +9067,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Signal Row. The railway cutting hums beneath the houses."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8628,12 +9118,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal — to measure it, to plan — they would need a room with a view.' Carlyle nods. 'It's barely a quarter mile from the station.'"
+          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal -- to measure it, to plan -- they would need a room with a view.' Carlyle: 'Signal Row. I noted the street name from the platform. Boarding houses, the lot of them.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 114
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -8674,6 +9171,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Signal Row. The railway cutting hums beneath the houses."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8718,12 +9222,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal — to measure it, to plan — they would need a room with a view.' Carlyle nods. 'It's barely a quarter mile from the station.'"
+          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal -- to measure it, to plan -- they would need a room with a view.' Carlyle: 'Signal Row. I noted the street name from the platform. Boarding houses, the lot of them.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 114
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -8764,6 +9275,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Signal Row. The railway cutting hums beneath the houses."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8808,12 +9326,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal — to measure it, to plan — they would need a room with a view.' Carlyle nods. 'It's barely a quarter mile from the station.'"
+          "text": "'The houses near the signal line,' you say. 'If someone needed to observe the signal -- to measure it, to plan -- they would need a room with a view.' Carlyle: 'Signal Row. I noted the street name from the platform. Boarding houses, the lot of them.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 114
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -8854,6 +9379,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson drives to Signal Row. The railway cutting hums beneath the houses."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8907,6 +9439,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 21
@@ -8944,6 +9483,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates to Long Acre."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -8997,6 +9543,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 21
@@ -9034,6 +9587,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates to Long Acre."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9087,6 +9647,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 21
@@ -9124,6 +9691,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates to Long Acre."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9177,6 +9751,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 21
@@ -9214,6 +9795,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates to Long Acre."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9267,6 +9855,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 21
@@ -9304,6 +9899,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates to Long Acre."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9357,6 +9959,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 21
@@ -9394,6 +10003,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates to Long Acre."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9447,6 +10063,13 @@
           }
         },
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
+        },
+        {
           "type": "GOTO",
           "params": {
             "locno": 21
@@ -9484,6 +10107,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson navigates to Long Acre."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9528,12 +10158,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson drives to Curzon Street. He checks his watch. 'Mr Carlyle's luncheon will have begun, sir. The daily woman left at noon. You have perhaps two hours.' He parks where he can see the entrance."
+          "text": "Parkinson drives to Curzon Street. He checks his watch. 'The porter has just gone to his dinner, sir. We have thirty minutes before he returns to his desk.' He parks where he can see the entrance. 'I will watch the stairs.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 116
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -9574,6 +10211,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson pulls up at Curzon Street. He checks his watch and takes his position."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9618,12 +10262,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson drives to Curzon Street. He checks his watch. 'Mr Carlyle's luncheon will have begun, sir. The daily woman left at noon. You have perhaps two hours.' He parks where he can see the entrance."
+          "text": "Parkinson drives to Curzon Street. He checks his watch. 'The porter has just gone to his dinner, sir. We have thirty minutes before he returns to his desk.' He parks where he can see the entrance. 'I will watch the stairs.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 116
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -9664,6 +10315,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson pulls up at Curzon Street. He checks his watch and takes his position."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9708,12 +10366,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson drives to Curzon Street. He checks his watch. 'Mr Carlyle's luncheon will have begun, sir. The daily woman left at noon. You have perhaps two hours.' He parks where he can see the entrance."
+          "text": "Parkinson drives to Curzon Street. He checks his watch. 'The porter has just gone to his dinner, sir. We have thirty minutes before he returns to his desk.' He parks where he can see the entrance. 'I will watch the stairs.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 116
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -9754,6 +10419,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson pulls up at Curzon Street. He checks his watch and takes his position."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9798,12 +10470,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson drives to Curzon Street. He checks his watch. 'Mr Carlyle's luncheon will have begun, sir. The daily woman left at noon. You have perhaps two hours.' He parks where he can see the entrance."
+          "text": "Parkinson drives to Curzon Street. He checks his watch. 'The porter has just gone to his dinner, sir. We have thirty minutes before he returns to his desk.' He parks where he can see the entrance. 'I will watch the stairs.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 116
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -9844,6 +10523,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson pulls up at Curzon Street. He checks his watch and takes his position."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9888,12 +10574,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson drives to Curzon Street. He checks his watch. 'Mr Carlyle's luncheon will have begun, sir. The daily woman left at noon. You have perhaps two hours.' He parks where he can see the entrance."
+          "text": "Parkinson drives to Curzon Street. He checks his watch. 'The porter has just gone to his dinner, sir. We have thirty minutes before he returns to his desk.' He parks where he can see the entrance. 'I will watch the stairs.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 116
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -9934,6 +10627,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson pulls up at Curzon Street. He checks his watch and takes his position."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -9978,12 +10678,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson drives to Curzon Street. He checks his watch. 'Mr Carlyle's luncheon will have begun, sir. The daily woman left at noon. You have perhaps two hours.' He parks where he can see the entrance."
+          "text": "Parkinson drives to Curzon Street. He checks his watch. 'The porter has just gone to his dinner, sir. We have thirty minutes before he returns to his desk.' He parks where he can see the entrance. 'I will watch the stairs.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 116
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -10024,6 +10731,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson pulls up at Curzon Street. He checks his watch and takes his position."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -10068,12 +10782,19 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Parkinson drives to Curzon Street. He checks his watch. 'Mr Carlyle's luncheon will have begun, sir. The daily woman left at noon. You have perhaps two hours.' He parks where he can see the entrance."
+          "text": "Parkinson drives to Curzon Street. He checks his watch. 'The porter has just gone to his dinner, sir. We have thirty minutes before he returns to his desk.' He parks where he can see the entrance. 'I will watch the stairs.'"
         },
         {
           "type": "SET",
           "params": {
             "flagno": 116
+          }
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
           }
         },
         {
@@ -10114,6 +10835,13 @@
           "type": "MESSAGE",
           "params": {},
           "text": "Parkinson pulls up at Curzon Street. He checks his watch and takes his position."
+        },
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 1
+          }
         },
         {
           "type": "GOTO",
@@ -10199,7 +10927,7 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Carlyle: 'The signal box is small. Equipment everywhere — block instruments, lever frame, the lamp housing. Empty now — operations suspended for the inquiry.'"
+          "text": "Carlyle: 'The signal box is small. Equipment everywhere -- block instruments, lever frame, the lamp housing. Empty now -- the inquiry has suspended operations.' He pauses. 'The floor has been swept, but not thoroughly. There may be something the sweepers missed.'"
         },
         {
           "type": "SET",
@@ -10397,7 +11125,13 @@
           "type": "EQ",
           "params": {
             "flagno": 98,
-            "value": 8
+            "value": 4
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 97
           }
         }
       ],
@@ -10405,7 +11139,7 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "A soft tap on the door. 'Still clear, sir. But I would suggest efficiency.'"
+          "text": "A soft tap on the door. Parkinson's voice, low: 'The porter's break cannot last much longer, sir.'"
         }
       ],
       "id": 320
@@ -11642,6 +12376,13 @@
       ],
       "actions": [
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 2
+          }
+        },
+        {
           "type": "CREATE",
           "params": {
             "objno": 19
@@ -11667,12 +12408,18 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "'Greatorex,' you say. Your secretary appears at the door. 'The Evening Herald, sir. I have marked the financial pages.' 'Read me the railway stocks.' Greatorex reads. The Central and Suburban Deferred fell nine points. 'Now read me the three days before the crash.' A steady rise. Someone was buying."
+          "text": "'Greatorex,' you say. Your secretary appears at the door. 'The Evening Herald, sir. I have marked the financial pages.' 'Read me the railway stocks.' Greatorex reads. The Central and Suburban Deferred fell nine points on the day of the crash. 'Now read me the three days before.' A steady rise. Someone was buying heavily before the crash and selling after. Carlyle sets down his glass. 'Harold Pendleton. I knew I had heard that name. A stockbroker -- I met him at my club last week. He was boasting about a railway investment. I thought nothing of it at the time.'"
         },
         {
           "type": "MESSAGE",
           "params": {},
           "text": "Carlyle sets down his glass. 'The cologne, Max. You mentioned a cologne.' 'The same cologne. At Hutchins's kitchen, where a visitor came three weeks ago. At the signal box, where someone tampered with the lamp. I will find it again before this is finished.' You light a cigar. The smoke rises, clean and honest — nothing like the scent you are hunting."
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 65
+          }
         }
       ],
       "id": 359
@@ -11704,6 +12451,19 @@
         }
       ],
       "actions": [
+        {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 2
+          }
+        },
+        {
+          "type": "CREATE",
+          "params": {
+            "objno": 19
+          }
+        },
         {
           "type": "SET",
           "params": {
@@ -11751,7 +12511,7 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "Your fingers move across the collection. Greek, Roman, Renaissance. Each piece has a story your hands can read — weight, patina, the temperature of the metal. The small Donatello is your favourite. It isn't a Donatello, of course. It took you three years to prove it. You are one of the foremost authorities on numismatic forgeries in England."
+          "text": "Your fingers find the small Donatello on the side table. Except it is not a Donatello -- it took you three years to prove it. The patina is too uniform, the weight fractionally wrong. You are one of the foremost authorities on numismatic forgeries in England. Some deceptions require patience."
         },
         {
           "type": "DONE",
@@ -11805,7 +12565,7 @@
         {
           "type": "MESSAGE",
           "params": {},
-          "text": "You select a cigar by touch, cut it precisely, and light it. The smoke rises. For a moment the world narrows to this — the warmth of the armchair, the crackle of the fire, the particular quality of tobacco that costs more than most men earn in a week. You think better when you smoke."
+          "text": "You select a cigar by touch, cut it precisely, and light it. The smoke rises. For a moment the world narrows to this -- the warmth of the armchair, the crackle of the fire. You think better when you smoke. Always have."
         },
         {
           "type": "DONE",
@@ -11882,6 +12642,13 @@
       ],
       "actions": [
         {
+          "type": "LET",
+          "params": {
+            "flagno": 138,
+            "value": 2
+          }
+        },
+        {
           "type": "SET",
           "params": {
             "flagno": 132
@@ -11935,6 +12702,2708 @@
         }
       ],
       "id": 367
+    },
+    {
+      "id": 370,
+      "name": "FEEL DESK study",
+      "process": "PRO5",
+      "verb": "feel",
+      "noun": "desk",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "A large desk, partners style. Everything has a specific location known by distance and angle from the near left corner. The telegram is at the front -- rough government paper. The Herald is to the right -- you can feel the ink, thicker on the financial pages where Carlyle has been marking."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 371,
+      "name": "LISTEN study",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The fire settles with a soft collapse of coals. The electric lamps hum at a frequency most people cannot hear. Outside, a cab passes -- one horse, iron-rimmed wheels, moving east. Carlyle turns a page. His breathing is slightly elevated. He is waiting for you to read the telegram."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 372,
+      "name": "Carlyle prompts telegram",
+      "process": "PRO4",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 64
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 136
+          }
+        },
+        {
+          "type": "GT",
+          "params": {
+            "flagno": 31,
+            "value": 3
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 136
+          }
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Carlyle shifts in his chair. 'The telegram, Max. You might want to read it before the morning gets away from us.'"
+        }
+      ]
+    },
+    {
+      "id": 373,
+      "name": "Margaret interjects about visitor",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 6
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 66
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 75
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 137
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Margaret speaks suddenly from the corner. 'There was a man.' Hutchins turns sharply. 'Margaret --' 'A man came, Father. Three weeks before. You were out. He left something.' Her voice is steady but her hands are not."
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 137
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 374,
+      "name": "READ NEWSPAPER re-read Day 1",
+      "process": "PRO5",
+      "verb": "read",
+      "noun": "newspa",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 4
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 65
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
+        },
+        {
+          "type": "ABSENT",
+          "params": {
+            "objno": 19
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The Morning Herald. Twenty-seven dead at Knight's Cross. Hutchins named. Railway stocks fell and recovered. Harold Pendleton bought heavily before the crash."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 375,
+      "name": "READ NEWSPAPER Day 2",
+      "process": "PRO5",
+      "verb": "read",
+      "noun": "newspa",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 4
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The Morning Herald, Day Two. The Knight's Cross inquiry has adjourned pending further investigation. An editorial demands answers. The railway company has issued a statement expressing confidence in its safety procedures. In the financial pages, Central and Suburban shares continue to recover. No mention of Pendleton."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 376,
+      "name": "READ NEWSPAPER Day 3",
+      "process": "PRO5",
+      "verb": "read",
+      "noun": "newspa",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 4
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 3
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The Morning Herald, Day Three. The Knight's Cross inquiry reconvenes today. The editorial calls for a swift verdict. Hutchins is named twice on the front page. Public opinion has hardened. Someone must be held to account, the paper says. It does not say who."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 377,
+      "name": "READ EVENING Day 2",
+      "process": "PRO5",
+      "verb": "read",
+      "noun": "evenin",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 19
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The Evening Herald, Day Two. A sidebar on the financial page notes that several investors profited handsomely from the railway crash. No names are printed, but the pattern is there for anyone who cares to look. An advertisement for Long Acre lamp-makers catches your attention -- or would, if you could see advertisements."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 378,
+      "name": "READ NEWSPAPER -> Evening Day 1",
+      "process": "PRO5",
+      "verb": "read",
+      "noun": "newspa",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 19
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The Evening Herald. Greatorex has marked the financial pages. The Central and Suburban Deferred fell nine points on the day of the crash. Three days before, they were rising steadily. Someone was buying. And now you know his name."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 379,
+      "name": "READ NEWSPAPER -> Evening Day 2",
+      "process": "PRO5",
+      "verb": "read",
+      "noun": "newspa",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 19
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The Evening Herald, Day Two. A sidebar on the financial page notes that several investors profited handsomely from the railway crash. No names are printed, but the pattern is there for anyone who cares to look. An advertisement for Long Acre lamp-makers catches your attention -- or would, if you could see advertisements."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 380,
+      "name": "LISTEN signal box",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 13
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The box is silent now. No trains. No bells. Only the wind through the cutting and, faintly, the creak of the signal arm outside. A box built for constant noise, holding its breath."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 381,
+      "name": "FEEL glass signal box",
+      "process": "PRO5",
+      "verb": "feel",
+      "noun": "glass",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 13
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Your fingertips trace the edge. Too clean. Too regular for a break. Someone scored this glass with a tool, then snapped it along the line. Measured. Deliberate. Four and seven-eighths inches -- your trained touch is certain."
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 78
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 382,
+      "name": "LISTEN Signal Row",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 17
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Trains below in the cutting. The rhythm is steady -- one every few minutes. The houses lean over the line like spectators. Someone in these rooms had a clear view of the signal box."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 385,
+      "name": "Carlyle arrival Signal Row",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 17
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 5
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 139
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Carlyle: 'Substantial houses, these. The kind that take lodgers. Railway workers, travelling men. The cutting runs directly below -- you can hear every train that passes.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 139
+          }
+        }
+      ]
+    },
+    {
+      "id": 386,
+      "name": "FEEL ruler Chubb room",
+      "process": "PRO5",
+      "verb": "feel",
+      "noun": "ruler",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 18
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 0
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "A wooden ruler. Your fingertips find the groove -- worn deeper than the rest at one point. Someone checked this measurement many times. Four and seven-eighths inches. The same as the glass."
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 77
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 387,
+      "name": "LISTEN Chubb room",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 18
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The trains are louder here. Through the north window you can hear the signal arm, the rattle of points changing. Someone sat in this room and studied that signal until they knew its every mood."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 388,
+      "name": "Carlyle arrival Long Acre",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 20
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 5
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 140
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Carlyle: 'A specialist lamp shop. Glass discs on a rack -- railway signal glasses.' He approaches the counter. 'Good afternoon. My name is Carlyle, retained by the Board of Trade inquiry into the Knight's Cross accident. We have some questions about a recent order.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 140
+          }
+        }
+      ]
+    },
+    {
+      "id": 389,
+      "name": "LISTEN Long Acre",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 20
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Glass chimes softly as the door settles. The sound of a shop that deals in precision -- no clutter, no hurry. Each disc rings at its own pitch."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 390,
+      "name": "SMELL Long Acre",
+      "process": "PRO5",
+      "verb": "smell",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 20
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Brass polish and lamp oil. Honest tradesman smells. No cologne here -- whatever trace the buyer left has long since faded."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 392,
+      "name": "Carlyle cologne connection office",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 16
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 90
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 100
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 141
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "In the motor car afterwards, you say: 'The cologne, Carlyle. The same cologne. At Hutchins's kitchen. At the signal box. And now here, soaked into his office.' Carlyle is quiet. 'What do you need, Max?' 'His address. And time.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 141
+          }
+        }
+      ]
+    },
+    {
+      "id": 393,
+      "name": "Carlyle hints Hampton Day 2",
+      "process": "PRO4",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 1
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 95,
+            "value": 1
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 2
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 68
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 142
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Carlyle: 'While Parkinson watches Curzon Street, perhaps we should visit Hampton. Mead is the key to understanding how the signal was tampered with. He may know more than he told the inquiry.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 142
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 394,
+      "name": "Parkinson at flat",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 22
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "PLACE",
+          "params": {
+            "objno": 6,
+            "locno": 22
+          }
+        }
+      ]
+    },
+    {
+      "id": 395,
+      "name": "WEST workshop no evidence",
+      "process": "PRO5",
+      "verb": "w",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 10
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 70
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You return to the cottage. Mead relaxes visibly as you come through the door -- you can hear the tension leave his breathing. Whatever is in that workshop, he does not want you to find it."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 9
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 396,
+      "name": "Post-flat auto-return",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 23
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 97
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 99
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 132
+          }
+        },
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 93,
+            "value": 3
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Richmond, Parkinson. We have what we need. Tomorrow we finish this.' The motor car turns towards home. There is much to prepare."
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": 398,
+      "name": "LISTEN loc 2",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Winter air. Horses on the road, wheels on cobbles. A steam whistle somewhere south. The familiar sounds of Richmond -- your territory, mapped in sound over forty years."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 399,
+      "name": "LISTEN loc 4",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 4
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Children chanting a skipping rhyme in a nearby yard. A woman calling from an upstairs window. The slow clop of a delivery horse. Coal smoke and domestic life -- the sounds of a street where everyone knows everyone else's business."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 400,
+      "name": "LISTEN loc 6",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 6
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The kettle mutters steadily on the range. Above, a child's footsteps cross the ceiling. Hutchins shifts his weight from foot to foot -- the restlessness of a man who cannot sit still in his own home. Margaret's breathing is quiet and controlled."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 401,
+      "name": "LISTEN loc 7",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 7
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Birdsong. The distant sound of the river. A quieter neighbourhood than Holloway -- respectable, unhurried. Someone is practising scales on a piano nearby. The cottage is ahead; you can hear a clock ticking through an open window."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 402,
+      "name": "LISTEN loc 9",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 9
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "A clock ticks too loudly in the silence. Mead's breathing is steady but shallow -- a man holding himself very still. The cottage is clean but the quiet is wrong. This is the quiet of someone waiting for something terrible."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 403,
+      "name": "LISTEN loc 10",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 10
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The workshop has its own silence -- the held breath of a space that is usually full of work. A tap drips somewhere. Metal tools cool and contract with faint ticks. Without Carlyle, every sound is sharper."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 404,
+      "name": "LISTEN loc 11",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 11
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Wind across the open platform. The creak of the signal arm. Far down the track, the low rumble of an approaching train. The sound builds, passes in a rush of iron and steam, then fades. The signal arm creaks again."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 405,
+      "name": "LISTEN loc 14",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 14
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The City at full roar. Hansom cabs, motor cars, the cries of newsboys. Footsteps everywhere -- the hurried pace of men with money to make. Somewhere a bell strikes the quarter hour. Threadneedle Street is near."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 406,
+      "name": "LISTEN loc 16",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 16
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Pendleton's pen scratches across paper. His breathing is steady -- the confidence of a man who believes he is untouchable. The scratch of a match as he lights a cigar. Traffic noise filters up from the street below."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 407,
+      "name": "LISTEN loc 22",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 22
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Your own breathing, controlled and steady. From below, the faint sound of the porter's chair. Street noise through the window -- a cab, a door. Every sound is a potential interruption. You work faster."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 408,
+      "name": "LISTEN loc 24",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The murmur of the public gallery. The scratch of the chairman's pen. Somewhere a woman coughs. Hutchins's breathing, three rows back -- you would know it anywhere. And beside him, the particular stillness of a man who knows he is about to be named."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 410,
+      "name": "SMELL loc 2",
+      "process": "PRO5",
+      "verb": "smell",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 2
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Winter air, sharp and clean after the warmth of the study. Gravel dust. The faint sweetness of horse chestnuts from the tree at the gate. Home."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 411,
+      "name": "SMELL loc 4",
+      "process": "PRO5",
+      "verb": "smell",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 4
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Coal smoke -- thick, domestic, the smell of a street where every chimney works hard. Frying onions from a nearby kitchen. Damp wool. The honest smells of working London."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 412,
+      "name": "SMELL loc 7",
+      "process": "PRO5",
+      "verb": "smell",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 7
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Green and damp. River mud somewhere nearby. Wood smoke from the cottage chimneys. A quieter, cleaner air than London -- the suburbs breathing at their own pace."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 413,
+      "name": "SMELL loc 9",
+      "process": "PRO5",
+      "verb": "smell",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 9
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Fresh soap and carbolic. Someone has cleaned this cottage within the last hour -- the anxious tidiness of a household expecting visitors. Beneath it, pipe tobacco and machine oil. Mead's life in two scents."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 414,
+      "name": "SMELL loc 11",
+      "process": "PRO5",
+      "verb": "smell",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 11
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Creosote and engine smoke. The permanent smell of every railway platform -- oil-soaked sleepers, coal dust, the metallic tang of brakes. The wind carries it all."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 415,
+      "name": "SMELL loc 17",
+      "process": "PRO5",
+      "verb": "smell",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 17
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Carbolic soap. Boiled cabbage from somewhere. The soot and sulphur of the railway cutting below. The honest smells of a boarding-house street."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 416,
+      "name": "DROP evidence intercept",
+      "process": "PRO5",
+      "verb": "drop",
+      "noun": "glass",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You would not want to lose this. It may be needed as evidence."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 417,
+      "name": "DROP card intercept",
+      "process": "PRO5",
+      "verb": "drop",
+      "noun": "card",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You would not want to lose this. It may be needed as evidence."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 418,
+      "name": "DROP cert intercept",
+      "process": "PRO5",
+      "verb": "drop",
+      "noun": "cert",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You would not want to lose this. It may be needed as evidence."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 419,
+      "name": "DROP letter intercept",
+      "process": "PRO5",
+      "verb": "drop",
+      "noun": "letter",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You would not want to lose this. It may be needed as evidence."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 420,
+      "name": "DROP slip intercept",
+      "process": "PRO5",
+      "verb": "drop",
+      "noun": "slip",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You would not want to lose this. It may be needed as evidence."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 421,
+      "name": "DROP ruler intercept",
+      "process": "PRO5",
+      "verb": "drop",
+      "noun": "ruler",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You would not want to lose this. It may be needed as evidence."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 422,
+      "name": "EXAMINE workbench hint",
+      "process": "PRO5",
+      "verb": "examin",
+      "noun": "workbe",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 10
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 69
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "A heavy workbench, scarred and stained. The surface tells a story of years of use. Something about the grain feels wrong beneath your fingers -- as if part of the surface has been moved more recently than the rest."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 423,
+      "name": "ACCUSE generic",
+      "process": "PRO5",
+      "verb": "accuse",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "This is not the place for accusations. You need to confront the man directly."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 424,
+      "name": "KNOCK at flat",
+      "process": "PRO5",
+      "verb": "knock",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 22
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Knocking would rather defeat the purpose of breaking in quietly."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 425,
+      "name": "WAIT generic",
+      "process": "PRO5",
+      "verb": "wait",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Time passes."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 426,
+      "name": "Greatorex: herald",
+      "process": "PRO21",
+      "verb": "_",
+      "noun": "herald",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'The Herald, sir. I have marked the financial pages as usual. Railway stocks remain volatile. Shall I read the details?' Greatorex is efficient and discreet -- the perfect secretary for a blind man."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 427,
+      "name": "Greatorex: stocks",
+      "process": "PRO21",
+      "verb": "_",
+      "noun": "stocks",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'Central and Suburban Deferred, sir. Down nine points on the day of the crash, recovered within the week. Someone profited handsomely.' He pauses. 'Shall I compile a fuller summary of the trading patterns?'"
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 428,
+      "name": "Greatorex: unknown",
+      "process": "PRO21",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'I'm afraid that is outside my area, sir. The financial pages are my particular province.' Greatorex is helpful but knows his limits."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 429,
+      "name": "ASK dispatch Greatorex",
+      "process": "PRO5",
+      "verb": "ask",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "EQ",
+          "params": {
+            "flagno": 103,
+            "value": 24
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "PROCESS",
+          "params": {
+            "procno": 21
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "name": "SMELL generic",
+      "process": "PRO5",
+      "verb": "smell",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You breathe in carefully. Nothing unusual draws your attention."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ],
+      "id": 73
+    },
+    {
+      "id": 409,
+      "name": "LISTEN motor car generic",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 6
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The engine ticks as it cools. Parkinson's breathing is steady behind the partition -- the patience of a man who has learned to wait. Street sounds filter through the glass, muffled and distant."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 397,
+      "name": "LISTEN generic fallback",
+      "process": "PRO5",
+      "verb": "listen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You listen. The world speaks to you in its usual voices -- nothing out of the ordinary reaches your ears."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 430,
+      "name": "Arrival at Hutchins door",
+      "process": "PRO5",
+      "verb": "e",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 4
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 143
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You knock. Footsteps inside -- quick, light, a young woman's step. The door opens. 'Mr Carrados? Father is expecting you. Please, come in.' She leads you through to the kitchen. The smell of baking and carbolic soap. Someone has put out the good cups."
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 143
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 6
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 431,
+      "name": "Arrival at Mead cottage",
+      "process": "PRO5",
+      "verb": "e",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 7
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 144
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You knock at the cottage door. A long pause. Then slow footsteps. The door opens a crack. 'Mr Mead? I am Max Carrados. This is my colleague Mr Carlyle. We are looking into the Knight's Cross matter.' Another pause. The door opens wider. The smell of fresh soap and pipe tobacco."
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 144
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 9
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 432,
+      "name": "Arrival at signal box",
+      "process": "PRO5",
+      "verb": "e",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 11
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 145
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The signal box stands at the end of the platform. A chain across the door with a notice -- Carlyle reads it: 'Closed pending inquiry.' The chain is not locked. You lift it aside and step in."
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 145
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 13
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 433,
+      "name": "SEARCH signal box floor",
+      "process": "PRO5",
+      "verb": "search",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 13
+          }
+        },
+        {
+          "type": "ABSENT",
+          "params": {
+            "objno": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You kneel and move your hands across the floor. Dust, grit, the expected debris of a working signal box. Then — glass. A fragment, sharp-edged, caught between the floorboards where the sweepers missed it. Your fingers close around it carefully."
+        },
+        {
+          "type": "CREATE",
+          "params": {
+            "objno": 1
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 434,
+      "name": "FEEL floor signal box",
+      "process": "PRO5",
+      "verb": "feel",
+      "noun": "floor",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 13
+          }
+        },
+        {
+          "type": "ABSENT",
+          "params": {
+            "objno": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Your hands read the floor like a page. Dust. Grit. Metal filings near the lever frame. Then, beneath the lamp housing — glass. A fragment caught in a crack. Sharp, clean-edged. Not broken by accident. You pick it up."
+        },
+        {
+          "type": "CREATE",
+          "params": {
+            "objno": 1
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 435,
+      "name": "Chubb admission first visit",
+      "process": "PRO5",
+      "verb": "e",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 17
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 146
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Carlyle rings the bell. A flurry of footsteps. The door opens to a woman whose voice carries the particular brightness of someone starved for conversation. 'Yes? Can I help you?' Carlyle produces his card. 'We are assisting the Board of Trade inquiry into the Knight's Cross accident. We understand you had a lodger who left recently.' 'Oh! The gentleman! Come in, come in. I have been LONGING to tell someone about that man. First floor, through there.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 146
+          }
+        },
+        {
+          "type": "GOTO",
+          "params": {
+            "locno": 18
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 436,
+      "name": "Hearing opens",
+      "process": "PRO0",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 153
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The hearing room. The murmur of the public gallery dies as you enter. The chairman's voice: 'Mr Carrados. You have requested to address this board regarding the Knight's Cross signal failure. You may present your evidence.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 153
+          }
+        }
+      ]
+    },
+    {
+      "id": 437,
+      "name": "PRESENT glass at hearing",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "glass",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 1
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 147
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You hold up the glass fragment. 'This was cut from the signal lamp at Knight's Cross. The edges are scored -- deliberate, measured. Four and seven-eighths inches. This was not an accident. This was sabotage.' The gallery murmurs. The chairman's pen scratches. 'Continue, Mr Carrados.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 147
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 438,
+      "name": "PRESENT ruler at hearing",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "ruler",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 0
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 148
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You place the ruler on the table. 'This was found in a boarding house on Signal Row, overlooking the railway cutting. The groove is worn at exactly four and seven-eighths inches -- the same measurement as the glass. Someone practised this measurement from a window with a direct view of the signal box.' The chairman leans forward. 'You are suggesting premeditation, Mr Carrados.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 148
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 439,
+      "name": "PRESENT cert at hearing",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "cert",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 2
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 149
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You produce the stock certificates. 'Purchased three days before the crash. Sold one week after, at the peak of the recovery. A fortune made from twenty-seven deaths.' The chairman studies the dates. 'And the purchaser?' 'Harold Pendleton. Stockbroker. Of 14 Threadneedle Street and 23 Curzon Street, Mayfair.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 149
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 440,
+      "name": "PRESENT slip at hearing",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "slip",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 22
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 150
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You lay the order slip on the table. 'From a lamp-maker in Long Acre. One green glass disc, four and seven-eighths inches diameter. Paid cash. The shopman will testify to the buyer's appearance and his distinctive cologne.' Pendleton's solicitor shifts in his chair."
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 150
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 441,
+      "name": "PRESENT letter at hearing",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "letter",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "PRESENT",
+          "params": {
+            "objno": 14
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 151
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You produce the letter. 'Found in the workshop of Iver Mead, the signal box guard. A threatening letter, demanding cooperation. Mr Mead will testify that this man visited the signal box the night of the crash and threatened his family.' Mead rises, three rows back. His voice is unsteady. 'He said he would hurt them. I was afraid. I should have spoken. I know that now.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 151
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 442,
+      "name": "Testify about cologne",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "cologn",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "GT",
+          "params": {
+            "flagno": 80,
+            "value": 2
+          }
+        },
+        {
+          "type": "ZERO",
+          "params": {
+            "flagno": 152
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "'And the cologne,' you say. 'The same distinctive scent at every scene. At Hutchins's kitchen, where a man came to bribe a signalman. At the signal box, where the lamp was tampered with. In a boarding house overlooking the line. At a lamp-maker's shop. And in the office and home of Harold Pendleton.' You turn towards the gallery. 'The sighted investigators found nothing. But a blind man followed his nose across London, and it led to the same man every time.'"
+        },
+        {
+          "type": "SET",
+          "params": {
+            "flagno": 152
+          }
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 443,
+      "name": "Already presented glass",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "glass",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 147
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You have already presented the glass."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 444,
+      "name": "Already presented ruler",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "ruler",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 148
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You have already presented the ruler."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 445,
+      "name": "Already presented certificates",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "cert",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 149
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You have already presented the certificates."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 446,
+      "name": "Already presented order slip",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "slip",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 150
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You have already presented the order slip."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 447,
+      "name": "Already presented letter",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "letter",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 151
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You have already presented the letter."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 448,
+      "name": "Already presented cologne",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "cologn",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 152
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "You have already presented the cologne."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 449,
+      "name": "PRESENT nothing to present",
+      "process": "PRO5",
+      "verb": "presen",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The chairman looks at you expectantly. You have nothing more to present on that subject."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 450,
+      "name": "ACCUSE at hearing - full evidence",
+      "process": "PRO5",
+      "verb": "accuse",
+      "noun": "pendle",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 147
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 149
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 151
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 150
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 148
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The chairman nods slowly. 'The evidence is overwhelming.' He turns to the gallery. 'This board finds that the signal failure at Knight's Cross was the result of deliberate sabotage. Harold Pendleton is referred to the police for prosecution.'"
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Pendleton is white. His solicitor grips his arm. 'I want --' 'You want nothing, Mr Pendleton.' The chairman's voice is iron."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Hutchins is cleared. His record restored. As you leave, his hand grips yours -- rough, callused, trembling. He says nothing. He does not need to."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "In the motor car, Carlyle is quiet. Then: 'How did you know, Max?' You smile. 'I listened, Louis. The signal was clear. Someone simply made certain that clear looked like danger.' Carlyle: 'The blind detective sees what sighted men miss.' 'No,' you say. 'The blind detective hears what sighted men ignore.'"
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "#n*** THE END ***#n#nEnding A: Full Justice#nPendleton convicted. Hutchins restored. Mead protected."
+        },
+        {
+          "type": "END",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 451,
+      "name": "ACCUSE at hearing - partial",
+      "process": "PRO5",
+      "verb": "accuse",
+      "noun": "pendle",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 147
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The chairman considers. 'The evidence of tampering is clear. Hutchins is exonerated.' He pauses. 'Regarding the saboteur -- the evidence is suggestive, Mr Carrados, but this board cannot convict on suggestion alone. We recommend further police investigation.'"
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Pendleton adjusts his cufflinks. He knows. You know. But knowing is not proving. Not yet."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "#n*** THE END ***#n#nEnding B: Partial Justice#nHutchins cleared. Pendleton referred but not convicted.#nYou needed more evidence."
+        },
+        {
+          "type": "END",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 452,
+      "name": "ACCUSE at hearing - hollow",
+      "process": "PRO5",
+      "verb": "accuse",
+      "noun": "pendle",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The chairman looks at you. 'And the saboteur, Mr Carrados?' You have suspicion. You have a name. But you do not have proof that would stand before this board."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "Hutchins is cleared. But somewhere in the City, Pendleton orders another cigar. He knows what he did. And he knows you cannot prove it."
+        },
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "#n*** THE END ***#n#nEnding C: Hollow Victory#nHutchins cleared. The saboteur walks free."
+        },
+        {
+          "type": "END",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": 453,
+      "name": "Chairman prompts after evidence",
+      "process": "PRO4",
+      "verb": "_",
+      "noun": "_",
+      "enabled": true,
+      "conditions": [
+        {
+          "type": "AT",
+          "params": {
+            "locno": 24
+          }
+        },
+        {
+          "type": "NOTZERO",
+          "params": {
+            "flagno": 153
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "MESSAGE",
+          "params": {},
+          "text": "The chairman waits. You may PRESENT more evidence or ACCUSE PENDLETON to conclude."
+        },
+        {
+          "type": "DONE",
+          "params": {}
+        }
+      ]
     }
   ],
   "flags": [
@@ -12291,18 +15760,132 @@
       "name": "day2_complete",
       "description": "All day 2 objectives met",
       "initialValue": 0
+    },
+    {
+      "id": 135,
+      "name": "first_look_study",
+      "description": "First LOOK at study",
+      "initialValue": 0
+    },
+    {
+      "id": 136,
+      "name": "carlyle_prompted",
+      "description": "Carlyle prompted about telegram",
+      "initialValue": 0
+    },
+    {
+      "id": 137,
+      "name": "margaret_interjected",
+      "description": "Margaret has spoken up about the visitor",
+      "initialValue": 0
+    },
+    {
+      "id": 138,
+      "name": "time_of_day",
+      "description": "Time of day: 0=Morning, 1=Afternoon, 2=Evening",
+      "initialValue": 0
+    },
+    {
+      "id": 139,
+      "name": "described_signal_row",
+      "description": "Carlyle described Signal Row",
+      "initialValue": 0
+    },
+    {
+      "id": 140,
+      "name": "described_long_acre",
+      "description": "Carlyle described Long Acre",
+      "initialValue": 0
+    },
+    {
+      "id": 141,
+      "name": "carlyle_cologne_office",
+      "description": "Carlyle heard cologne connection at office",
+      "initialValue": 0
+    },
+    {
+      "id": 142,
+      "name": "carlyle_hinted_hampton",
+      "description": "Carlyle suggested visiting Hampton on Day 2",
+      "initialValue": 0
+    },
+    {
+      "id": 143,
+      "name": "hutchins_door_answered",
+      "description": "Margaret answered the door at Holloway",
+      "initialValue": 0
+    },
+    {
+      "id": 144,
+      "name": "mead_door_answered",
+      "description": "Mead answered the door at Hampton",
+      "initialValue": 0
+    },
+    {
+      "id": 145,
+      "name": "signal_box_entered",
+      "description": "First entry to signal box",
+      "initialValue": 0
+    },
+    {
+      "id": 146,
+      "name": "chubb_admitted",
+      "description": "Miss Chubb let us in",
+      "initialValue": 0
+    },
+    {
+      "id": 147,
+      "name": "hearing_glass",
+      "description": "Presented glass at hearing",
+      "initialValue": 0
+    },
+    {
+      "id": 148,
+      "name": "hearing_ruler",
+      "description": "Presented ruler at hearing",
+      "initialValue": 0
+    },
+    {
+      "id": 149,
+      "name": "hearing_cert",
+      "description": "Presented certificate at hearing",
+      "initialValue": 0
+    },
+    {
+      "id": 150,
+      "name": "hearing_slip",
+      "description": "Presented order slip at hearing",
+      "initialValue": 0
+    },
+    {
+      "id": 151,
+      "name": "hearing_letter",
+      "description": "Presented letter at hearing",
+      "initialValue": 0
+    },
+    {
+      "id": 152,
+      "name": "hearing_cologne",
+      "description": "Testified about cologne at hearing",
+      "initialValue": 0
+    },
+    {
+      "id": 153,
+      "name": "hearing_started",
+      "description": "Chairman has opened the hearing",
+      "initialValue": 0
     }
   ],
   "messages": [
-    "The paper is cheap government stock, rough against your fingertips. The typewriter keys struck hard and fast — a man in a hurry, or a man afraid. You set the telegram down carefully. 'Someone wanted this crash, Carlyle. A disaster like this does not happen by chance — it happens by design. And design requires motive. What does this morning's Herald say about Knight's Cross?'",
-    "Carlyle reads aloud. The accident coverage is substantial -- twenty-seven dead, the inquiry, Hutchins's name prominent. Then the financial pages. Railway stocks fell sharply on the day of the crash and recovered within a week. Someone bought before the fall and sold at the peak. 'Someone who knew this crash was coming,' you say. Carlyle pauses. 'Harold Pendleton. A stockbroker in the City. I heard his name at my club -- he purchased heavily three days before the crash.' You stand. 'Then we begin with Hutchins. I want to hear the man's story. Holloway, Carlyle.'",
+    "The paper is cheap government stock, rough against your fingertips. The typewriter keys struck hard and fast -- a man in a hurry, or a man afraid. The message is brief: MR CARRADOS STOP SIGNALMAN HUTCHINS ACCUSED FATAL CRASH KNIGHTS CROSS STOP TWENTY SEVEN DEAD STOP SWEARS SIGNAL CLEAR STOP INQUIRY TOMORROW STOP DESPERATELY NEED YOUR HELP STOP. You set it down. 'The Morning Herald, Carlyle. What does it say about Knight's Cross?'",
+    "Carlyle reads aloud. The accident coverage is substantial -- twenty-seven dead, the inquiry, Hutchins's name prominent. The driver insists the signal showed clear. Then the financial pages. 'Railway stocks fell sharply on the day of the crash,' Carlyle says, 'and recovered within a week.' You are very still. 'Read that again.' He does. 'Someone bought before the fall and sold at the peak,' you say. 'Someone who knew this crash was coming.' Carlyle is quiet. You stand. 'We begin with Hutchins. I want to hear the man's story in his own words. His address will be in the inquiry file. Holloway, Carlyle.'",
     "'Harold Pendleton,' Carlyle says. 'A stockbroker in the City. I heard his name mentioned at my club last week in connection with a remarkably well-timed railway investment. I thought nothing of it at the time. He purchased heavily three days before the crash.' You stand. 'Then we begin with Hutchins. I want to hear the man's story in his own words before I form any further conclusions. Holloway, Carlyle.'",
     "Your fingertips move slowly along the wood. The grooves are regular except at one point — at what your trained touch tells you is four and seven-eighths inches, the wood is worn fractionally deeper. This measurement was checked many times. 'Carlyle — the glass fragment. Measure it against this.' He takes both. A pause. 'Four and seven-eighths inches, Max.' 'Of course it is.' You are very still. 'Someone stood at this window and verified that measurement until they were certain. This was planned over days. Possibly weeks.'",
     "You turn the fragment carefully in your hands. The edges are wrong — too clean, too regular for a break. Your fingertip follows the scored line, feeling the deliberateness of it. Cut with a tool. Measured. Intentional. 'It is an inside man, Carlyle. Someone with access to this box, knowledge of this lamp, and a very steady hand. The guard on duty that night was Mead.' You pocket the fragment. 'We go to Hampton.'",
     "'Green, Mr Carrados.' His voice is quiet but absolutely certain. 'I have driven that route for fifteen years. I know that signal the way I know my own heartbeat. It was green. Clear. I brought her through at full speed because that is what a clear signal means. They do not believe me. Nobody believes me. But it was green.'",
     "A long silence. The kettle mutters. Somewhere above, a child moves across the floor. 'Twenty-seven,' he says at last. The word has weight. 'I keep trying to learn their names from the papers. It seems wrong not to know them.' His voice does not break exactly, but it bends. 'I did not do it, Mr Carrados. I know that is what they all say. But I did not do it.'",
-    "'There was something...' He hesitates — the hesitation of a man who has been disbelieved once and fears it again. 'The lamp looked different that night. The green was brighter than usual. Too bright, almost. Cleaner. I mentioned it at the inquiry.' His voice hardens slightly. 'They wrote it down and moved on.' You are already very still. 'Brighter than usual. Not dimmer. Brighter.' 'Yes sir.' You stand. 'Carlyle — the signal box. Now.'",
-    "'Iver Mead? Good man. Solid. Known him eight years.' A hesitation. 'He was quiet before that shift. More quiet than usual. I asked if he was all right and he said he was. But he was not.' A pause. 'I should have pressed him. I know that now.'",
+    "'There was something...' He hesitates -- the hesitation of a man who has been disbelieved once and fears it again. 'The lamp in the signal box at Knight's Cross. The green was brighter than usual. Too bright, almost. Cleaner. I mentioned it at the inquiry.' His voice hardens slightly. 'They wrote it down and moved on.' You are already very still. 'Brighter than usual. Not dimmer. Brighter.' 'Yes sir.' You stand. 'Carlyle -- the signal box. Knight's Cross is on the Dorvelle line, near Woundy station. Now.'",
+    "'Good man. Solid. Been at that box for years.' Hutchins pauses. 'Quiet, though. Quieter than usual before that shift. He lives out Hampton way -- a cottage on the court. His wife died last year. He was never the same after.' He shifts his weight. 'I don't want to think ill of Mead. But something was wrong.'",
     "'Pendleton?' He tries the name carefully. 'No sir. I do not know that name.' His voice is steady and untroubled. He is telling the truth. But his breathing carries something else — a residual tension that is not quite this question. There is more here. You will need to find the right way in.",
     "She speaks before her husband can stop her. 'He is a good man, Mr Carrados. Whatever they say about him.' Then, quieter: 'There was a man who came to the house. Three weeks ago, perhaps four. George was not home. He said he had business with my husband. He waited. He smelled of money — expensive, very sure of himself. He left no name. George never mentioned anyone calling. I never told him. The man frightened me, though I could not have said why at the time.'",
     "'I wasn't there,' she says. Her voice is steady but the steadiness costs her something. 'He came home at two in the morning. I heard the door. I did not go down.' A pause. 'I wish I had gone down.'",
@@ -12330,7 +15913,7 @@
     "'The signal box can wait. I want to hear Hutchins tell his story in his own words first. A man's voice tells you things a report cannot. I am not ready for the signal box yet.'",
     "'I am not ready to face Mead yet. I need to understand the method before I confront the man who used it. The signal box first.'",
     "'I have suspicion, Carlyle, and suspicion is worthless in a court of law. I need what is in that workshop before I face Pendleton. We are not finished at Hampton.'",
-    "Mead has positioned himself between you and the workshop door. The displacement of air is unmistakeable. He will not allow you through without a reason to look elsewhere. You need Carlyle to give him one.",
+    "Mead has positioned himself between you and the workshop door. The displacement of air is unmistakeable. He will not move without a reason to look elsewhere. Perhaps if you gave him something official to occupy himself with.",
     "Pendleton is watching the desk too carefully. You need Carlyle to occupy his attention before you can search it.",
     "Parkinson pulls into the traffic and you settle back, the city moving around you in sound and smell. 'Tell me about Hutchins,' you say. Carlyle opens the file. 'Forty-three years old. Started on the railway at sixteen. Fifteen years on the Knight's Cross route without incident. His supervisor describes him as meticulous.' 'And yet,' you say. 'And yet,' Carlyle agrees.",
     "'Brighter than usual,' Carlyle repeats, as Parkinson navigates south. 'What does that mean precisely, Max?' 'It means someone replaced the red glass in that signal lamp with a piece calculated to allow enough light through to read as clear at distance. Red light through clear glass at the right width produces exactly that effect — brighter, cleaner, wrong. That requires knowledge of the mechanism. And access to the box.' 'An inside man,' you confirm. 'Let us go and see what he left behind.'",
@@ -12886,11 +16469,6 @@
       "id": 60
     },
     {
-      "word": "margar",
-      "wordType": "noun",
-      "id": 118
-    },
-    {
       "word": "wardro",
       "wordType": "noun",
       "id": 119
@@ -12929,7 +16507,31 @@
       "word": "smoke",
       "wordType": "verb",
       "id": 125
+    },
+    {
+      "word": "KNOCK",
+      "wordType": "verb",
+      "id": 61
+    },
+    {
+      "word": "WAIT",
+      "wordType": "verb",
+      "id": 62
+    },
+    {
+      "word": "HERALD",
+      "wordType": "noun",
+      "id": 125
     }
   ],
-  "music": []
+  "music": [],
+  "statusBarConfig": {
+    "paperColor": 4,
+    "inkColor": 15,
+    "showTurns": false,
+    "showLocationName": true,
+    "rightContent": "daytime",
+    "dayFlagId": 93,
+    "timeFlagId": 138
+  }
 }

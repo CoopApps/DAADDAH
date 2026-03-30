@@ -19,6 +19,10 @@ struct MessageIndices {
     game_msg_start: u8,
     /// Index of the game intro text shown at startup in PRO 6
     intro_msg: u8,
+    /// Indices for day labels ("Day 1", "Day 2", "Day 3") used by daytime status bar
+    day_msgs: [u8; 3],
+    /// Indices for time labels (" Morn", " Aftn", " Eve") used by daytime status bar
+    time_msgs: [u8; 3],
 }
 
 /// DAAD Code Generator
@@ -475,10 +479,10 @@ impl DaadCodeGenerator {
         let system_messages = vec![
             "/0 \"It's too dark to see anything.\"",
             "/1 \"I can also see: \"",
-            "/2 \">\"",
-            "/3 \">\"",
-            "/4 \">\"",
-            "/5 \">\"",
+            "/2 \"\"",
+            "/3 \"\"",
+            "/4 \"\"",
+            "/5 \"\"",
             "/6 \"#nI was not able to understand any of that.  Please try again.\"",
             "/7 \"#nI can't go in that direction.\"",
             "/8 \"I can't do that.#n\"",
@@ -744,13 +748,28 @@ impl DaadCodeGenerator {
         // Next available index after location names
         let help_idx       = 16 + n_locs;       // help text
         let darkness_idx   = 16 + n_locs + 1;   // "Darkness"
-        let game_start     = 16 + n_locs + 2;   // game messages begin here
 
         // Help text
         code.push_str(&format!("/{} \"Text adventures use simple ACTION-OBJECT commands.#n#nMovement: NORTH/N, SOUTH/S, EAST/E, WEST/W, IN, OUT.#n#nUseful commands: EXAMINE (or X), TAKE, DROP, INVENTORY (I), LOOK (L), READ, FEEL, SMELL, LISTEN, DRIVE, ASK, ACCUSE, SEARCH.#n\"\n\n", help_idx));
 
         // Darkness label
         code.push_str(&format!("/{} \"Darkness\"\n\n", darkness_idx));
+
+        // Day/time labels for daytime status bar (6 messages)
+        let day1_idx = 16 + n_locs + 2;
+        let day2_idx = day1_idx + 1;
+        let day3_idx = day1_idx + 2;
+        let morn_idx = day1_idx + 3;
+        let aftn_idx = day1_idx + 4;
+        let eve_idx  = day1_idx + 5;
+        code.push_str(&format!("/{} \"Day 1\"\n", day1_idx));
+        code.push_str(&format!("/{} \"Day 2\"\n", day2_idx));
+        code.push_str(&format!("/{} \"Day 3\"\n", day3_idx));
+        code.push_str(&format!("/{} \" Morn\"\n", morn_idx));
+        code.push_str(&format!("/{} \" Aftn\"\n", aftn_idx));
+        code.push_str(&format!("/{} \" Eve\"\n\n", eve_idx));
+
+        let game_start = day1_idx + 6;
 
         // Game messages start here
         code.push_str(&format!("; Game messages start at {}\n\n", game_start));
@@ -771,6 +790,8 @@ impl DaadCodeGenerator {
             loc_names_start: 16,
             game_msg_start: game_start as u8,
             intro_msg: 14,
+            day_msgs: [day1_idx as u8, day2_idx as u8, day3_idx as u8],
+            time_msgs: [morn_idx as u8, aftn_idx as u8, eve_idx as u8],
         };
 
         (code, indices)
@@ -891,9 +912,9 @@ impl DaadCodeGenerator {
 ");
         code.push_str("RAMLO   29  verb
 ");
-        code.push_str("L       30  verb
+        code.push_str("LOOK    24  verb
 ");
-        code.push_str("LOOK    30  verb
+        code.push_str("L       24  verb
 ");
         code.push_str("X       30  verb
 ");
@@ -1314,10 +1335,11 @@ impl DaadCodeGenerator {
             code.push('\n');
         }
 
-        // EXAMINE catch-all: if no game rule matched, describe the object generically
+        // EXAMINE catch-all: WHATO resolves noun to object, SYSMESS 63 prints default
+        // Uses EXAMI (verb 30) — separate from LOOK (verb 24) so LOOK does room, EXAMINE does objects
         code.push_str("; EXAMINE catch-all: WHATO resolves noun to object, SYSMESS 63 prints default\n");
         code.push_str(">\n");
-        code.push_str("L       _       WHATO\n");
+        code.push_str("EXAMI   _       WHATO\n");
         code.push_str("                SYSMESS 63\n");
         code.push_str("                DONE\n\n");
 
@@ -1381,9 +1403,9 @@ impl DaadCodeGenerator {
         code.push_str("RAMLO   _       RAMLOAD 255\n");
         code.push_str("                CLS\n");
         code.push_str("                RESTART\n\n");
-        // LOOK catch-all at end
+        // LOOK catch-all at end (uses LOOK verb 24, separate from EXAMINE verb 30)
         code.push_str(">\n");
-        code.push_str("L       _       CLS\n");
+        code.push_str("LOOK    _       CLS\n");
         code.push_str("                RESTART\n\n");
 
         // ── PRO 6: Initialization (matching blank_en.dsf) ─────────────────
@@ -1577,6 +1599,50 @@ impl DaadCodeGenerator {
                 }
                 code.push_str(&format!("                DPRINT {}\n", right_flag));
                 code.push_str("                WINDOW 1\n\n");
+            },
+            "daytime" => {
+                // Day/time display: "Day 1 Morn", "Day 2 Aftn", "Day 3 Eve" etc.
+                // Uses MES (no newline) instead of MESSAGE (with newline) for status bar.
+                let day_flag = game.status_bar_config.as_ref()
+                    .and_then(|c| c.day_flag_id)
+                    .unwrap_or(93);
+                let time_flag = game.status_bar_config.as_ref()
+                    .and_then(|c| c.time_flag_id)
+                    .unwrap_or(138);
+
+                code.push_str("; Day/time display on status bar right side.\n\n");
+
+                // TAB to right position (col 29 of 40 leaves 11 chars for "Day N Time")
+                code.push_str(">\n");
+                code.push_str("_       _       TAB 29\n\n");
+
+                // Day number entries using MES (no newline, no DONE — fall through to time)
+                for day in 1..=3usize {
+                    code.push_str(">\n");
+                    code.push_str(&format!("_       _       EQ {} {}\n", day_flag, day));
+                    code.push_str(&format!("                MES {}\n\n", indices.day_msgs[day - 1]));
+                }
+
+                // Time of day entries using MES (no newline), with WINDOW 1 to return
+                // Morning (flag=0): use ZERO
+                code.push_str(">\n");
+                code.push_str(&format!("_       _       ZERO {}\n", time_flag));
+                code.push_str(&format!("                MES {}\n", indices.time_msgs[0]));
+                code.push_str("                WINDOW 1\n\n");
+                // Afternoon (flag=1)
+                code.push_str(">\n");
+                code.push_str(&format!("_       _       EQ {} 1\n", time_flag));
+                code.push_str(&format!("                MES {}\n", indices.time_msgs[1]));
+                code.push_str("                WINDOW 1\n\n");
+                // Evening (flag=2)
+                code.push_str(">\n");
+                code.push_str(&format!("_       _       EQ {} 2\n", time_flag));
+                code.push_str(&format!("                MES {}\n", indices.time_msgs[2]));
+                code.push_str("                WINDOW 1\n\n");
+
+                // Fallback: just switch back to text window
+                code.push_str(">\n");
+                code.push_str("_       _       WINDOW 1\n\n");
             },
             _ => {
                 // "turns" (default) — matching Rabenstein PRO 12 exactly

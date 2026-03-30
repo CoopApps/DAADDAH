@@ -245,6 +245,12 @@ pub struct StatusBarConfig {
     /// Label text for right content (e.g. "Score: ", "Time: ")
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub right_label: Option<String>,
+    /// Flag ID for day number (used with right_content="daytime")
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub day_flag_id: Option<u8>,
+    /// Flag ID for time of day (used with right_content="daytime", 0=Morn 1=Aftn 2=Eve)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_flag_id: Option<u8>,
 }
 
 /// DAAD's process tables
