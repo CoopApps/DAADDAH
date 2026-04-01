@@ -26,7 +26,10 @@ interface BackendGame {
     rightContent?: string;
     rightFlagId?: number;
     rightLabel?: string;
+    dayFlagId?: number;
+    timeFlagId?: number;
   };
+  imageHeight?: number;
 }
 
 interface BackendLocation {
@@ -230,6 +233,7 @@ export function toBackendGame(game: DaadGame): BackendGame {
     })),
     systemMessages: game.systemMessages,
     statusBarConfig: (game as any).statusBarConfig,
+    imageHeight: (game as any).imageHeight,
   };
 }
 
@@ -377,6 +381,7 @@ export function toFrontendGame(backend: BackendGame): DaadGame {
     })),
     systemMessages: backend.systemMessages,
     statusBarConfig: (backend as any).statusBarConfig,
+    imageHeight: (backend as any).imageHeight,
   } as any;
 
   return normalizeGameState(game);

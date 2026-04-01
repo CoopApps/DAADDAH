@@ -631,17 +631,22 @@ _       _       CLEAR DarkF
 >
 _       _       PROCESS 11
 
-; Set text window position (with platform-specific split screen).
+; Load location image if PCX file exists, otherwise use full text window.
 >
-_       _       WINAT 13 0
-                #ifdef "splitModeOn"
-                    XSPLITSCR 1
-                    #ifdef "cpc"
-                    WINAT 14 0
-                    #endif
-                #endif
+_       _       ZERO DarkF
+                PICTURE @Player
+                DISPLAY 0
                 WINDOW 1
-                WINSIZE 25 127
+                WINAT 13 0
+                WINSIZE 12 40
+                SKIP $pictureOK
+
+; No picture fallback - text window below status bar (full height).
+>
+_       _       WINDOW 1
+                WINAT 1 0
+                WINSIZE 24 40
+$pictureOK
 
 ; If dark, print darkness message.
 >

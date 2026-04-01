@@ -375,6 +375,7 @@ export default function GameInfoPanel({ game, setGame, onNavigateToPanel }: Game
                   <option value="turns">Turns</option>
                   <option value="score">Score</option>
                   <option value="custom">Custom Flag</option>
+                  <option value="daytime">Day / Time</option>
                   <option value="none">None</option>
                 </select>
               </div>
@@ -396,6 +397,22 @@ export default function GameInfoPanel({ game, setGame, onNavigateToPanel }: Game
                   )}
                 </div>
               )}
+              {game.statusBarConfig?.rightContent === "daytime" && (
+                <div style={{ display: "flex", gap: 4 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 10, margin: 0 }}>Day Flag</label>
+                    <input className="form-input" type="number" style={{ fontSize: 11, width: 50 }}
+                      value={game.statusBarConfig?.dayFlagId ?? 93} min={0} max={255}
+                      onChange={e => updateStatusBar({ dayFlagId: parseInt(e.target.value) || 93 })} />
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 10, margin: 0 }}>Time Flag</label>
+                    <input className="form-input" type="number" style={{ fontSize: 11, width: 50 }}
+                      value={game.statusBarConfig?.timeFlagId ?? 138} min={0} max={255}
+                      onChange={e => updateStatusBar({ timeFlagId: parseInt(e.target.value) || 138 })} />
+                  </div>
+                </div>
+              )}
             </div>
             <div style={{
               padding: "4px 8px", fontSize: 12, fontFamily: "monospace", marginTop: 8,
@@ -406,12 +423,31 @@ export default function GameInfoPanel({ game, setGame, onNavigateToPanel }: Game
               {(() => {
                 const rc = game.statusBarConfig?.rightContent ?? "turns";
                 if (rc === "none") return "";
+                if (rc === "daytime") return "                    Day 1  Morn";
                 const label = game.statusBarConfig?.rightLabel ?? (rc === "score" ? "Score: " : "Turns: ");
                 return "                    " + label + "0";
               })()}
             </div>
           </div>
         )}
+      </div>
+
+      {/* Graphics Layout */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <h3 style={{ margin: "0 0 8px", color: "var(--cyan-bright)", fontSize: 14 }}>Graphics Layout</h3>
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <div>
+            <label className="form-label" style={{ fontSize: 10, margin: 0 }}>Image Height (rows)</label>
+            <input className="form-input" type="number" style={{ fontSize: 11, width: 60 }}
+              value={game.imageHeight ?? 0} min={0} max={24}
+              onChange={e => setGame({ ...game, imageHeight: parseInt(e.target.value) || 0 })} />
+          </div>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", lineHeight: 1.3 }}>
+            {(game.imageHeight ?? 0) === 0 ? "No graphics — text only" :
+             `${(game.imageHeight ?? 0) * 8}px image area. Status bar at top, graphics below, text fills rest.`}
+            {(game.imageHeight ?? 0) === 13 && " (Rabenstein default)"}
+          </div>
+        </div>
       </div>
 
       {/* System Messages (STX) */}

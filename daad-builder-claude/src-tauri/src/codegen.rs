@@ -345,20 +345,36 @@ impl DaadCodeGenerator {
         logs.push("[VALIDATION]".to_string());
         logs.push("  ✓ All sections in correct DRC order".to_string());
         logs.push("  ✓ System messages (0-64) included".to_string());
-        logs.push("  ✓ PRO 5 rule ordering correct".to_string());
 
-        // Check for container objects whose IDs clash with location IDs
-        let loc_ids: std::collections::HashSet<u8> = game.locations.iter().map(|l| l.id).collect();
-        for obj in &game.objects {
-            if obj.is_container && loc_ids.contains(&obj.id) {
-                logs.push(format!(
-                    "  ⚠ WARNING: Object #{} ({}) is a container but location #{} exists. \
-                     DAAD reserves location N for container object N's contents. \
-                     Renumber the object or the location to avoid a conflict.",
-                    obj.id, obj.name, obj.id
-                ));
-            }
+        // 1. Parameter schema validation
+        let param_warnings = Self::validate_rule_params(&game.rules);
+        if param_warnings.is_empty() {
+            logs.push("  ✓ All action/condition parameters valid".to_string());
+        } else {
+            logs.push(format!("  {} parameter warning(s):", param_warnings.len()));
+            logs.extend(param_warnings);
         }
+
+        // 2. Rule ordering warnings (informational — auto-sort already applied in generate_processes)
+        let ordering_warnings = Self::check_rule_ordering_warnings(&game.rules);
+        if ordering_warnings.is_empty() {
+            logs.push("  ✓ PRO 5 rule ordering correct".to_string());
+        } else {
+            logs.push(format!("  {} rule ordering warning(s):", ordering_warnings.len()));
+            logs.extend(ordering_warnings);
+        }
+
+        // 3. Container/location ID clash
+        let clash_warnings = Self::check_container_clashes(game);
+        if clash_warnings.is_empty() {
+            logs.push("  ✓ No container/location ID clashes".to_string());
+        } else {
+            logs.extend(clash_warnings);
+        }
+
+        // 4. Inline text audit
+        let text_notes = Self::audit_inline_text(&game.rules);
+        logs.extend(text_notes);
 
         let line_count = code.lines().count();
         logs.push(String::new());
@@ -1126,6 +1142,16 @@ impl DaadCodeGenerator {
         let help_title = indices.help_title_msg;
         let help_body  = indices.help_body_msg;
 
+        // ── Layout calculation from image_height ──────────────────────────
+        // image_height = character rows for graphics (0 = text-only, 13 = Rabenstein)
+        // Layout: [status bar @ 0] [gap @ 1] [graphics 2..img_rows+1] [text @ img_rows+2..24]
+        // With no graphics: [status bar @ 0] [text @ 1..24]
+        let img_rows = game.image_height.unwrap_or(0) as usize;
+        let status_row: usize = 0;                    // status bar always at top
+        let gfx_row: usize = 2;                       // graphics start after 1-row gap below status
+        let text_row = if img_rows > 0 { gfx_row + img_rows } else { 1 }; // text below graphics (or below status if no gfx)
+        let text_height = 25 - text_row;              // remaining rows for text
+
         // ── PRO 0: Main location loop ──────────────────────────────────────
         code.push_str("/PRO 0\n\n");
         code.push_str("; PRO 0 is the first process executed in DAAD.\n");
@@ -1136,26 +1162,6 @@ impl DaadCodeGenerator {
         code.push_str("_       _       AT 0\n");
         code.push_str("                PROCESS 6\n\n");
 
-        // Status line update — must run before text window reset
-        code.push_str(">\n");
-        code.push_str("_       _       PROCESS 11\n\n");
-
-        // Text window position reset — runs every turn (critical for stable layout)
-        let has_images = game.locations.iter().any(|l| l.image.is_some());
-        if has_images {
-            code.push_str("; Set text window below picture area.\n");
-            code.push_str(">\n");
-            code.push_str("_       _       WINAT 13 0\n");
-            code.push_str("                WINDOW 1\n");
-            code.push_str("                WINSIZE 12 40\n\n");
-        } else {
-            code.push_str("; Set text window below status bar (line 1).\n");
-            code.push_str(">\n");
-            code.push_str("_       _       WINDOW 1\n");
-            code.push_str("                WINAT 1 0\n");
-            code.push_str("                WINSIZE 24 40\n\n");
-        }
-
         // Dark flag calculation
         code.push_str(">\n");
         code.push_str("_       _       WINDOW 0\n");
@@ -1164,22 +1170,36 @@ impl DaadCodeGenerator {
         code.push_str("                ABSENT 0\n");
         code.push_str("                SET DarkF\n\n");
 
-        if has_images {
-            // Load location picture (if light)
+        if img_rows > 0 {
+            // Try to load location picture (PICTURE acts as condition — succeeds if PCX exists)
+            code.push_str("; Load location image if PCX file exists, otherwise use full text window.\n");
             code.push_str(">\n");
             code.push_str("_       _       ZERO DarkF\n");
             code.push_str("                PICTURE @Player\n");
             code.push_str("                DISPLAY 0\n");
+            code.push_str("                WINDOW 1\n");
+            code.push_str(&format!("                WINAT {} 0\n", text_row));
+            code.push_str(&format!("                WINSIZE {} 40\n", text_height));
             code.push_str("                SKIP $pictureOK\n\n");
 
-            // No picture fallback — set text window to full screen
+            // No picture fallback — text window below status bar (full height, no image gap)
             code.push_str(">\n");
             code.push_str("_       _       WINDOW 1\n");
-            code.push_str("                WINAT 0 0\n");
-            code.push_str("                WINSIZE 24 COLS\n");
-            code.push_str("                CLS\n");
+            code.push_str(&format!("                WINAT {} 0\n", status_row + 1));
+            code.push_str(&format!("                WINSIZE {} 40\n", 25 - (status_row + 1)));
             code.push_str("$pictureOK\n\n");
+        } else {
+            // No images configured — text window below status bar
+            code.push_str(">\n");
+            code.push_str("_       _       WINDOW 1\n");
+            code.push_str(&format!("                WINAT {} 0\n", text_row));
+            code.push_str(&format!("                WINSIZE {} 40\n", text_height));
+            code.push_str("\n");
         }
+
+        // Status line update — AFTER image so it draws on top, not underneath
+        code.push_str(">\n");
+        code.push_str("_       _       PROCESS 11\n\n");
 
         // Text window: darkness message or location description
         code.push_str(">\n");
@@ -1319,7 +1339,8 @@ impl DaadCodeGenerator {
         // User-defined response rules for PRO5 (response table):
         // - All PRO1 and PRO5 rules
         // - PRO0 rules with explicit verb/noun (not wildcards)
-        let pro5_rules: Vec<_> = game.rules.iter()
+        // Auto-sorted by specificity: specific verb+noun first, then wildcards last
+        let mut pro5_rules: Vec<_> = game.rules.iter()
             .filter(|r| r.enabled && {
                 let v = r.verb.as_deref().unwrap_or("_");
                 let n = r.noun.as_deref().unwrap_or("_");
@@ -1330,6 +1351,7 @@ impl DaadCodeGenerator {
                 }
             })
             .collect();
+        pro5_rules.sort_by(|a, b| Self::rule_specificity(a).cmp(&Self::rule_specificity(b)));
         for rule in pro5_rules {
             code.push_str(&Self::generate_rule(rule, game, indices.game_msg_start));
             code.push('\n');
@@ -1403,7 +1425,15 @@ impl DaadCodeGenerator {
         code.push_str("RAMLO   _       RAMLOAD 255\n");
         code.push_str("                CLS\n");
         code.push_str("                RESTART\n\n");
+        // LOOK + noun → treat as EXAMINE (WHATO resolves noun to present object)
+        // If noun matches a present object, describe it. Otherwise fall through to room redescription.
+        code.push_str("; LOOK <object> redirects to EXAMINE behaviour.\n");
+        code.push_str(">\n");
+        code.push_str("LOOK    _       WHATO\n");
+        code.push_str("                SYSMESS 63\n");
+        code.push_str("                DONE\n\n");
         // LOOK catch-all at end (uses LOOK verb 24, separate from EXAMINE verb 30)
+        // Falls through here only if WHATO failed (no matching object = bare LOOK)
         code.push_str(">\n");
         code.push_str("LOOK    _       CLS\n");
         code.push_str("                RESTART\n\n");
@@ -1418,14 +1448,14 @@ impl DaadCodeGenerator {
         code.push_str("                WINAT 0 0\n");
         code.push_str("                WINSIZE 25 40\n");
         code.push_str("                CLS\n");
-        // Status bar: WINDOW 2, line 0, 1 row, 40 cols
+        // Status bar: WINDOW 2, sits below graphics area
         code.push_str("                WINDOW 2\n");
-        code.push_str("                WINAT 0 0\n");
+        code.push_str(&format!("                WINAT {} 0\n", status_row));
         code.push_str("                WINSIZE 1 40\n");
-        // Text window: WINDOW 1, line 1 (below status), 24 rows, 40 cols
+        // Text window: WINDOW 1, below status bar
         code.push_str("                WINDOW 1\n");
-        code.push_str("                WINAT 1 0\n");
-        code.push_str("                WINSIZE 24 40\n");
+        code.push_str(&format!("                WINAT {} 0\n", text_row));
+        code.push_str(&format!("                WINSIZE {} 40\n", text_height));
         // Title screen
         code.push_str("                DESC 0\n");
         code.push_str("                ANYKEY\n");
@@ -1526,7 +1556,7 @@ impl DaadCodeGenerator {
         // Reset WINDOW 2 position every time (PCDAAD may not persist from init)
         code.push_str(">\n");
         code.push_str("_       _       WINDOW 2\n");
-        code.push_str("                WINAT 0 0\n");
+        code.push_str(&format!("                WINAT {} 0\n", status_row));
         code.push_str("                WINSIZE 1 40\n");
         let sb_paper = game.status_bar_config.as_ref().map_or(4, |c| c.paper_color);
         let sb_ink = game.status_bar_config.as_ref().map_or(15, |c| c.ink_color);
@@ -1829,6 +1859,190 @@ impl DaadCodeGenerator {
             "INKEY" => "INKEY".to_string(),
             "QUIT" => "QUIT".to_string(),
             _ => format!("{} {}", cond_type, params.iter().map(|(k,v)| format!("{:?}", v)).collect::<Vec<_>>().join(" ")),
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // VALIDATION: Parameter schema, rule ordering, container clashes
+    // ═══════════════════════════════════════════════════════════════
+
+    /// Check action/condition params against expected schema.
+    /// Returns warnings for missing required parameters.
+    pub fn validate_rule_params(rules: &[Rule]) -> Vec<String> {
+        let mut warnings = Vec::new();
+
+        // Action type → required parameter keys
+        fn action_required_params(action_type: &str) -> &'static [&'static str] {
+            match action_type {
+                "GET" | "DROP" | "WEAR" | "REMOVE" | "CREATE" | "DESTROY" | "SETCO" => &["objno"],
+                "SWAP" | "COPYOO" | "PUTIN" | "TAKEOUT" => &["objno1", "objno2"],
+                "PLACE" => &["objno", "locno"],
+                "PUTO" | "GOTO" | "LISTAT" | "DOALL" => &["locno"],
+                "SET" | "CLEAR" | "MOVE" | "RANDOM" | "PRINT" | "DPRINT" | "WEIGHT" => &["flagno"],
+                "LET" | "PLUS" | "MINUS" => &["flagno", "value"],
+                "ADD" | "SUB" | "COPYFF" | "COPYBF" | "SAME" | "NOTSAME" | "BIGGER" | "SMALLER" => &["flagno1", "flagno2"],
+                "COPYOF" | "WEIGH" => &["objno", "flagno"],
+                "COPYFO" => &["flagno", "objno"],
+                "ABILITY" => &["maxcarr", "strength"],
+                "MESSAGE" | "MES" => &["mesno"], // or text (checked separately)
+                "SYSMESS" => &["sysno"],
+                "PROCESS" => &["prono"],
+                "WINDOW" => &["winno"],
+                "WINAT" | "PRINTAT" => &["line", "column"],
+                "WINSIZE" => &["lines", "columns"],
+                "PAPER" | "INK" | "BORDER" => &["color"],
+                "TAB" => &["column"],
+                "MODE" => &["mode"],
+                "PAUSE" => &["decisecs"],
+                "PICTURE" => &["picno"],
+                "DISPLAY" => &["value"],
+                "BEEP" => &["duration", "pitch"],
+                "RAMLOAD" => &["slot"],
+                "SKIP" => &["count"],
+                "SFX" => &["value1", "value2"],
+                "GFX" => &["gfxno", "param"],
+                "XMES" | "XMESSAGE" => &["bank", "mesno"],
+                "XSPLITSCR" => &["lines"],
+                "SYNONYM" => &["verb", "noun"],
+                _ => &[], // Zero-param or unknown — no required params
+            }
+        }
+
+        // Condition type → required parameter keys
+        fn condition_required_params(cond_type: &str) -> &'static [&'static str] {
+            match cond_type {
+                "AT" | "NOTAT" | "ATGT" | "ATLT" => &["locno"],
+                "PRESENT" | "ABSENT" | "WORN" | "NOTWORN" | "CARRIED" | "NOTCARR" => &["objno"],
+                "ISAT" | "ISNOTAT" => &["objno", "locno"],
+                "ZERO" | "NOTZERO" => &["flagno"],
+                "EQ" | "NOTEQ" | "GT" | "LT" => &["flagno", "value"],
+                "SAME" | "NOTSAME" | "BIGGER" | "SMALLER" => &["flagno1", "flagno2"],
+                "CHANCE" => &["percent"],
+                "HASAT" | "HASNAT" => &["attribute"],
+                "ADJECT1" | "ADVERB" | "PREP" | "NOUN2" | "ADJECT2" => &["word"],
+                _ => &[], // ISDONE, ISNDONE, INKEY, QUIT, etc.
+            }
+        }
+
+        for rule in rules {
+            if !rule.enabled { continue; }
+
+            for (i, action) in rule.actions.iter().enumerate() {
+                let atype = action.r#type.as_str();
+                // MESSAGE/MES can use inline text instead of mesno
+                if (atype == "MESSAGE" || atype == "MES") && action.text.is_some() {
+                    continue; // inline text — no mesno needed
+                }
+                for &key in action_required_params(atype) {
+                    if !action.params.contains_key(key) {
+                        warnings.push(format!(
+                            "  ⚠ Rule '{}' (id {}): action {} [{}] missing parameter '{}' (defaults to 0)",
+                            rule.name, rule.id, atype, i, key
+                        ));
+                    }
+                }
+            }
+
+            for (i, cond) in rule.conditions.iter().enumerate() {
+                let ctype = cond.r#type.as_str();
+                for &key in condition_required_params(ctype) {
+                    if !cond.params.contains_key(key) {
+                        warnings.push(format!(
+                            "  ⚠ Rule '{}' (id {}): condition {} [{}] missing parameter '{}' (defaults to 0)",
+                            rule.name, rule.id, ctype, i, key
+                        ));
+                    }
+                }
+            }
+        }
+        warnings
+    }
+
+    /// Detect rule ordering issues: wildcard rules before more specific ones.
+    /// Returns warnings (informational — auto-sort fixes the issue).
+    pub fn check_rule_ordering_warnings(rules: &[Rule]) -> Vec<String> {
+        let mut warnings = Vec::new();
+
+        // Only check PRO5/PRO1 response rules
+        let response_rules: Vec<&Rule> = rules.iter()
+            .filter(|r| r.enabled && matches!(r.process.as_str(), "PRO1" | "PRO5"))
+            .collect();
+
+        for (i, rule) in response_rules.iter().enumerate() {
+            let v = rule.verb.as_deref().unwrap_or("_");
+            let n = rule.noun.as_deref().unwrap_or("_");
+            if n != "_" { continue; } // Only check wildcard-noun rules
+
+            // Look for later rules with same verb but specific noun
+            for later in &response_rules[i+1..] {
+                let lv = later.verb.as_deref().unwrap_or("_");
+                let ln = later.noun.as_deref().unwrap_or("_");
+                if lv == v && ln != "_" {
+                    warnings.push(format!(
+                        "  ⚠ Rule ordering: '{}' ({} _) shadows '{}' ({} {}) — auto-sorted",
+                        rule.name, v, later.name, lv, ln
+                    ));
+                }
+            }
+        }
+        warnings
+    }
+
+    /// Check for container objects whose IDs clash with gameplay locations.
+    pub fn check_container_clashes(game: &DaadGame) -> Vec<String> {
+        let mut warnings = Vec::new();
+        for obj in &game.objects {
+            if obj.is_container {
+                if let Some(loc) = game.locations.iter().find(|l| l.id == obj.id) {
+                    if !loc.description.trim().is_empty() {
+                        warnings.push(format!(
+                            "  ⚠ Container '{}' (object {}) shares ID with location '{}' (location {}). \
+                             Items PUT IN the container will appear at that location.",
+                            obj.name, obj.id, loc.name, loc.id
+                        ));
+                    }
+                }
+            }
+        }
+        warnings
+    }
+
+    /// Count inline text vs message array references in MESSAGE actions.
+    pub fn audit_inline_text(rules: &[Rule]) -> Vec<String> {
+        let mut notes = Vec::new();
+        let mut inline_count = 0u32;
+        let mut mesno_count = 0u32;
+
+        for rule in rules {
+            for action in &rule.actions {
+                if action.r#type == "MESSAGE" || action.r#type == "MES" {
+                    if action.text.is_some() {
+                        inline_count += 1;
+                    } else {
+                        mesno_count += 1;
+                    }
+                }
+            }
+        }
+
+        if inline_count > 0 {
+            notes.push(format!(
+                "  ℹ {} MESSAGE action(s) use inline text, {} use message array. \
+                 Consider moving recurring text to the messages array for easier maintenance.",
+                inline_count, mesno_count
+            ));
+        }
+        notes
+    }
+
+    /// Calculate rule specificity for sorting: 0=specific, 1=half-wild, 2=full-wild
+    fn rule_specificity(rule: &Rule) -> u8 {
+        let v = rule.verb.as_deref().unwrap_or("_");
+        let n = rule.noun.as_deref().unwrap_or("_");
+        match (v == "_", n == "_") {
+            (false, false) => 0, // specific verb + specific noun
+            (false, true) | (true, false) => 1, // one wildcard
+            (true, true) => 2, // full wildcard
         }
     }
 

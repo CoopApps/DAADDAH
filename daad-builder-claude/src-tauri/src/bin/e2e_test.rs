@@ -99,9 +99,19 @@ fn main() {
     println!("\n[2] Generating DSF...");
     let (dsf_code, logs) = daad_builder_lib::codegen::DaadCodeGenerator::generate_verbose(&game);
 
-    // Print last few log lines
-    for line in logs.iter().rev().take(5).collect::<Vec<_>>().iter().rev() {
-        println!("  {}", line);
+    // Print validation warnings and notes from codegen logs
+    let validation_lines: Vec<&String> = logs.iter()
+        .filter(|l| l.contains("⚠") || l.contains("ℹ") || l.contains("[VALIDATION]") || l.contains("warning") || l.contains("parameter"))
+        .collect();
+    if !validation_lines.is_empty() {
+        for line in &validation_lines {
+            println!("  {}", line);
+        }
+    } else {
+        // Print last few log lines as fallback
+        for line in logs.iter().rev().take(5).collect::<Vec<_>>().iter().rev() {
+            println!("  {}", line);
+        }
     }
 
     let dsf_lines = dsf_code.lines().count();

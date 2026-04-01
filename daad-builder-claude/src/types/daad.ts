@@ -261,6 +261,10 @@ export interface DaadGame {
    * of the status bar at the top of the screen (WINDOW 2 in DAAD).
    */
   statusBarConfig?: StatusBarConfig;
+  /** Height of graphics area in character rows (each row = 8px).
+   * 0 = no graphics, 13 = Rabenstein default (104px).
+   * Status bar at top, then graphics, then text window fills the rest. */
+  imageHeight?: number;
 }
 
 export interface StatusBarConfig {
@@ -272,12 +276,16 @@ export interface StatusBarConfig {
   showTurns: boolean;
   /** Show location name on the left side. Default: true */
   showLocationName: boolean;
-  /** What to show on the right side: "turns", "score", "custom", or "none". Default: "turns" */
-  rightContent?: "turns" | "score" | "custom" | "none";
+  /** What to show on the right side: "turns", "score", "custom", "daytime", or "none". Default: "turns" */
+  rightContent?: "turns" | "score" | "custom" | "daytime" | "none";
   /** Flag ID to display when rightContent is "score" or "custom". Default: 30 (Score) */
   rightFlagId?: number;
   /** Label for the right side content. Default: "Turns: " or "Score: " */
   rightLabel?: string;
+  /** Flag ID for day number (used with rightContent="daytime"). Default: 93 */
+  dayFlagId?: number;
+  /** Flag ID for time of day (used with rightContent="daytime", 0=Morn 1=Aftn 2=Eve). Default: 138 */
+  timeFlagId?: number;
 }
 
 export type PanelType =
