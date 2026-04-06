@@ -1,0 +1,92 @@
+examine telegram
+examine briefcase
+examine newspaper
+s
+in
+drive holloway
+out
+e
+talk hutchins
+ask signal
+talk margaret
+ask visitor
+talk end
+w
+in
+drive woundy
+out
+e
+smell
+look
+w
+n
+e
+talk chubb
+ask lodger
+talk end
+u
+smell
+feel floor
+examine glass
+take glass
+take ruler
+examine ruler
+d
+w
+s
+in
+drive richmond
+talk carlyle
+ask card
+ask glass
+talk end
+drive city
+out
+e
+smell
+w
+in
+drive richmond
+talk carlyle
+ask address
+ask harris
+talk end
+s
+in
+drive hampton
+out
+e
+talk mead
+ask distraction
+talk end
+e
+smell
+feel workbench
+open drawer
+take letter
+take receipts
+take diagram
+w
+s
+in
+drive mayfair
+in
+open door
+search desk
+out
+drive longacre
+out
+talk shopman
+ask glass
+talk end
+out
+drive city
+out
+e
+accuse pendleton
+present glass
+present ruler
+present cert
+present slip
+present letter
+accuse pendleton
