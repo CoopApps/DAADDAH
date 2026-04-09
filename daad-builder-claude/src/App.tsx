@@ -117,12 +117,12 @@ function App() {
     // Listen for the simple signal that MCP changed the game
     // Then fetch fresh state from the API
     listen('mcp-game-changed', async () => {
-      console.log('[MCP] Game changed signal received, fetching fresh state...');
+      // debug: console.log('[MCP] Game changed signal received, fetching fresh state...');
       try {
         const response = await fetch('http://localhost:3042/api/game');
         if (response.ok) {
           const gameData = await response.json();
-          console.log('[MCP] Fetched game state:', gameData);
+          // debug: console.log('[MCP] Fetched game state:', gameData);
           // Use toFrontendGame to convert from backend format (snake_case) to frontend format (camelCase)
           setGame(toFrontendGame(gameData));
           setShowWelcome(false);
@@ -476,7 +476,7 @@ function App() {
       case "debug":
         return <DebugPanel game={game} setGame={updateGame} />;
       case "graphics":
-        return <GraphicsPanel game={game} setGame={updateGame} />;
+        return <GraphicsPanel game={game} setGame={updateGame} onNavigateToPanel={(panel, itemId) => { setActivePanel(panel as any); if (itemId !== undefined) setSelectItemId(itemId); }} />;
       default:
         return null;
     }

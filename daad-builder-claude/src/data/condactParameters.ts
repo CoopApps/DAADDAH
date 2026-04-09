@@ -88,11 +88,14 @@ export const CONDITION_PARAMS: Record<ConditionType, CondactParamDefinition[]> =
   ISNDONE: [{ name: "procno", type: "number", description: "Process ID (0-3)" }],
 
   // Object Attributes
-  HASAT: [{ name: "objno", type: "object", description: "Object ID" }],
-  HASNAT: [{ name: "objno", type: "object", description: "Object ID" }],
+  HASAT: [{ name: "attribute", type: "number", description: "Attribute bit position (0-15)" }],
+  HASNAT: [{ name: "attribute", type: "number", description: "Attribute bit position (0-15)" }],
 
   // Player Interaction
   INKEY: [{ name: "keycode", type: "number", description: "ASCII key code" }],
+
+  // Quit confirmation
+  QUIT: [],
 };
 
 // Action parameter definitions

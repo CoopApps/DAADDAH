@@ -63,7 +63,7 @@ export async function initDatabase(): Promise<void> {
       )
     `);
 
-    console.log("[Database] Initialized SQLite database");
+    // debug: console.log("[Database] Initialized SQLite database");
   } catch (error) {
     console.error("[Database] Failed to initialize database:", error);
     throw new Error(`Database initialization failed: ${error}`);
@@ -105,7 +105,7 @@ export async function saveProject(name: string, game: DaadGame): Promise<number>
         "UPDATE projects SET data = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
         [data, existing[0].id]
       );
-      console.log(`[Database] Updated project: ${name} (ID: ${existing[0].id})`);
+      // debug: console.log(`[Database] Updated project: ${name} (ID: ${existing[0].id})`);
       return existing[0].id;
     } else {
       // Insert new project
@@ -113,7 +113,7 @@ export async function saveProject(name: string, game: DaadGame): Promise<number>
         "INSERT INTO projects (name, data) VALUES ($1, $2)",
         [name, data]
       );
-      console.log(`[Database] Created new project: ${name} (ID: ${result.lastInsertId})`);
+      // debug: console.log(`[Database] Created new project: ${name} (ID: ${result.lastInsertId})`);
       return result.lastInsertId;
     }
   } catch (error) {
@@ -188,7 +188,7 @@ export async function deleteProject(id: number): Promise<void> {
     if (!db) await initDatabase();
 
     await db!.execute("DELETE FROM projects WHERE id = $1", [id]);
-    console.log(`[Database] Deleted project ID: ${id}`);
+    // debug: console.log(`[Database] Deleted project ID: ${id}`);
   } catch (error) {
     console.error("[Database] Failed to delete project:", error);
     throw new Error(`Failed to delete project: ${error}`);
@@ -238,7 +238,7 @@ export async function loadAutoSave(): Promise<DaadGame | null> {
 
     if (result.length === 0) return null;
 
-    console.log(`[Database] Found auto-save from: ${result[0].updated_at}`);
+    // debug: console.log(`[Database] Found auto-save from: ${result[0].updated_at}`);
     try {
       const rawGame = JSON.parse(result[0].data);
       return normalizeGameState(rawGame);
@@ -257,7 +257,7 @@ export async function closeDatabase(): Promise<void> {
     if (db) {
       await db.close();
       db = null;
-      console.log("[Database] Connection closed");
+      // debug: console.log("[Database] Connection closed");
     }
   } catch (error) {
     console.error("[Database] Failed to close connection:", error);

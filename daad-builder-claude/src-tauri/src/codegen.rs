@@ -19,6 +19,10 @@ struct MessageIndices {
     game_msg_start: u8,
     /// Index of the game intro text shown at startup in PRO 6
     intro_msg: u8,
+    /// Indices for day labels ("Day 1", "Day 2", "Day 3") used by daytime status bar
+    day_msgs: [u8; 3],
+    /// Indices for time labels (" Morn", " Aftn", " Eve") used by daytime status bar
+    time_msgs: [u8; 3],
 }
 
 /// DAAD Code Generator
@@ -26,6 +30,23 @@ struct MessageIndices {
 pub struct DaadCodeGenerator;
 
 impl DaadCodeGenerator {
+    /// Escape text for DSF output: handle quotes, newlines, and replace
+    /// Unicode characters that don't exist in Windows-1252 with safe alternatives.
+    /// DRB expects Windows-1252 encoding, so characters like em-dash (U+2014),
+    /// smart quotes, etc. must be replaced.
+    fn escape_text(text: &str) -> String {
+        text.replace('\u{2014}', "--")   // em-dash → --
+            .replace('\u{2013}', "-")    // en-dash → -
+            .replace('\u{2018}', "'")    // left single quote → '
+            .replace('\u{2019}', "'")    // right single quote → '
+            .replace('\u{201C}', "\"")   // left double quote → "
+            .replace('\u{201D}', "\"")   // right double quote → "
+            .replace('\u{2026}', "...")  // ellipsis → ...
+            .replace('"', "\\\"")
+            .replace('\n', "#n")
+            .replace('\r', "")
+    }
+
     /// Generate complete DAAD source code from visual game
     pub fn generate(game: &DaadGame) -> String {
         let mut code = String::new();
@@ -48,11 +69,27 @@ impl DaadCodeGenerator {
         // 1. /CTL section (required by DRC)
         code.push_str(&Self::generate_ctl_section());
 
+        // Auto-detect MALUVA: if any rule uses X-prefixed condacts or locations have images
+        let uses_maluva = game.rules.iter().any(|r|
+            r.actions.iter().any(|a| {
+                let t = a.r#type.as_str();
+                t.starts_with("X") && t != "X" && t.len() > 1
+            })
+        ) || game.locations.iter().any(|l| l.image.is_some());
+        if uses_maluva {
+            code.push_str("#extern \"MALUVA\"\n");
+            // Enable split screen mode when game has pictures (CPC/C64 need XSPLITSCR)
+            if game.locations.iter().any(|l| l.image.is_some()) {
+                code.push_str("#define splitModeOn\n");
+            }
+            code.push_str("\n");
+        }
+
         // 2. /VOC - Vocabulary (MUST be position 2, immediately after /CTL)
         code.push_str(&Self::generate_vocabulary(&game.vocabulary, &game.objects));
 
-        // 3. /STX - System Text Messages
-        code.push_str(&Self::generate_system_messages());
+        // 3. /STX - System Text Messages (with optional custom overrides)
+        code.push_str(&Self::generate_system_messages(game.system_messages.as_ref()));
 
         // 4. /MTX - Message Texts (also computes system message indices)
         let (mtx, msg_indices) = Self::generate_messages_with_indices(&game.messages, &game.locations, game.intro_text.as_deref().unwrap_or(""));
@@ -68,7 +105,7 @@ impl DaadCodeGenerator {
         code.push_str(&Self::generate_connections(&game.locations));
 
         // 8. /OBJ - Object Definitions
-        code.push_str(&Self::generate_object_definitions(&game.objects));
+        code.push_str(&Self::generate_object_definitions(&game.objects, &game.locations));
 
         // 9. /PRO - Process tables (PRO 0-12)
         code.push_str(&Self::generate_processes(game, &msg_indices));
@@ -135,8 +172,8 @@ impl DaadCodeGenerator {
 
         // 3. STX Section
         logs.push("[STX] System text messages...".to_string());
-        code.push_str(&Self::generate_system_messages());
-        logs.push("  ✓ 63 standard DAAD system messages (0-62)".to_string());
+        code.push_str(&Self::generate_system_messages(game.system_messages.as_ref()));
+        logs.push("  ✓ 65 standard DAAD system messages (0-64)".to_string());
         logs.push(String::new());
 
         // 4. MTX Section
@@ -232,7 +269,7 @@ impl DaadCodeGenerator {
 
         // 8. OBJ Section
         logs.push("[OBJ] Object definitions...".to_string());
-        code.push_str(&Self::generate_object_definitions(&game.objects));
+        code.push_str(&Self::generate_object_definitions(&game.objects, &game.locations));
         if !game.objects.is_empty() {
             logs.push(format!("  ✓ {} object properties defined", game.objects.len()));
             let mut carried = 0;
@@ -308,7 +345,36 @@ impl DaadCodeGenerator {
         logs.push("[VALIDATION]".to_string());
         logs.push("  ✓ All sections in correct DRC order".to_string());
         logs.push("  ✓ System messages (0-64) included".to_string());
-        logs.push("  ✓ PRO 5 rule ordering correct".to_string());
+
+        // 1. Parameter schema validation
+        let param_warnings = Self::validate_rule_params(&game.rules);
+        if param_warnings.is_empty() {
+            logs.push("  ✓ All action/condition parameters valid".to_string());
+        } else {
+            logs.push(format!("  {} parameter warning(s):", param_warnings.len()));
+            logs.extend(param_warnings);
+        }
+
+        // 2. Rule ordering warnings (informational — auto-sort already applied in generate_processes)
+        let ordering_warnings = Self::check_rule_ordering_warnings(&game.rules);
+        if ordering_warnings.is_empty() {
+            logs.push("  ✓ PRO 5 rule ordering correct".to_string());
+        } else {
+            logs.push(format!("  {} rule ordering warning(s):", ordering_warnings.len()));
+            logs.extend(ordering_warnings);
+        }
+
+        // 3. Container/location ID clash
+        let clash_warnings = Self::check_container_clashes(game);
+        if clash_warnings.is_empty() {
+            logs.push("  ✓ No container/location ID clashes".to_string());
+        } else {
+            logs.extend(clash_warnings);
+        }
+
+        // 4. Inline text audit
+        let text_notes = Self::audit_inline_text(&game.rules);
+        logs.extend(text_notes);
 
         let line_count = code.lines().count();
         logs.push(String::new());
@@ -422,35 +488,35 @@ impl DaadCodeGenerator {
         code
     }
 
-    fn generate_system_messages() -> String {
+    fn generate_system_messages(overrides: Option<&std::collections::HashMap<u8, String>>) -> String {
         let mut code = String::from("/STX    ;System Message Texts\n");
 
-        // Standard DAAD system messages (0-62) - required by DRC
+        // Standard DAAD system messages (0-64) - required by DRC
         let system_messages = vec![
             "/0 \"It's too dark to see anything.\"",
             "/1 \"I can also see: \"",
-            "/2 \"What now?\"",
-            "/3 \"What next?\"",
-            "/4 \"What should I do now?\"",
-            "/5 \"What should I do next?\"",
-            "/6 \"I was not able to understand any of that.  Please try again.\"",
-            "/7 \"I can't go in that direction.\"",
-            "/8 \"I can't do that.\"",
-            "/9 \"I have with me:\"",
-            "/10 \"I am wearing:\"",
+            "/2 \"\"",
+            "/3 \"\"",
+            "/4 \"\"",
+            "/5 \"\"",
+            "/6 \"#nI was not able to understand any of that.  Please try again.\"",
+            "/7 \"#nI can't go in that direction.\"",
+            "/8 \"I can't do that.#n\"",
+            "/9 \"I have with me:#n\"",
+            "/10 \"I am wearing:#n\"",
             "/11 \"\";*Spare\"",
             "/12 \"Are you sure? \"",
             "/13 \"Would you like another go? \"",
             "/14 \"\";*Spare\"",
-            "/15 \"OK.\"",
-            "/16 \"Press any key to continue.\"",
+            "/15 \"OK.#n\"",
+            "/16 \"Press any key to continue.#n\"",
             "/17 \"\";*You have taken\"",
-            "/18 \"\";*\\\\sturn\"",
+            "/18 \"\";*#sturn\"",
             "/19 \"\";*s\"",
             "/20 \"\";*.[CR]\"",
             "/21 \"\";*You have scored\"",
             "/22 \"\";*%[CR]\"",
-            "/23 \"I'm not wearing one of those.\"",
+            "/23 \"I'm not wearing one of those.#n\"",
             "/24 \"I can't.  I'm wearing the _.\"",
             "/25 \"I already have the _.\"",
             "/26 \"There isn't one of those here.\"",
@@ -460,24 +526,24 @@ impl DaadCodeGenerator {
             "/30 \"Y\"    ;One upper case character only",
             "/31 \"N\"    ;One upper case character only",
             "/32 \"More...\"",
-            "/33 \">\"",
+            "/33 \"#n>\"",
             "/34 \"\";*Spare\"",
-            "/35 \"Time passes...\"",
-            "/36 \"I now have the _.\"",
-            "/37 \"I'm now wearing the _.\"",
-            "/38 \"I've removed the _.\"",
-            "/39 \"I've dropped the _.\"",
-            "/40 \"I can't wear the _.\"",
-            "/41 \"I can't remove the _.\"",
-            "/42 \"I can't remove the _.  My hands are full.\"",
-            "/43 \"The _ weighs too much for me.\"",
-            "/44 \"The _ is in the \"",
-            "/45 \"The _ isn't in the \"",
+            "/35 \"#nTime passes...#n\"",
+            "/36 \"I now have _.#n\"",
+            "/37 \"I'm now wearing _.#n\"",
+            "/38 \"I've removed _.#n\"",
+            "/39 \"I've dropped _.#n\"",
+            "/40 \"I can't wear _.\"",
+            "/41 \"I can't remove _.\"",
+            "/42 \"I can't remove _.  My hands are full.\"",
+            "/43 \"_ weighs too much for me.\"",
+            "/44 \"_ is in the \"",
+            "/45 \"_ isn't in the \"",
             "/46 \", \"",
             "/47 \" and \"",
             "/48 \".\"",
-            "/49 \"I don't have the _.\"",
-            "/50 \"I'm not wearing the _.\"",
+            "/49 \"I don't have _.\"",
+            "/50 \"I'm not wearing _.\"",
             "/51 \".\"",
             "/52 \"There isn't one of those in the \"",
             "/53 \"Nothing.\"",
@@ -490,9 +556,19 @@ impl DaadCodeGenerator {
             "/60 \"Type in name of file:\"",
             "/61 \"Start tape.\"",
             "/62 \"Tape or Disc?\"",
+            "/63 \"You see nothing special about the _.\"",
+            "/64 \"You are carrying too much already.\"",
         ];
 
-        for msg in system_messages {
+        for (idx, msg) in system_messages.iter().enumerate() {
+            // Check if there's a custom override for this message index
+            if let Some(overrides) = overrides {
+                if let Some(custom_text) = overrides.get(&(idx as u8)) {
+                    let escaped = Self::escape_text(custom_text);
+                    code.push_str(&format!("/{} \"{}\"\n", idx, escaped));
+                    continue;
+                }
+            }
             code.push_str(msg);
             code.push('\n');
         }
@@ -508,10 +584,7 @@ impl DaadCodeGenerator {
             code.push_str("; No locations defined\n\n");
         } else {
             for loc in locations {
-                let escaped_desc = loc.description
-                    .replace('"', "\\\"")
-                    .replace('\n', "^")
-                    .replace('\r', "");
+                let escaped_desc = Self::escape_text(&loc.description);
 
                 code.push_str(&format!(
                     "/{} \"{}\"{}\n",
@@ -564,7 +637,7 @@ impl DaadCodeGenerator {
                 } else {
                     format!("a {} {}", obj.adjective.to_lowercase(), obj.noun.to_lowercase())
                 };
-                let escaped = display_text.replace('"', "\\\"");
+                let escaped = Self::escape_text(&display_text);
                 code.push_str(&format!("/{} \"{}\"\n", obj.id, escaped));
             }
             code.push('\n');
@@ -572,7 +645,9 @@ impl DaadCodeGenerator {
         code
     }
 
-    fn generate_object_definitions(objects: &[Object]) -> String {
+    fn generate_object_definitions(objects: &[Object], locations: &[Location]) -> String {
+        // Collect location IDs to detect container conflicts
+        let loc_ids: std::collections::HashSet<u8> = locations.iter().map(|l| l.id).collect();
         let mut code = String::from("/OBJ\n\n");
 
         if objects.is_empty() {
@@ -584,21 +659,29 @@ impl DaadCodeGenerator {
                 let loc_str = match &obj.location {
                     ObjectLocation::Carried => "CARRIED".to_string(),
                     ObjectLocation::Worn => "WORN".to_string(),
-                    ObjectLocation::Limbo => "_".to_string(),
+                    ObjectLocation::Limbo => "NOTCREATED".to_string(),
                     ObjectLocation::At { location_id } => location_id.to_string(),
                     ObjectLocation::Inside { .. } => "_".to_string(),
                 };
                 code.push_str(&format!("  {:<12}", loc_str));
 
                 code.push_str(&format!("{:<3}", obj.weight.min(63)));
-                code.push_str(if obj.is_container { " Y" } else { " _" });
+                // Suppress container flag if object ID clashes with a location ID
+                // (DAAD reserves location N for container object N's contents)
+                let container_ok = obj.is_container && !loc_ids.contains(&obj.id);
+                code.push_str(if container_ok { " Y" } else { " _" });
                 code.push_str(if obj.is_wearable { " Y" } else { " _" });
-                code.push_str(if obj.is_light_source { "  Y" } else { "  _" });
-                code.push_str(if obj.is_psi { " Y" } else { " _" });
-                code.push_str(if !obj.is_takeable { " Y" } else { " _" });
 
-                for _ in 0..13 {
-                    code.push_str(" _");
+                // 16 user-defined attribute flags (DAAD OBJ spec)
+                // Bits 0-15, tested with HASAT/HASNAT condacts
+                if let Some(ref attrs) = obj.attributes {
+                    for bit in 0..16u8 {
+                        code.push_str(if attrs.contains(&bit) { " Y" } else { " _" });
+                    }
+                } else {
+                    for _ in 0..16 {
+                        code.push_str(" _");
+                    }
                 }
 
                 let noun = if obj.noun.is_empty() { "_" } else { &obj.noun };
@@ -608,7 +691,8 @@ impl DaadCodeGenerator {
                 code.push_str(&format!(" {}", adjective.to_uppercase()));
 
                 let mut attrs = Vec::new();
-                if obj.is_container { attrs.push("container"); }
+                if obj.is_container && container_ok { attrs.push("container"); }
+                if obj.is_container && !container_ok { attrs.push("container(suppressed:loc clash)"); }
                 if obj.is_wearable { attrs.push("wearable"); }
                 if obj.is_light_source { attrs.push("light"); }
                 if obj.is_psi { attrs.push("psi"); }
@@ -658,7 +742,7 @@ impl DaadCodeGenerator {
 
         // Message 14: intro text
         let escaped_intro = if !intro_text.is_empty() {
-            intro_text.replace('"', "\\\"").replace('\n', "#n").replace('\r', "")
+            Self::escape_text(intro_text)
         } else {
             String::from("Welcome.")
         };
@@ -668,24 +752,18 @@ impl DaadCodeGenerator {
         // Message 15: turns label
         code.push_str("/15 \"Turns: \"\n\n");
 
-        // Messages 16-31: location names (location ids 1-16)
-        for i in 0..16usize {
-            let loc_id = (i + 1) as u8;
-            let name = locations.iter()
-                .find(|l| l.id == loc_id)
-                .map(|l| l.name.as_str())
-                .unwrap_or("");
-            let escaped = name.replace('"', "\\\"");
-            code.push_str(&format!("/{} \"{}\"
-", 16 + i, escaped));
+        // Location names: one per location with id > 0 (dynamic count, not capped at 16)
+        let locs_with_names: Vec<_> = locations.iter().filter(|l| l.id > 0).collect();
+        let n_locs = locs_with_names.len();
+        for (i, loc) in locs_with_names.iter().enumerate() {
+            let escaped = Self::escape_text(&loc.name);
+            code.push_str(&format!("/{} \"{}\"\n", 16 + i, escaped));
         }
         code.push('\n');
 
         // Next available index after location names
-        let n_locs = locations.iter().filter(|l| l.id > 0).count();
         let help_idx       = 16 + n_locs;       // help text
         let darkness_idx   = 16 + n_locs + 1;   // "Darkness"
-        let game_start     = 16 + n_locs + 2;   // game messages begin here
 
         // Help text
         code.push_str(&format!("/{} \"Text adventures use simple ACTION-OBJECT commands.#n#nMovement: NORTH/N, SOUTH/S, EAST/E, WEST/W, IN, OUT.#n#nUseful commands: EXAMINE (or X), TAKE, DROP, INVENTORY (I), LOOK (L), READ, FEEL, SMELL, LISTEN, DRIVE, ASK, ACCUSE, SEARCH.#n\"\n\n", help_idx));
@@ -693,15 +771,28 @@ impl DaadCodeGenerator {
         // Darkness label
         code.push_str(&format!("/{} \"Darkness\"\n\n", darkness_idx));
 
+        // Day/time labels for daytime status bar (6 messages)
+        let day1_idx = 16 + n_locs + 2;
+        let day2_idx = day1_idx + 1;
+        let day3_idx = day1_idx + 2;
+        let morn_idx = day1_idx + 3;
+        let aftn_idx = day1_idx + 4;
+        let eve_idx  = day1_idx + 5;
+        code.push_str(&format!("/{} \"Day 1\"\n", day1_idx));
+        code.push_str(&format!("/{} \"Day 2\"\n", day2_idx));
+        code.push_str(&format!("/{} \"Day 3\"\n", day3_idx));
+        code.push_str(&format!("/{} \" Morn\"\n", morn_idx));
+        code.push_str(&format!("/{} \" Aftn\"\n", aftn_idx));
+        code.push_str(&format!("/{} \" Eve\"\n\n", eve_idx));
+
+        let game_start = day1_idx + 6;
+
         // Game messages start here
         code.push_str(&format!("; Game messages start at {}\n\n", game_start));
         for (i, msg) in messages.iter().enumerate() {
             let idx = game_start + i;
             if idx > 254 { break; }
-            let escaped = msg
-                .replace('"', "\\\"")
-                .replace('\n', "#n")
-                .replace('\r', "");
+            let escaped = Self::escape_text(msg);
             code.push_str(&format!("/{} \"{}\"
 ", idx, escaped));
         }
@@ -715,6 +806,8 @@ impl DaadCodeGenerator {
             loc_names_start: 16,
             game_msg_start: game_start as u8,
             intro_msg: 14,
+            day_msgs: [day1_idx as u8, day2_idx as u8, day3_idx as u8],
+            time_msgs: [morn_idx as u8, aftn_idx as u8, eve_idx as u8],
         };
 
         (code, indices)
@@ -835,9 +928,9 @@ impl DaadCodeGenerator {
 ");
         code.push_str("RAMLO   29  verb
 ");
-        code.push_str("L       30  verb
+        code.push_str("LOOK    24  verb
 ");
-        code.push_str("LOOK    30  verb
+        code.push_str("L       24  verb
 ");
         code.push_str("X       30  verb
 ");
@@ -857,6 +950,30 @@ impl DaadCodeGenerator {
 ");
         code.push_str("
 ");
+
+        // ── BLOCK 3b: Extended system verbs (referenced by hardcoded process tables) ──
+        code.push_str("; Extended system verbs\n");
+        code.push_str("EXITS   40  verb\n");
+        code.push_str("HELP    41  verb\n");
+        code.push_str("USE     42  verb\n");
+        code.push_str("OPEN    43  verb\n");
+        code.push_str("CLOSE   44  verb\n");
+        code.push_str("SEARCH  45  verb\n");
+        code.push_str("PUSH    46  verb\n");
+        code.push_str("PULL    47  verb\n");
+        code.push_str("GIVE    48  verb\n");
+        code.push_str("ENTER   49  verb\n");
+        code.push_str("EAT     50  verb\n");
+        code.push_str("DRINK   51  verb\n");
+        code.push_str("LOCK    52  verb\n");
+        code.push_str("UNLOCK  53  verb\n");
+        code.push_str("FEEL    54  verb\n");
+        code.push_str("TOUCH   54  verb\n");
+        code.push_str("SMELL   55  verb\n");
+        code.push_str("LISTEN  56  verb\n");
+        code.push_str("DRIVE   57  verb\n");
+        code.push_str("ACCUSE  58  verb\n");
+        code.push_str("\n");
 
         // ── BLOCK 4: Standard prepositions (hardcoded, matching blank_en.dsf) ──
         code.push_str("; Prepositions
@@ -914,6 +1031,9 @@ impl DaadCodeGenerator {
             "GET","TAKE","GRAB","DROP","PUT","REMOVE","WEAR","R","REDES",
             "QUIT","STOP","SAVE","LOAD","RAMSA","RAMLO","L","LOOK","X","EX",
             "EXAMI","READ","SAY","ASK","TALK","SPEAK",
+            "EXITS","HELP","USE","OPEN","CLOSE","SEARCH","PUSH","PULL",
+            "GIVE","ENTER","EAT","DRINK","LOCK","UNLOCK",
+            "FEEL","TOUCH","SMELL","LISTEN","DRIVE","ACCUSE",
             "TO","FROM","THROUGH","OVER","UNDER","BY","ON","OFF","AT","ABOUT",
             "IT","THEM","AND","THEN",
         ].iter().copied().collect();
@@ -1000,6 +1120,14 @@ impl DaadCodeGenerator {
     fn generate_processes(game: &DaadGame, indices: &MessageIndices) -> String {
         let mut code = String::new();
 
+        // Check if game uses MALUVA features (needed for SAVE/LOAD and picture handling)
+        let uses_maluva = game.rules.iter().any(|r|
+            r.actions.iter().any(|a| {
+                let t = a.r#type.as_str();
+                t.starts_with("X") && t != "X" && t.len() > 1
+            })
+        ) || game.locations.iter().any(|l| l.image.is_some());
+
         // Find starting location (first non-zero location, or 1 if none)
         let start_loc = game.locations.iter()
             .find(|l| l.id > 0)
@@ -1014,6 +1142,16 @@ impl DaadCodeGenerator {
         let help_title = indices.help_title_msg;
         let help_body  = indices.help_body_msg;
 
+        // ── Layout calculation from image_height ──────────────────────────
+        // image_height = character rows for graphics (0 = text-only, 13 = Rabenstein)
+        // Layout: [status bar @ 0] [gap @ 1] [graphics 2..img_rows+1] [text @ img_rows+2..24]
+        // With no graphics: [status bar @ 0] [text @ 1..24]
+        let img_rows = game.image_height.unwrap_or(0) as usize;
+        let status_row: usize = 0;                    // status bar always at top
+        let gfx_row: usize = 2;                       // graphics start after 1-row gap below status
+        let text_row = if img_rows > 0 { gfx_row + img_rows } else { 1 }; // text below graphics (or below status if no gfx)
+        let text_height = 25 - text_row;              // remaining rows for text
+
         // ── PRO 0: Main location loop ──────────────────────────────────────
         code.push_str("/PRO 0\n\n");
         code.push_str("; PRO 0 is the first process executed in DAAD.\n");
@@ -1025,36 +1163,50 @@ impl DaadCodeGenerator {
         code.push_str("                PROCESS 6\n\n");
 
         // Dark flag calculation
-        code.push_str("; Sets DarkF according to Dark flag and light sources.\n");
         code.push_str(">\n");
-        code.push_str("_       _       CLEAR DarkF\n");
+        code.push_str("_       _       WINDOW 0\n");
+        code.push_str("                CLEAR DarkF\n");
         code.push_str("                NOTZERO Dark\n");
         code.push_str("                ABSENT 0\n");
         code.push_str("                SET DarkF\n\n");
 
-        // Status line update
-        code.push_str("; Updates status line.\n");
+        if img_rows > 0 {
+            // Try to load location picture (PICTURE acts as condition — succeeds if PCX exists)
+            code.push_str("; Load location image if PCX file exists, otherwise use full text window.\n");
+            code.push_str(">\n");
+            code.push_str("_       _       ZERO DarkF\n");
+            code.push_str("                PICTURE @Player\n");
+            code.push_str("                DISPLAY 0\n");
+            code.push_str("                WINDOW 1\n");
+            code.push_str(&format!("                WINAT {} 0\n", text_row));
+            code.push_str(&format!("                WINSIZE {} 40\n", text_height));
+            code.push_str("                SKIP $pictureOK\n\n");
+
+            // No picture fallback — text window below status bar (full height, no image gap)
+            code.push_str(">\n");
+            code.push_str("_       _       WINDOW 1\n");
+            code.push_str(&format!("                WINAT {} 0\n", status_row + 1));
+            code.push_str(&format!("                WINSIZE {} 40\n", 25 - (status_row + 1)));
+            code.push_str("$pictureOK\n\n");
+        } else {
+            // No images configured — text window below status bar
+            code.push_str(">\n");
+            code.push_str("_       _       WINDOW 1\n");
+            code.push_str(&format!("                WINAT {} 0\n", text_row));
+            code.push_str(&format!("                WINSIZE {} 40\n", text_height));
+            code.push_str("\n");
+        }
+
+        // Status line update — AFTER image so it draws on top, not underneath
         code.push_str(">\n");
         code.push_str("_       _       PROCESS 11\n\n");
 
-        // Text window + darkness message
-        code.push_str("; Go to text window; if dark print darkness message.\n");
+        // Text window: darkness message or location description
         code.push_str(">\n");
         code.push_str("_       _       WINDOW 1\n");
         code.push_str("                NOTZERO DarkF\n");
         code.push_str("                SYSMESS 0\n\n");
 
-        // PICTURE/DISPLAY: only emit if any location has an image defined
-        let has_images = game.locations.iter().any(|l| l.image.is_some());
-        if has_images {
-            code.push_str("; Load location picture and display (if light).\n");
-            code.push_str(">\n");
-            code.push_str("_       _       PICTURE @Player\n");
-            code.push_str("                DISPLAY @DarkF\n\n");
-        }
-
-        // Location description if light
-        code.push_str("; If light, print current location description.\n");
         code.push_str(">\n");
         code.push_str("_       _       ZERO DarkF\n");
         code.push_str("                DESC @Player\n\n");
@@ -1110,15 +1262,13 @@ impl DaadCodeGenerator {
         code.push_str("_       _       PLUS Turns 1\n\n");
 
         code.push_str(">\n");
-        code.push_str("_       _       PROCESS 11\n\n");
-
-        code.push_str(">\n");
         code.push_str("_       _       PROCESS 5\n");
         code.push_str("                ISDONE\n");
         code.push_str("                REDO\n\n");
 
         code.push_str(">\n");
         code.push_str("_       _       MOVE Player\n");
+        code.push_str("                CLS\n");
         code.push_str("                RESTART\n\n");
 
         code.push_str(">\n");
@@ -1146,7 +1296,8 @@ impl DaadCodeGenerator {
         code.push_str(">\n");
         code.push_str("_       _       NEWLINE\n");
         code.push_str("                ZERO DarkF\n");
-        code.push_str("                LISTOBJ\n\n");
+        code.push_str("                LISTOBJ\n");
+        code.push_str("                NEWLINE\n\n");
 
         // ── PRO 4: Status table (auto-events before input) ─────────────────
         code.push_str("/PRO 4\n\n");
@@ -1188,7 +1339,8 @@ impl DaadCodeGenerator {
         // User-defined response rules for PRO5 (response table):
         // - All PRO1 and PRO5 rules
         // - PRO0 rules with explicit verb/noun (not wildcards)
-        let pro5_rules: Vec<_> = game.rules.iter()
+        // Auto-sorted by specificity: specific verb+noun first, then wildcards last
+        let mut pro5_rules: Vec<_> = game.rules.iter()
             .filter(|r| r.enabled && {
                 let v = r.verb.as_deref().unwrap_or("_");
                 let n = r.noun.as_deref().unwrap_or("_");
@@ -1199,10 +1351,19 @@ impl DaadCodeGenerator {
                 }
             })
             .collect();
+        pro5_rules.sort_by(|a, b| Self::rule_specificity(a).cmp(&Self::rule_specificity(b)));
         for rule in pro5_rules {
             code.push_str(&Self::generate_rule(rule, game, indices.game_msg_start));
             code.push('\n');
         }
+
+        // EXAMINE catch-all: WHATO resolves noun to object, SYSMESS 63 prints default
+        // Uses EXAMI (verb 30) — separate from LOOK (verb 24) so LOOK does room, EXAMINE does objects
+        code.push_str("; EXAMINE catch-all: WHATO resolves noun to object, SYSMESS 63 prints default\n");
+        code.push_str(">\n");
+        code.push_str("EXAMI   _       WHATO\n");
+        code.push_str("                SYSMESS 63\n");
+        code.push_str("                DONE\n\n");
 
         // Standard commands at end (from Rabenstein)
         code.push_str(">\n");
@@ -1226,73 +1387,97 @@ impl DaadCodeGenerator {
         code.push_str("WEAR    _       AUTOW\n");
         code.push_str("                DONE\n\n");
         code.push_str(">\n");
-        code.push_str("R       _       EQ 34 255\n");
+        code.push_str("R       _       CLS\n");
         code.push_str("                RESTART\n\n");
-        code.push_str(">\n");
-        code.push_str("R       _       LET 33 30\n");
-        code.push_str("                REDO\n\n");
+
         code.push_str(">\n");
         code.push_str("QUIT    _       QUIT\n");
         code.push_str("                END\n\n");
         code.push_str(">\n");
         code.push_str("QUIT    _       DONE\n\n");
-        code.push_str(">\n");
-        code.push_str("SAVE    _       SAVE 0\n");
-        code.push_str("                RESTART\n\n");
-        code.push_str(">\n");
-        code.push_str("LOAD    _       LOAD 0\n");
-        code.push_str("                RESTART\n\n");
+
+        // SAVE/LOAD: use XSAVE/XLOAD (Maluva, disk-based) when available,
+        // fall back to built-in SAVE/LOAD (tape-based) otherwise
+        if uses_maluva {
+            code.push_str(">\n");
+            code.push_str("SAVE    _       XSAVE 0\n");
+            code.push_str("                CLS\n");
+            code.push_str("                RESTART\n\n");
+            code.push_str(">\n");
+            code.push_str("LOAD    _       XLOAD 0\n");
+            code.push_str("                CLS\n");
+            code.push_str("                RESTART\n\n");
+        } else {
+            code.push_str(">\n");
+            code.push_str("SAVE    _       SAVE 0\n");
+            code.push_str("                CLS\n");
+            code.push_str("                RESTART\n\n");
+            code.push_str(">\n");
+            code.push_str("LOAD    _       LOAD 0\n");
+            code.push_str("                CLS\n");
+            code.push_str("                RESTART\n\n");
+        }
         code.push_str(">\n");
         code.push_str("RAMSA   _       RAMSAVE\n");
+        code.push_str("                CLS\n");
         code.push_str("                RESTART\n\n");
         code.push_str(">\n");
         code.push_str("RAMLO   _       RAMLOAD 255\n");
+        code.push_str("                CLS\n");
         code.push_str("                RESTART\n\n");
-        // LOOK catch-all at end
+        // LOOK + noun → treat as EXAMINE (WHATO resolves noun to present object)
+        // If noun matches a present object, describe it. Otherwise fall through to room redescription.
+        code.push_str("; LOOK <object> redirects to EXAMINE behaviour.\n");
         code.push_str(">\n");
-        code.push_str("L       _       RESTART\n\n");
+        code.push_str("LOOK    _       WHATO\n");
+        code.push_str("                SYSMESS 63\n");
+        code.push_str("                DONE\n\n");
+        // LOOK catch-all at end (uses LOOK verb 24, separate from EXAMINE verb 30)
+        // Falls through here only if WHATO failed (no matching object = bare LOOK)
+        code.push_str(">\n");
+        code.push_str("LOOK    _       CLS\n");
+        code.push_str("                RESTART\n\n");
 
-        // ── PRO 6: Initialization ──────────────────────────────────────────
+        // ── PRO 6: Initialization (matching blank_en.dsf) ─────────────────
         code.push_str("/PRO 6\n\n");
         code.push_str("; Initialization process. Called from PRO 0 at location 0.\n\n");
 
-        // Status line window
+        // Init: set up all windows, show title + intro
         code.push_str(">\n");
-        code.push_str("_       _       WINDOW 2\n");
-        code.push_str("                WINAT 6 0\n");
-        code.push_str("                WINSIZE 1 COLS\n\n");
-
-        // 80-col fallback
-        code.push_str(">\n");
-        code.push_str("_       _       LT GFlags 128\n");
-        code.push_str("                WINSIZE 1 80\n\n");
-
-        // Colours + window setup
-        code.push_str(">\n");
-        code.push_str("_       _       PAPER 0\n");
-        code.push_str("                INK 1\n");
+        code.push_str("_       _       WINDOW 0\n");
+        code.push_str("                WINAT 0 0\n");
+        code.push_str("                WINSIZE 25 40\n");
         code.push_str("                CLS\n");
-        code.push_str("                PROCESS 9\n\n");
-
-        // Title screen + intro
-        code.push_str(">\n");
-        code.push_str("_       _       DESC 0\n");
+        // Status bar: WINDOW 2, sits below graphics area
+        code.push_str("                WINDOW 2\n");
+        code.push_str(&format!("                WINAT {} 0\n", status_row));
+        code.push_str("                WINSIZE 1 40\n");
+        // Text window: WINDOW 1, below status bar
+        code.push_str("                WINDOW 1\n");
+        code.push_str(&format!("                WINAT {} 0\n", text_row));
+        code.push_str(&format!("                WINSIZE {} 40\n", text_height));
+        // Title screen
+        code.push_str("                DESC 0\n");
         code.push_str("                ANYKEY\n");
         code.push_str("                CLS\n");
+        // Intro text
         code.push_str(&format!("                MESSAGE {}\n", intro_msg));
         code.push_str("                ANYKEY\n");
-        code.push_str("                CLEAR 255\n\n");
+        code.push_str("                CLS\n");
+        // Begin flag clear
+        code.push_str("                SET 255\n\n");
 
-        // Flag clear loop (matching Rabenstein exactly)
+        // Flag clear loop (matching blank_en.dsf exactly)
+        code.push_str("$initLoop\n");
         code.push_str(">\n");
-        code.push_str("_       _       NOTEQ 255 GFlags\n");
+        code.push_str("_       _       MINUS 255 1\n");
+        code.push_str("                NOTEQ 255 GFlags\n");
         code.push_str("                CLEAR @255\n\n");
         code.push_str(">\n");
-        code.push_str("_       _       PLUS 255 1\n");
-        code.push_str("                LT 255 255\n");
-        code.push_str("                SKIP -2\n\n");
+        code.push_str("_       _       NOTZERO 255\n");
+        code.push_str("                SKIP $initLoop\n\n");
 
-        // Reset and start
+        // Reset objects and start
         code.push_str(">\n");
         code.push_str("_       _       RESET\n");
         code.push_str("                LET Strength 10\n");
@@ -1301,6 +1486,22 @@ impl DaadCodeGenerator {
         code.push_str("                SET CPAdject\n");
         code.push_str("                LET OFlags 64\n");
         code.push_str(&format!("                GOTO {}\n\n", start_loc));
+
+        // Initialize user flags (64+) with non-zero initial values
+        let init_flags: Vec<_> = game.flags.iter()
+            .filter(|f| f.id >= 64 && f.initial_value != 0)
+            .collect();
+        if !init_flags.is_empty() {
+            code.push_str("; User flag initialization\n");
+            for flag in &init_flags {
+                code.push_str(">\n");
+                if flag.initial_value == 255 {
+                    code.push_str(&format!("_       _       SET {}\n\n", flag.id));
+                } else {
+                    code.push_str(&format!("_       _       LET {} {}\n\n", flag.id, flag.initial_value));
+                }
+            }
+        }
 
         // ── PRO 7: Text window "up" ────────────────────────────────────────
         code.push_str("/PRO 7\n\n");
@@ -1351,40 +1552,170 @@ impl DaadCodeGenerator {
 
         // ── PRO 11: Status line ────────────────────────────────────────────
         code.push_str("/PRO 11\n\n");
-        code.push_str("; Update status line.\n\n");
+        code.push_str("; Update status bar (WINDOW 2, defined in PRO 6 init).\n\n");
+        // Reset WINDOW 2 position every time (PCDAAD may not persist from init)
         code.push_str(">\n");
         code.push_str("_       _       WINDOW 2\n");
-        code.push_str("                PAPER 0\n");
-        code.push_str("                INK 1\n");
+        code.push_str(&format!("                WINAT {} 0\n", status_row));
+        code.push_str("                WINSIZE 1 40\n");
+        let sb_paper = game.status_bar_config.as_ref().map_or(4, |c| c.paper_color);
+        let sb_ink = game.status_bar_config.as_ref().map_or(15, |c| c.ink_color);
+        code.push_str(&format!("                PAPER {}\n", sb_paper));
+        code.push_str(&format!("                INK {}\n", sb_ink));
         code.push_str("                CLS\n\n");
-        code.push_str("; If dark, print darkness label and turns.\n");
+        let show_loc = game.status_bar_config.as_ref().map_or(true, |c| c.show_location_name);
+        let show_turns = game.status_bar_config.as_ref().map_or(true, |c| c.show_turns);
+
+        code.push_str("; If dark, print darkness label.\n");
         code.push_str(">\n");
         code.push_str("_       _       NOTZERO DarkF\n");
         code.push_str(&format!("                MES {}\n", dark_msg));
-        code.push_str("                PROCESS 12\n");
-        code.push_str("                DONE\n\n");
-        code.push_str("; Print location name for each location.\n");
-        for loc in &game.locations {
-            if loc.id == 0 { continue; }
-            let msg_idx = loc_name_msg_offset + (loc.id as usize - 1);
-            code.push_str(">\n");
-            code.push_str(&format!("_       _       AT {}\n", loc.id));
-            code.push_str(&format!("                MES {}\n\n", msg_idx));
+        if show_turns {
+            code.push_str("                PROCESS 12\n");
         }
+        code.push_str("                DONE\n\n");
+
+        if show_loc {
+            // Location entries — NO DONE, fall through (matching Rabenstein)
+            code.push_str("; Print location name at status line.\n");
+            for loc in &game.locations {
+                if loc.id == 0 { continue; }
+                let msg_idx = loc_name_msg_offset + (loc.id as usize - 1);
+                code.push_str(">\n");
+                code.push_str(&format!("_       _       AT {}\n", loc.id));
+                code.push_str(&format!("                MES {}\n\n", msg_idx));
+            }
+        }
+
+        // PROCESS 12 at the end — prints turns and switches back to WINDOW 1
         code.push_str(">\n");
         code.push_str("_       _       PROCESS 12\n\n");
 
-        // ── PRO 12: Print turns counter ────────────────────────────────────
+        // ── PRO 12: Print right-side status bar content ─────────────────
         code.push_str("/PRO 12\n\n");
-        code.push_str("; Print turns at status line.\n\n");
-        code.push_str(">\n");
-        code.push_str("_       _       TAB Turns_TAB\n");
-        code.push_str("                LT 29 128\n");
-        code.push_str("                TAB 67\n\n");
-        code.push_str(">\n");
-        code.push_str(&format!("_       _       MES {}\n", turns_msg));
-        code.push_str("                DPRINT Turns\n");
-        code.push_str("                WINDOW 1\n\n");
+        let right_content = game.status_bar_config.as_ref()
+            .and_then(|c| c.right_content.as_deref())
+            .unwrap_or("turns");
+        let right_flag = game.status_bar_config.as_ref()
+            .and_then(|c| c.right_flag_id)
+            .unwrap_or(if right_content == "score" { 30 } else { 31 }); // Score=flag 30, Turns=flag 31
+
+        match right_content {
+            "none" => {
+                // No right content, just switch back to text window
+                code.push_str(">\n");
+                code.push_str("_       _       WINDOW 1\n\n");
+            },
+            "score" => {
+                code.push_str("; Print score right-justified in status bar.\n\n");
+                code.push_str(">\n");
+                code.push_str("_       _       TAB Turns_TAB\n");
+                let label = game.status_bar_config.as_ref()
+                    .and_then(|c| c.right_label.as_deref())
+                    .unwrap_or("Score: ");
+                code.push_str(&format!("                MESSAGE \"{}\"\n", Self::escape_text(label)));
+                code.push_str(&format!("                DPRINT {}\n", right_flag));
+                code.push_str("                WINDOW 1\n\n");
+            },
+            "custom" => {
+                code.push_str("; Print custom flag right-justified in status bar.\n\n");
+                code.push_str(">\n");
+                code.push_str("_       _       TAB Turns_TAB\n");
+                let label = game.status_bar_config.as_ref()
+                    .and_then(|c| c.right_label.as_deref())
+                    .unwrap_or("");
+                if !label.is_empty() {
+                    code.push_str(&format!("                MESSAGE \"{}\"\n", Self::escape_text(label)));
+                }
+                code.push_str(&format!("                DPRINT {}\n", right_flag));
+                code.push_str("                WINDOW 1\n\n");
+            },
+            "daytime" => {
+                // Day/time display: "Day 1 Morn", "Day 2 Aftn", "Day 3 Eve" etc.
+                // Uses MES (no newline) instead of MESSAGE (with newline) for status bar.
+                let day_flag = game.status_bar_config.as_ref()
+                    .and_then(|c| c.day_flag_id)
+                    .unwrap_or(93);
+                let time_flag = game.status_bar_config.as_ref()
+                    .and_then(|c| c.time_flag_id)
+                    .unwrap_or(138);
+
+                code.push_str("; Day/time display on status bar right side.\n\n");
+
+                // TAB to right position (col 29 of 40 leaves 11 chars for "Day N Time")
+                code.push_str(">\n");
+                code.push_str("_       _       TAB 29\n\n");
+
+                // Day number entries using MES (no newline, no DONE — fall through to time)
+                for day in 1..=3usize {
+                    code.push_str(">\n");
+                    code.push_str(&format!("_       _       EQ {} {}\n", day_flag, day));
+                    code.push_str(&format!("                MES {}\n\n", indices.day_msgs[day - 1]));
+                }
+
+                // Time of day entries using MES (no newline), with WINDOW 1 to return
+                // Morning (flag=0): use ZERO
+                code.push_str(">\n");
+                code.push_str(&format!("_       _       ZERO {}\n", time_flag));
+                code.push_str(&format!("                MES {}\n", indices.time_msgs[0]));
+                code.push_str("                WINDOW 1\n\n");
+                // Afternoon (flag=1)
+                code.push_str(">\n");
+                code.push_str(&format!("_       _       EQ {} 1\n", time_flag));
+                code.push_str(&format!("                MES {}\n", indices.time_msgs[1]));
+                code.push_str("                WINDOW 1\n\n");
+                // Evening (flag=2)
+                code.push_str(">\n");
+                code.push_str(&format!("_       _       EQ {} 2\n", time_flag));
+                code.push_str(&format!("                MES {}\n", indices.time_msgs[2]));
+                code.push_str("                WINDOW 1\n\n");
+
+                // Fallback: just switch back to text window
+                code.push_str(">\n");
+                code.push_str("_       _       WINDOW 1\n\n");
+            },
+            _ => {
+                // "turns" (default) — matching Rabenstein PRO 12 exactly
+                // Entry 1: TAB positioning (with text-mode fallback)
+                code.push_str(">\n");
+                code.push_str("_       _       TAB Turns_TAB\n");
+                code.push_str("                LT 29 128\n");
+                code.push_str("                TAB 67\n\n");
+                // Entry 2: print label + value, switch back to text window
+                code.push_str(">\n");
+                code.push_str(&format!("_       _       MES {}\n", turns_msg));
+                code.push_str("                DPRINT Turns\n");
+                code.push_str("                WINDOW 1\n\n");
+            },
+        }
+
+        // ── User-defined process tables (PRO 13+) ───────────────────────────
+        // Collect all process table numbers used by rules that aren't handled above
+        let handled_processes: std::collections::HashSet<&str> = [
+            "PRO0", "PRO1", "PRO2", "PRO3", "PRO4", "PRO5",
+        ].iter().copied().collect();
+
+        let mut custom_processes: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+        for rule in &game.rules {
+            if rule.enabled && !handled_processes.contains(rule.process.as_str()) {
+                custom_processes.insert(rule.process.clone());
+            }
+        }
+
+        for proc_name in &custom_processes {
+            // Extract process number from "PRO13" → "13"
+            let proc_num = proc_name.strip_prefix("PRO").unwrap_or(proc_name);
+            code.push_str(&format!("/PRO {}\n\n", proc_num));
+            code.push_str(&format!("; User-defined process table {}\n\n", proc_name));
+
+            let proc_rules: Vec<_> = game.rules.iter()
+                .filter(|r| r.enabled && r.process == *proc_name)
+                .collect();
+            for rule in proc_rules {
+                code.push_str(&Self::generate_rule(rule, game, indices.game_msg_start));
+                code.push('\n');
+            }
+        }
 
         code
     }
@@ -1453,8 +1784,17 @@ impl DaadCodeGenerator {
         let verb = rule.verb.as_deref().unwrap_or(&default_verb);
         let noun = rule.noun.as_deref().unwrap_or(&default_noun);
 
+        // Emit primary trigger
         code.push_str(">\n");
         code.push_str(&format!("{:<8} {}\n", verb, noun));
+
+        // Emit stacked triggers (additional verb/noun pairs sharing same conditions+actions)
+        if let Some(ref triggers) = rule.additional_triggers {
+            for trigger in triggers {
+                code.push_str(">\n");
+                code.push_str(&format!("{:<8} {}\n", trigger.verb, trigger.noun));
+            }
+        }
 
         // Generate conditions
         for condition in &rule.conditions {
@@ -1473,9 +1813,15 @@ impl DaadCodeGenerator {
         code
     }
 
+    /// Format a parameter value, prefixing with @ if indirect
+    fn fmt_param(value: u8, indirect: bool) -> String {
+        if indirect { format!("@{}", value) } else { format!("{}", value) }
+    }
+
     fn generate_condition(condition: &Condition, _game: &DaadGame) -> String {
         let cond_type = &condition.r#type;
         let params = &condition.params;
+        let ind = condition.indirect.unwrap_or(false);
 
         match cond_type.as_str() {
             "AT" => format!("AT {}", Self::get_u8_param(params, "locno")),
@@ -1490,12 +1836,12 @@ impl DaadCodeGenerator {
             "NOTCARR" => format!("NOTCARR {}", Self::get_u8_param(params, "objno")),
             "ISAT" => format!("ISAT {} {}", Self::get_u8_param(params, "objno"), Self::get_u8_param(params, "locno")),
             "ISNOTAT" => format!("ISNOTAT {} {}", Self::get_u8_param(params, "objno"), Self::get_u8_param(params, "locno")),
-            "ZERO" => format!("ZERO {}", Self::get_u8_param(params, "flagno")),
-            "NOTZERO" => format!("NOTZERO {}", Self::get_u8_param(params, "flagno")),
-            "EQ" => format!("EQ {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
-            "NOTEQ" => format!("NOTEQ {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
-            "GT" => format!("GT {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
-            "LT" => format!("LT {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
+            "ZERO" => format!("ZERO {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind)),
+            "NOTZERO" => format!("NOTZERO {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind)),
+            "EQ" => format!("EQ {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
+            "NOTEQ" => format!("NOTEQ {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
+            "GT" => format!("GT {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
+            "LT" => format!("LT {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
             "SAME" => format!("SAME {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "NOTSAME" => format!("NOTSAME {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "BIGGER" => format!("BIGGER {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
@@ -1513,6 +1859,190 @@ impl DaadCodeGenerator {
             "INKEY" => "INKEY".to_string(),
             "QUIT" => "QUIT".to_string(),
             _ => format!("{} {}", cond_type, params.iter().map(|(k,v)| format!("{:?}", v)).collect::<Vec<_>>().join(" ")),
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // VALIDATION: Parameter schema, rule ordering, container clashes
+    // ═══════════════════════════════════════════════════════════════
+
+    /// Check action/condition params against expected schema.
+    /// Returns warnings for missing required parameters.
+    pub fn validate_rule_params(rules: &[Rule]) -> Vec<String> {
+        let mut warnings = Vec::new();
+
+        // Action type → required parameter keys
+        fn action_required_params(action_type: &str) -> &'static [&'static str] {
+            match action_type {
+                "GET" | "DROP" | "WEAR" | "REMOVE" | "CREATE" | "DESTROY" | "SETCO" => &["objno"],
+                "SWAP" | "COPYOO" | "PUTIN" | "TAKEOUT" => &["objno1", "objno2"],
+                "PLACE" => &["objno", "locno"],
+                "PUTO" | "GOTO" | "LISTAT" | "DOALL" => &["locno"],
+                "SET" | "CLEAR" | "MOVE" | "RANDOM" | "PRINT" | "DPRINT" | "WEIGHT" => &["flagno"],
+                "LET" | "PLUS" | "MINUS" => &["flagno", "value"],
+                "ADD" | "SUB" | "COPYFF" | "COPYBF" | "SAME" | "NOTSAME" | "BIGGER" | "SMALLER" => &["flagno1", "flagno2"],
+                "COPYOF" | "WEIGH" => &["objno", "flagno"],
+                "COPYFO" => &["flagno", "objno"],
+                "ABILITY" => &["maxcarr", "strength"],
+                "MESSAGE" | "MES" => &["mesno"], // or text (checked separately)
+                "SYSMESS" => &["sysno"],
+                "PROCESS" => &["prono"],
+                "WINDOW" => &["winno"],
+                "WINAT" | "PRINTAT" => &["line", "column"],
+                "WINSIZE" => &["lines", "columns"],
+                "PAPER" | "INK" | "BORDER" => &["color"],
+                "TAB" => &["column"],
+                "MODE" => &["mode"],
+                "PAUSE" => &["decisecs"],
+                "PICTURE" => &["picno"],
+                "DISPLAY" => &["value"],
+                "BEEP" => &["duration", "pitch"],
+                "RAMLOAD" => &["slot"],
+                "SKIP" => &["count"],
+                "SFX" => &["value1", "value2"],
+                "GFX" => &["gfxno", "param"],
+                "XMES" | "XMESSAGE" => &["bank", "mesno"],
+                "XSPLITSCR" => &["lines"],
+                "SYNONYM" => &["verb", "noun"],
+                _ => &[], // Zero-param or unknown — no required params
+            }
+        }
+
+        // Condition type → required parameter keys
+        fn condition_required_params(cond_type: &str) -> &'static [&'static str] {
+            match cond_type {
+                "AT" | "NOTAT" | "ATGT" | "ATLT" => &["locno"],
+                "PRESENT" | "ABSENT" | "WORN" | "NOTWORN" | "CARRIED" | "NOTCARR" => &["objno"],
+                "ISAT" | "ISNOTAT" => &["objno", "locno"],
+                "ZERO" | "NOTZERO" => &["flagno"],
+                "EQ" | "NOTEQ" | "GT" | "LT" => &["flagno", "value"],
+                "SAME" | "NOTSAME" | "BIGGER" | "SMALLER" => &["flagno1", "flagno2"],
+                "CHANCE" => &["percent"],
+                "HASAT" | "HASNAT" => &["attribute"],
+                "ADJECT1" | "ADVERB" | "PREP" | "NOUN2" | "ADJECT2" => &["word"],
+                _ => &[], // ISDONE, ISNDONE, INKEY, QUIT, etc.
+            }
+        }
+
+        for rule in rules {
+            if !rule.enabled { continue; }
+
+            for (i, action) in rule.actions.iter().enumerate() {
+                let atype = action.r#type.as_str();
+                // MESSAGE/MES can use inline text instead of mesno
+                if (atype == "MESSAGE" || atype == "MES") && action.text.is_some() {
+                    continue; // inline text — no mesno needed
+                }
+                for &key in action_required_params(atype) {
+                    if !action.params.contains_key(key) {
+                        warnings.push(format!(
+                            "  ⚠ Rule '{}' (id {}): action {} [{}] missing parameter '{}' (defaults to 0)",
+                            rule.name, rule.id, atype, i, key
+                        ));
+                    }
+                }
+            }
+
+            for (i, cond) in rule.conditions.iter().enumerate() {
+                let ctype = cond.r#type.as_str();
+                for &key in condition_required_params(ctype) {
+                    if !cond.params.contains_key(key) {
+                        warnings.push(format!(
+                            "  ⚠ Rule '{}' (id {}): condition {} [{}] missing parameter '{}' (defaults to 0)",
+                            rule.name, rule.id, ctype, i, key
+                        ));
+                    }
+                }
+            }
+        }
+        warnings
+    }
+
+    /// Detect rule ordering issues: wildcard rules before more specific ones.
+    /// Returns warnings (informational — auto-sort fixes the issue).
+    pub fn check_rule_ordering_warnings(rules: &[Rule]) -> Vec<String> {
+        let mut warnings = Vec::new();
+
+        // Only check PRO5/PRO1 response rules
+        let response_rules: Vec<&Rule> = rules.iter()
+            .filter(|r| r.enabled && matches!(r.process.as_str(), "PRO1" | "PRO5"))
+            .collect();
+
+        for (i, rule) in response_rules.iter().enumerate() {
+            let v = rule.verb.as_deref().unwrap_or("_");
+            let n = rule.noun.as_deref().unwrap_or("_");
+            if n != "_" { continue; } // Only check wildcard-noun rules
+
+            // Look for later rules with same verb but specific noun
+            for later in &response_rules[i+1..] {
+                let lv = later.verb.as_deref().unwrap_or("_");
+                let ln = later.noun.as_deref().unwrap_or("_");
+                if lv == v && ln != "_" {
+                    warnings.push(format!(
+                        "  ⚠ Rule ordering: '{}' ({} _) shadows '{}' ({} {}) — auto-sorted",
+                        rule.name, v, later.name, lv, ln
+                    ));
+                }
+            }
+        }
+        warnings
+    }
+
+    /// Check for container objects whose IDs clash with gameplay locations.
+    pub fn check_container_clashes(game: &DaadGame) -> Vec<String> {
+        let mut warnings = Vec::new();
+        for obj in &game.objects {
+            if obj.is_container {
+                if let Some(loc) = game.locations.iter().find(|l| l.id == obj.id) {
+                    if !loc.description.trim().is_empty() {
+                        warnings.push(format!(
+                            "  ⚠ Container '{}' (object {}) shares ID with location '{}' (location {}). \
+                             Items PUT IN the container will appear at that location.",
+                            obj.name, obj.id, loc.name, loc.id
+                        ));
+                    }
+                }
+            }
+        }
+        warnings
+    }
+
+    /// Count inline text vs message array references in MESSAGE actions.
+    pub fn audit_inline_text(rules: &[Rule]) -> Vec<String> {
+        let mut notes = Vec::new();
+        let mut inline_count = 0u32;
+        let mut mesno_count = 0u32;
+
+        for rule in rules {
+            for action in &rule.actions {
+                if action.r#type == "MESSAGE" || action.r#type == "MES" {
+                    if action.text.is_some() {
+                        inline_count += 1;
+                    } else {
+                        mesno_count += 1;
+                    }
+                }
+            }
+        }
+
+        if inline_count > 0 {
+            notes.push(format!(
+                "  ℹ {} MESSAGE action(s) use inline text, {} use message array. \
+                 Consider moving recurring text to the messages array for easier maintenance.",
+                inline_count, mesno_count
+            ));
+        }
+        notes
+    }
+
+    /// Calculate rule specificity for sorting: 0=specific, 1=half-wild, 2=full-wild
+    fn rule_specificity(rule: &Rule) -> u8 {
+        let v = rule.verb.as_deref().unwrap_or("_");
+        let n = rule.noun.as_deref().unwrap_or("_");
+        match (v == "_", n == "_") {
+            (false, false) => 0, // specific verb + specific noun
+            (false, true) | (true, false) => 1, // one wildcard
+            (true, true) => 2, // full wildcard
         }
     }
 
@@ -1631,6 +2161,7 @@ impl DaadCodeGenerator {
     fn generate_action(action: &Action, _game: &DaadGame, game_msg_start: u8) -> String {
         let action_type = &action.r#type;
         let params = &action.params;
+        let ind = action.indirect.unwrap_or(false);
 
         match action_type.as_str() {
             "GET" => format!("GET {}", Self::get_u8_param(params, "objno")),
@@ -1653,17 +2184,17 @@ impl DaadCodeGenerator {
             "AUTOR" => "AUTOR".to_string(),
             "AUTOP" => "AUTOP".to_string(),
             "AUTOT" => "AUTOT".to_string(),
-            "SET" => format!("SET {}", Self::get_u8_param(params, "flagno")),
-            "CLEAR" => format!("CLEAR {}", Self::get_u8_param(params, "flagno")),
-            "LET" => format!("LET {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
-            "PLUS" => format!("PLUS {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
-            "MINUS" => format!("MINUS {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "value")),
+            "SET" => format!("SET {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind)),
+            "CLEAR" => format!("CLEAR {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind)),
+            "LET" => format!("LET {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
+            "PLUS" => format!("PLUS {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
+            "MINUS" => format!("MINUS {} {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind), Self::get_u8_param(params, "value")),
             "ADD" => format!("ADD {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "SUB" => format!("SUB {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "COPYFF" => format!("COPYFF {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "COPYBF" => format!("COPYBF {} {}", Self::get_u8_param(params, "flagno1"), Self::get_u8_param(params, "flagno2")),
             "RANDOM" => format!("RANDOM {}", Self::get_u8_param(params, "flagno")),
-            "MOVE" => format!("MOVE {}", Self::get_u8_param(params, "flagno")),
+            "MOVE" => format!("MOVE {}", Self::fmt_param(Self::get_u8_param(params, "flagno"), ind)),
             "COPYOF" => format!("COPYOF {} {}", Self::get_u8_param(params, "objno"), Self::get_u8_param(params, "flagno")),
             "COPYFO" => format!("COPYFO {} {}", Self::get_u8_param(params, "flagno"), Self::get_u8_param(params, "objno")),
             "WHATO" => "WHATO".to_string(),
@@ -1686,19 +2217,45 @@ impl DaadCodeGenerator {
             "TAB" => format!("TAB {}", Self::get_u8_param(params, "column")),
             "MODE" => format!("MODE {}", Self::get_u8_param(params, "mode")),
             // Game message indices in JSON are 0-based.
-            // In the DSF, game messages start at index 14 (after exits labels 0-13).
-            "MES" => format!("MES {}", Self::get_u8_param(params, "mesno") + game_msg_start),
-            "MESSAGE" => format!("MESSAGE {}", Self::get_u8_param(params, "mesno") + game_msg_start),
+            // In the DSF, game messages start at index game_msg_start (after exits/system labels).
+            // If action.text is set, emit inline MESSAGE "text" (DRC auto-assigns index).
+            "MES" | "MESSAGE" => {
+                if let Some(ref text) = action.text {
+                    let escaped = Self::escape_text(text);
+                    format!("MESSAGE \"{}\"", escaped)
+                } else {
+                    let cmd = if action_type == "MES" { "MES" } else { "MESSAGE" };
+                    format!("{} {}", cmd, Self::get_u8_param(params, "mesno") + game_msg_start)
+                }
+            },
             "SYSMESS" => format!("SYSMESS {}", Self::get_u8_param(params, "sysno")),
-            "DESC" => "DESC @Player".to_string(),
+            "DESC" => {
+                let locno = params.get("locno").and_then(|v| v.as_u64());
+                match locno {
+                    Some(l) => format!("DESC {}", l),
+                    None => "DESC @Player".to_string(),
+                }
+            },
             "SPACE" => "SPACE".to_string(),
             "NEWLINE" => "NEWLINE".to_string(),
             "PRINT" => format!("PRINT {}", Self::get_u8_param(params, "flagno")),
             "DPRINT" => format!("DPRINT {}", Self::get_u8_param(params, "flagno")),
             "LISTOBJ" => "LISTOBJ".to_string(),
             "LISTAT" => format!("LISTAT {}", Self::get_u8_param(params, "locno")),
-            "SAVE" => "SAVE".to_string(),
-            "LOAD" => "LOAD".to_string(),
+            "SAVE" => {
+                let slot = params.get("slot").and_then(|v| v.as_u64());
+                match slot {
+                    Some(s) => format!("SAVE {}", s),
+                    None => "SAVE 0".to_string(),
+                }
+            },
+            "LOAD" => {
+                let slot = params.get("slot").and_then(|v| v.as_u64());
+                match slot {
+                    Some(s) => format!("LOAD {}", s),
+                    None => "LOAD 0".to_string(),
+                }
+            },
             "RAMSAVE" => "RAMSAVE".to_string(),
             "RAMLOAD" => format!("RAMLOAD {}", Self::get_u8_param(params, "slot")),
             "INPUT" => format!("INPUT {} {}", Self::get_u8_param(params, "stream"), Self::get_u8_param(params, "option")),
@@ -1710,8 +2267,21 @@ impl DaadCodeGenerator {
             "SYNONYM" => format!("SYNONYM {} {}", Self::get_string_param(params, "verb"), Self::get_string_param(params, "noun")),
             "PROCESS" => format!("PROCESS {}", Self::get_u8_param(params, "prono")),
             "REDO" => "REDO".to_string(),
-            "DOALL" => format!("DOALL {}", Self::get_u8_param(params, "locno")),
-            "SKIP" => format!("SKIP {}", Self::get_u8_param(params, "count")),
+            "DOALL" => {
+                // DOALL accepts special keywords: HERE (current loc), CARRIED (254), WORN (253)
+                let loc_str = Self::get_string_param(params, "locno");
+                match loc_str.to_uppercase().as_str() {
+                    "HERE" | "CARRIED" | "WORN" | "NOTCREATED" => format!("DOALL {}", loc_str.to_uppercase()),
+                    _ => format!("DOALL {}", Self::get_u8_param(params, "locno")),
+                }
+            },
+            "SKIP" => {
+                // SKIP uses signed offsets (e.g. SKIP -2 for backward jumps)
+                let count = params.get("count")
+                    .and_then(|v| v.as_i64())
+                    .unwrap_or(0);
+                format!("SKIP {}", count)
+            },
             "RESTART" => "RESTART".to_string(),
             "END" => "END".to_string(),
             "EXIT" => format!("EXIT {}", Self::get_u8_param(params, "code")),
@@ -1731,12 +2301,12 @@ impl DaadCodeGenerator {
             "BEEP" => format!("BEEP {} {}", Self::get_u8_param(params, "duration"), Self::get_u8_param(params, "pitch")),
             "EXTERN" => format!("EXTERN {}", Self::get_u8_param(params, "value")),
             "CALL" => format!("CALL {}", Self::get_u8_param(params, "address")),
-            // DAAD Ready / Maluva extensions (passthrough)
-            "XMES" | "XMESSAGE" => format!("XMES {} {}", Self::get_u8_param(params, "bank"), Self::get_u8_param(params, "mesno")),
-            "XPLAY" => format!("XPLAY {}", Self::get_u8_param(params, "trackno")),
+            // Additional Maluva extensions (non-duplicate)
             "XBEEP" => format!("XBEEP {} {}", Self::get_u8_param(params, "duration"), Self::get_u8_param(params, "pitch")),
-            "XSPLITSCR" => format!("XSPLITSCR {}", Self::get_u8_param(params, "lines")),
-            "XSAVE" | "XLOAD" | "XPART" | "XUNDONE" => action_type.to_string(),
+            "XSAVE" | "XLOAD" | "XPART" => action_type.to_string(),
+            "XPICTURE" => format!("XPICTURE {}", Self::get_u8_param(params, "picno")),
+            "XNEXTCLS" => "XNEXTCLS".to_string(),
+            "XNEXTRST" => "XNEXTRST".to_string(),
             "MOUSE" => "MOUSE".to_string(),
             _ => format!("{} {}", action_type, params.iter().map(|(k,v)| format!("{:?}", v)).collect::<Vec<_>>().join(" ")),
         }

@@ -64,6 +64,14 @@ export interface GameObject {
    * If absent, codegen generates "a [adjective] [noun]" automatically.
    */
   otxText?: string;
+  /**
+   * User-defined attribute bit indices (0-15) that are set for this object.
+   * These map to the 16 attribute flags in the DAAD OBJ section and are
+   * tested with HASAT/HASNAT condacts. Common conventions:
+   * - Bit positions are game-defined via #define in the CTL section
+   * - e.g. [3, 7] means bits 3 and 7 are set (Y in OBJ output)
+   */
+  attributes?: number[];
 }
 
 export interface Flag {
@@ -105,7 +113,15 @@ export interface VocabEntry {
  *
  * PRO4 = Auto-events. Run before each player input prompt.
  */
-export type ProcessTable = "PRO0" | "PRO1" | "PRO2" | "PRO3" | "PRO4" | "PRO5";
+/**
+ * Process table assignment for rules.
+ * DAAD supports up to 256 process tables (PRO 0-255).
+ * Standard tables: PRO0=location loop, PRO1=input loop, PRO2=parse error,
+ * PRO3=post-description, PRO4=status/auto-events, PRO5=response table,
+ * PRO6=init, PRO7-9=window mgmt, PRO10=exits, PRO11=status line, PRO12=turns.
+ * Custom game logic can use PRO13+.
+ */
+export type ProcessTable = string; // "PRO0" through "PRO255"
 
 export type ConditionType =
   | "AT" | "NOTAT" | "ATGT" | "ATLT"
@@ -140,11 +156,30 @@ export type ActionType =
 export interface Condition {
   type: ConditionType;
   params: Record<string, unknown>;
+  /**
+   * When true, the first parameter uses DAAD indirection (@).
+   * e.g. EQ with indirect=true and flagno=38 emits "EQ @38 value"
+   * meaning "use the value in flag 38 as the flag number".
+   */
+  indirect?: boolean;
 }
 
 export interface Action {
   type: ActionType;
   params: Record<string, unknown>;
+  /**
+   * When true, the first parameter uses DAAD indirection (@).
+   * e.g. DESC with indirect=true emits "DESC @Player"
+   * meaning "describe the location stored in flag Player (38)".
+   */
+  indirect?: boolean;
+  /**
+   * Inline message text for MESSAGE/MES actions.
+   * When set, codegen emits MESSAGE "text" instead of MESSAGE <index>.
+   * DRC auto-assigns the MTX index. This is the preferred way to
+   * author responses — no manual message index tracking needed.
+   */
+  text?: string;
 }
 
 export interface Rule {
@@ -168,6 +203,16 @@ export interface Rule {
    * Always set this explicitly to avoid name-parsing bugs.
    */
   noun?: string;
+  /**
+   * Additional verb/noun triggers that share the same conditions+actions.
+   * Emitted as stacked ">" headers in the DSF, matching Rabenstein's pattern:
+   *   > EX BLOOD
+   *   > EX PATH
+   *   AT 8
+   *   MESSAGE "..."
+   *   DONE
+   */
+  additionalTriggers?: Array<{ verb: string; noun: string }>;
 }
 
 export type NoteName = "C" | "C#" | "D" | "D#" | "E" | "F" | "F#" | "G" | "G#" | "A" | "A#" | "B" | "R";
@@ -203,6 +248,44 @@ export interface DaadGame {
   messages: string[];
   vocabulary: VocabEntry[];
   music: Music[];
+  /**
+   * Custom system messages (STX overrides).
+   * Sparse map: only include indices you want to override.
+   * e.g. { 0: "You can't see a thing!", 7: "There's no way to go there." }
+   * Indices 0-64 correspond to DAAD standard system messages.
+   * Unset indices use the default English text from blank_en.dsf.
+   */
+  systemMessages?: Record<number, string>;
+  /**
+   * Status bar configuration. Controls the appearance and content
+   * of the status bar at the top of the screen (WINDOW 2 in DAAD).
+   */
+  statusBarConfig?: StatusBarConfig;
+  /** Height of graphics area in character rows (each row = 8px).
+   * 0 = no graphics, 13 = Rabenstein default (104px).
+   * Status bar at top, then graphics, then text window fills the rest. */
+  imageHeight?: number;
+}
+
+export interface StatusBarConfig {
+  /** DAAD PAPER color 0-15 for status bar background. Default: 4 (red) */
+  paperColor: number;
+  /** DAAD INK color 0-15 for status bar text. Default: 15 (white) */
+  inkColor: number;
+  /** Show turns counter on the right side. Default: true */
+  showTurns: boolean;
+  /** Show location name on the left side. Default: true */
+  showLocationName: boolean;
+  /** What to show on the right side: "turns", "score", "custom", "daytime", or "none". Default: "turns" */
+  rightContent?: "turns" | "score" | "custom" | "daytime" | "none";
+  /** Flag ID to display when rightContent is "score" or "custom". Default: 30 (Score) */
+  rightFlagId?: number;
+  /** Label for the right side content. Default: "Turns: " or "Score: " */
+  rightLabel?: string;
+  /** Flag ID for day number (used with rightContent="daytime"). Default: 93 */
+  dayFlagId?: number;
+  /** Flag ID for time of day (used with rightContent="daytime", 0=Morn 1=Aftn 2=Eve). Default: 138 */
+  timeFlagId?: number;
 }
 
 export type PanelType =
@@ -242,9 +325,13 @@ export function createDefaultGame(): DaadGame {
     objects: [],
     rules: [],
     flags: [
-      { id: 1,  name: "objects_carried",  description: "Number of objects carried (auto-updated)", initialValue: 0 },
-      { id: 37, name: "max_carry_objects", description: "Maximum objects player can carry (default: 4)", initialValue: 4 },
-      { id: 52, name: "max_carry_weight",  description: "Maximum weight player can carry (default: 10)", initialValue: 10 },
+      { id: 0,  name: "dark",             description: "Set to make current room dark (system)", initialValue: 0 },
+      { id: 1,  name: "objects_carried",   description: "Number of objects carried (auto-updated)", initialValue: 0 },
+      { id: 30, name: "score",            description: "Player score (display in status bar)", initialValue: 0 },
+      { id: 31, name: "turns",            description: "Turn counter (auto-incremented)", initialValue: 0 },
+      { id: 37, name: "max_carry_objects", description: "Maximum objects player can carry", initialValue: 4 },
+      { id: 38, name: "player_location",  description: "Current player location (system, read-only)", initialValue: 0 },
+      { id: 52, name: "max_carry_weight",  description: "Maximum weight player can carry", initialValue: 10 },
     ],
     messages: [],
     vocabulary: [],

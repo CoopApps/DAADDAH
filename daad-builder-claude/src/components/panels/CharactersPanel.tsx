@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DaadGame, GameObject } from "../../types/daad";
+import { DaadGame, GameObject, Rule, Condition, Action } from "../../types/daad";
 import { useDebounce } from "../../hooks/useDebounce";
 import { STATUS_MESSAGE_DURATION } from "../../utils/constants";
 
@@ -96,12 +96,12 @@ export default function CharactersPanel({ game, setGame, selectItemId }: Charact
   };
 
   const createNewCharacter = () => {
-    console.log("[CharactersPanel] createNewCharacter called");
-    console.log("[CharactersPanel] game.objects:", game.objects);
+    // debug: console.log("[CharactersPanel] createNewCharacter called");
+    // debug: console.log("[CharactersPanel] game.objects:", game.objects);
 
     // Use next available ID in objects array (consecutive)
     const newId = game.objects?.length || 0;
-    console.log("[CharactersPanel] newId:", newId);
+    // debug: console.log("[CharactersPanel] newId:", newId);
 
     const newChar: GameObject = {
       id: newId,
@@ -118,11 +118,11 @@ export default function CharactersPanel({ game, setGame, selectItemId }: Charact
       isPSI: true,
     };
 
-    console.log("[CharactersPanel] Creating character:", newChar);
+    // debug: console.log("[CharactersPanel] Creating character:", newChar);
     setGame(prev => ({ ...prev, objects: [...(prev.objects || []), newChar] }));
     setSelectedCharId(newId);
     showToast(`Character ${newId} created`, "success");
-    console.log("[CharactersPanel] Character creation complete");
+    // debug: console.log("[CharactersPanel] Character creation complete");
   };
 
   const initiateDelete = (character: GameObject) => {
@@ -548,30 +548,260 @@ export default function CharactersPanel({ game, setGame, selectItemId }: Charact
                   </select>
                 </div>
 
+                {/* ── COMPANION FOLLOW ─────────────────────────── */}
                 <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid var(--border)" }}>
-                  <h4 style={{ fontSize: 16, color: "var(--cyan-bright)", marginBottom: 12 }}>
-                    CONVERSATION TOPICS
+                  <h4 style={{ fontSize: 14, color: "var(--green-bright)", marginBottom: 8 }}>
+                    COMPANION FOLLOW
                   </h4>
-                  <p style={{ fontSize: 15, color: "var(--text-dim)", marginBottom: 12 }}>
-                    Create conversation rules in the Rules panel using verbs like ASK/TELL.
-                    Example: AT location, PRESENT {selectedChar.noun}, verb=ASK → MES response
+                  <p style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
+                    Generate rules so this NPC follows the player to every location.
+                    Creates one PLACE rule per location in PRO0.
                   </p>
-                  <div style={{
-                    padding: 12,
-                    backgroundColor: "var(--bg-darker)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 4,
-                    fontSize: 14,
-                    fontFamily: "monospace",
-                    color: "var(--text-dim)"
-                  }}>
-                    Rule example:<br />
-                    PRESENT {selectedChar.id} (this character)<br />
-                    verb = ASK, noun = "treasure"<br />
-                    → MES "The {selectedChar.noun} says: I know nothing!"
-                  </div>
+                  {(() => {
+                    const existingFollowRules = (game.rules || []).filter(r =>
+                      r.name.toLowerCase().includes(`${selectedChar.noun} follow`) ||
+                      (r.process === "PRO0" && r.actions.some(a => a.type === "PLACE" && a.params.objno === selectedChar.id))
+                    );
+                    return (
+                      <>
+                        {existingFollowRules.length > 0 && (
+                          <div style={{ fontSize: 10, color: "var(--amber-bright)", marginBottom: 6 }}>
+                            {existingFollowRules.length} follow rules already exist for this character
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button className="btn btn-primary" style={{ fontSize: 11, padding: "6px 12px" }}
+                            onClick={() => {
+                              const locations = game.locations.filter(l => l.id > 0);
+                              const nextId = game.rules.length > 0 ? Math.max(...game.rules.map(r => r.id)) + 1 : 1;
+                              const newRules: Rule[] = locations.map((loc, i) => ({
+                                id: nextId + i,
+                                name: `${selectedChar.noun} follows - ${loc.name}`,
+                                process: "PRO0",
+                                verb: "_",
+                                noun: "_",
+                                enabled: true,
+                                conditions: [{ type: "AT" as const, params: { locno: loc.id } }],
+                                actions: [{ type: "PLACE" as const, params: { objno: selectedChar.id, locno: loc.id } }],
+                              }));
+                              setGame(prev => ({ ...prev, rules: [...prev.rules, ...newRules] }));
+                              showToast(`Generated ${newRules.length} follow rules for ${selectedChar.noun}`, "success");
+                            }}>
+                            Generate Follow Rules ({game.locations.filter(l => l.id > 0).length} locations)
+                          </button>
+                          {existingFollowRules.length > 0 && (
+                            <button className="btn btn-danger" style={{ fontSize: 10, padding: "4px 8px" }}
+                              onClick={() => {
+                                const ids = new Set(existingFollowRules.map(r => r.id));
+                                setGame(prev => ({ ...prev, rules: prev.rules.filter(r => !ids.has(r.id)) }));
+                                showToast(`Removed ${existingFollowRules.length} follow rules`, "info");
+                              }}>
+                              Remove Follow Rules
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
 
+                {/* ── DIALOGUE TOPICS ─────────────────────────── */}
+                <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid var(--border)" }}>
+                  <h4 style={{ fontSize: 14, color: "var(--cyan-bright)", marginBottom: 8 }}>
+                    DIALOGUE TOPICS
+                  </h4>
+                  <p style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
+                    Add conversation topics. Each creates an ASK rule with a tracked flag.
+                  </p>
+                  {(() => {
+                    const dialogueRules = (game.rules || []).filter(r =>
+                      (r.verb === "ASK" || r.verb === "ask") &&
+                      r.conditions.some(c => c.type === "PRESENT" && c.params.objno === selectedChar.id)
+                    );
+                    return (
+                      <>
+                        {dialogueRules.length > 0 && (
+                          <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 6 }}>
+                            {dialogueRules.length} dialogue rule(s) for this character:
+                            {dialogueRules.map(r => (
+                              <span key={r.id} style={{ marginLeft: 4, color: "var(--cyan-bright)" }}>
+                                [{r.noun || "?"}]
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: 4, alignItems: "flex-end" }}>
+                          <div style={{ flex: 1 }}>
+                            <label className="form-label" style={{ fontSize: 10, margin: 0 }}>Topic noun</label>
+                            <input className="form-input" id={`topic-noun-${selectedChar.id}`}
+                              style={{ fontSize: 11 }} placeholder="e.g. sword, castle, quest" maxLength={5} />
+                          </div>
+                          <div style={{ flex: 2 }}>
+                            <label className="form-label" style={{ fontSize: 10, margin: 0 }}>Response text</label>
+                            <input className="form-input" id={`topic-response-${selectedChar.id}`}
+                              style={{ fontSize: 11 }} placeholder="What the character says..." />
+                          </div>
+                          <button className="btn btn-primary" style={{ fontSize: 10, padding: "6px 10px", whiteSpace: "nowrap" }}
+                            onClick={() => {
+                              const nounEl = document.getElementById(`topic-noun-${selectedChar.id}`) as HTMLInputElement;
+                              const respEl = document.getElementById(`topic-response-${selectedChar.id}`) as HTMLInputElement;
+                              const topicNoun = nounEl?.value.trim();
+                              const response = respEl?.value.trim();
+                              if (!topicNoun || !response) { showToast("Enter both topic and response", "error"); return; }
+
+                              const nextId = game.rules.length > 0 ? Math.max(...game.rules.map(r => r.id)) + 1 : 1;
+                              // Find next available flag for tracking
+                              const usedFlags = new Set(game.flags.map(f => f.id));
+                              let trackFlag = 64;
+                              while (usedFlags.has(trackFlag) && trackFlag < 255) trackFlag++;
+
+                              // Ensure vocab exists for the topic noun
+                              const vocabExists = game.vocabulary.some(v => v.word.toLowerCase() === topicNoun.toLowerCase());
+
+                              setGame(prev => {
+                                const newRules: Rule[] = [
+                                  // First time asking
+                                  {
+                                    id: nextId,
+                                    name: `ASK ${selectedChar.noun} ${topicNoun}`,
+                                    process: "PRO5", verb: "ASK", noun: topicNoun.toUpperCase(),
+                                    enabled: true,
+                                    conditions: [
+                                      { type: "PRESENT" as const, params: { objno: selectedChar.id } },
+                                      { type: "ZERO" as const, params: { flagno: trackFlag } },
+                                    ],
+                                    actions: [
+                                      { type: "MESSAGE" as const, params: {}, text: response },
+                                      { type: "SET" as const, params: { flagno: trackFlag } },
+                                      { type: "DONE" as const, params: {} },
+                                    ],
+                                  },
+                                  // Already asked
+                                  {
+                                    id: nextId + 1,
+                                    name: `ASK ${selectedChar.noun} ${topicNoun} (repeat)`,
+                                    process: "PRO5", verb: "ASK", noun: topicNoun.toUpperCase(),
+                                    enabled: true,
+                                    conditions: [
+                                      { type: "PRESENT" as const, params: { objno: selectedChar.id } },
+                                      { type: "NOTZERO" as const, params: { flagno: trackFlag } },
+                                    ],
+                                    actions: [
+                                      { type: "MESSAGE" as const, params: {}, text: `You've already discussed ${topicNoun} with ${selectedChar.noun}.` },
+                                      { type: "DONE" as const, params: {} },
+                                    ],
+                                  },
+                                ];
+                                const newFlag = { id: trackFlag, name: `asked_${selectedChar.noun}_${topicNoun}`, description: `Dialogue: asked ${selectedChar.noun} about ${topicNoun}`, initialValue: 0 };
+                                const newVocab = vocabExists ? [] : [{ word: topicNoun.toLowerCase().slice(0, 5), wordType: "noun" as const, id: Math.max(50, ...prev.vocabulary.map(v => v.id)) + 1 }];
+                                return {
+                                  ...prev,
+                                  rules: [...prev.rules, ...newRules],
+                                  flags: [...prev.flags, newFlag],
+                                  vocabulary: [...prev.vocabulary, ...newVocab],
+                                };
+                              });
+                              if (nounEl) nounEl.value = "";
+                              if (respEl) respEl.value = "";
+                              showToast(`Added dialogue topic: ${topicNoun}`, "success");
+                            }}>
+                            + Add Topic
+                          </button>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+
+                {/* ── NPC SCHEDULE ─────────────────────────────── */}
+                <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid var(--border)" }}>
+                  <h4 style={{ fontSize: 14, color: "var(--amber-bright)", marginBottom: 8 }}>
+                    NPC SCHEDULE
+                  </h4>
+                  <p style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
+                    Set up time-based movement. NPC moves to different locations based on turn ranges (flag 31 = Turns).
+                  </p>
+                  {(() => {
+                    const scheduleRules = (game.rules || []).filter(r =>
+                      r.process === "PRO4" &&
+                      r.actions.some(a => a.type === "PLACE" && a.params.objno === selectedChar.id)
+                    );
+                    return (
+                      <>
+                        {scheduleRules.length > 0 && (
+                          <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 6 }}>
+                            {scheduleRules.length} schedule rule(s) active
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: 4, alignItems: "flex-end" }}>
+                          <div>
+                            <label className="form-label" style={{ fontSize: 10, margin: 0 }}>From turn</label>
+                            <input className="form-input" id={`sched-from-${selectedChar.id}`} type="number"
+                              style={{ fontSize: 11, width: 55 }} placeholder="0" min={0} max={255} />
+                          </div>
+                          <div>
+                            <label className="form-label" style={{ fontSize: 10, margin: 0 }}>To turn</label>
+                            <input className="form-input" id={`sched-to-${selectedChar.id}`} type="number"
+                              style={{ fontSize: 11, width: 55 }} placeholder="20" min={0} max={255} />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <label className="form-label" style={{ fontSize: 10, margin: 0 }}>Location</label>
+                            <select className="form-input form-select" id={`sched-loc-${selectedChar.id}`}
+                              style={{ fontSize: 11 }}>
+                              {game.locations.filter(l => l.id > 0).map(loc => (
+                                <option key={loc.id} value={loc.id}>{loc.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <button className="btn btn-primary" style={{ fontSize: 10, padding: "6px 10px", whiteSpace: "nowrap" }}
+                            onClick={() => {
+                              const fromEl = document.getElementById(`sched-from-${selectedChar.id}`) as HTMLInputElement;
+                              const toEl = document.getElementById(`sched-to-${selectedChar.id}`) as HTMLInputElement;
+                              const locEl = document.getElementById(`sched-loc-${selectedChar.id}`) as HTMLSelectElement;
+                              const fromTurn = parseInt(fromEl?.value || "0");
+                              const toTurn = parseInt(toEl?.value || "20");
+                              const locId = parseInt(locEl?.value || "1");
+                              const locName = game.locations.find(l => l.id === locId)?.name || `loc ${locId}`;
+
+                              const nextId = game.rules.length > 0 ? Math.max(...game.rules.map(r => r.id)) + 1 : 1;
+                              const newRule: Rule = {
+                                id: nextId,
+                                name: `${selectedChar.noun} schedule: ${locName} (turns ${fromTurn}-${toTurn})`,
+                                process: "PRO4", verb: "_", noun: "_",
+                                enabled: true,
+                                conditions: [
+                                  ...(fromTurn > 0 ? [{ type: "GT" as const, params: { flagno: 31, value: fromTurn - 1 } }] : []),
+                                  { type: "LT" as const, params: { flagno: 31, value: toTurn + 1 } },
+                                ],
+                                actions: [
+                                  { type: "PLACE" as const, params: { objno: selectedChar.id, locno: locId } },
+                                ],
+                              };
+                              setGame(prev => ({ ...prev, rules: [...prev.rules, newRule] }));
+                              showToast(`Schedule: ${selectedChar.noun} at ${locName} (turns ${fromTurn}-${toTurn})`, "success");
+                            }}>
+                            + Add Schedule
+                          </button>
+                        </div>
+                        {scheduleRules.length > 0 && (
+                          <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 2 }}>
+                            {scheduleRules.map(r => (
+                              <div key={r.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10, padding: "2px 6px", background: "var(--bg-darker)", borderRadius: 3 }}>
+                                <span style={{ color: "var(--text-dim)" }}>{r.name}</span>
+                                <button className="btn btn-danger" style={{ fontSize: 9, padding: "1px 5px" }}
+                                  onClick={() => setGame(prev => ({ ...prev, rules: prev.rules.filter(rule => rule.id !== r.id) }))}>
+                                  x
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+
+                {/* ── DELETE ─────────────────────────────────── */}
                 <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid var(--border)" }}>
                   <button
                     className="btn btn-danger"

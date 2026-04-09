@@ -153,6 +153,11 @@ pub struct Object {
     /// If absent, codegen generates "a [adjective] [noun]" automatically.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub otx_text: Option<String>,
+    /// User-defined attribute bit indices (0-15) set for this object.
+    /// Maps to the 16 attribute flags in the DAAD OBJ section.
+    /// Tested with HASAT/HASNAT condacts.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attributes: Option<Vec<u8>>,
 }
 
 /// Where an object currently is
@@ -210,6 +215,42 @@ pub struct Rule {
     pub actions: Vec<Action>,
     /// Can disable rules without deleting them
     pub enabled: bool,
+    /// Additional verb/noun triggers sharing the same conditions+actions.
+    /// Emitted as stacked ">" headers in DSF (Rabenstein pattern).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub additional_triggers: Option<Vec<VerbNounTrigger>>,
+}
+
+/// A verb/noun pair for stacked triggers
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerbNounTrigger {
+    pub verb: String,
+    pub noun: String,
+}
+
+/// Status bar configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StatusBarConfig {
+    pub paper_color: u8,
+    pub ink_color: u8,
+    pub show_turns: bool,
+    pub show_location_name: bool,
+    /// What to show on the right: "turns", "score", "custom", "none"
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub right_content: Option<String>,
+    /// Flag ID for score/custom display
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub right_flag_id: Option<u8>,
+    /// Label text for right content (e.g. "Score: ", "Time: ")
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub right_label: Option<String>,
+    /// Flag ID for day number (used with right_content="daytime")
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub day_flag_id: Option<u8>,
+    /// Flag ID for time of day (used with right_content="daytime", 0=Morn 1=Aftn 2=Eve)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time_flag_id: Option<u8>,
 }
 
 /// DAAD's process tables
@@ -271,6 +312,9 @@ pub struct Condition {
     #[serde(rename = "type")]
     pub r#type: String,
     pub params: std::collections::HashMap<String, serde_json::Value>,
+    /// When true, the first parameter uses DAAD indirection (@).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub indirect: Option<bool>,
 }
 
 /// Action (generic DAAD format)
@@ -279,6 +323,13 @@ pub struct Action {
     #[serde(rename = "type")]
     pub r#type: String,
     pub params: std::collections::HashMap<String, serde_json::Value>,
+    /// When true, the first parameter uses DAAD indirection (@).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub indirect: Option<bool>,
+    /// Inline message text for MESSAGE/MES actions.
+    /// When set, codegen emits MESSAGE "text" instead of MESSAGE <index>.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
 }
 
 /// Flag (game variable)

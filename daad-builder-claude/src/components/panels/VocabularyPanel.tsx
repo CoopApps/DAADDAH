@@ -30,6 +30,7 @@ export default function VocabularyPanel({ game, setGame, selectItemId }: Vocabul
   const [selectedVocab, setSelectedVocab] = useState<SelectedVocabState>({ id: null, type: null });
   const [selectedType, setSelectedType] = useState<VocabType>("verb");
   const [newWord, setNewWord] = useState("");
+  const [manualIdOverride, setManualIdOverride] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [sortAlphabetically, setSortAlphabetically] = useState(false);
@@ -118,7 +119,7 @@ export default function VocabularyPanel({ game, setGame, selectItemId }: Vocabul
     const entry: VocabEntry = {
       word: newWord.toLowerCase().trim().slice(0, MAX_VOCAB_WORD_LENGTH),
       wordType: selectedType,
-      id: getNextId(selectedType),
+      id: manualIdOverride ?? getNextId(selectedType),
     };
 
     setGame(prev => ({
@@ -127,7 +128,8 @@ export default function VocabularyPanel({ game, setGame, selectItemId }: Vocabul
     }));
 
     setNewWord("");
-    showToast(`Added "${entry.word}" as ${selectedType}`, "success");
+    setManualIdOverride(null);
+    showToast(`Added "${entry.word}" as ${selectedType} (ID: ${entry.id})`, "success");
   };
 
   const handleDeleteWord = (entry: VocabEntry) => {
@@ -467,6 +469,19 @@ export default function VocabularyPanel({ game, setGame, selectItemId }: Vocabul
               <option value="noun">Noun</option>
               <option value="adjective">Adjective</option>
             </select>
+          </div>
+
+          <div className="form-group" style={{ width: 70, marginBottom: 0 }}>
+            <label className="form-label">ID (opt)</label>
+            <input
+              type="number"
+              className="form-input"
+              value={manualIdOverride ?? ""}
+              onChange={(e) => setManualIdOverride(e.target.value ? parseInt(e.target.value) : null)}
+              placeholder="auto"
+              min={1} max={255}
+              style={{ fontSize: 11 }}
+            />
           </div>
 
           <button className="btn btn-primary" onClick={addWord} style={{ marginBottom: 20 }}>

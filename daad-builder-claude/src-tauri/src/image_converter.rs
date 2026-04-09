@@ -100,9 +100,88 @@ impl ImageConverter {
         Self::convert_to_indexed_format(img, height, 320, 200, &palette)
     }
 
-    /// Convert image to MS-DOS VGA format (320x200, 256 colors)
+    /// Convert image to MS-DOS VGA format (320x200, 256 colors, raw indexed)
     pub fn to_msdos_vga(img: &DynamicImage, height: u16) -> Vec<u8> {
         Self::convert_to_indexed_format(img, height, 320, 200, &Self::vga_palette())
+    }
+
+    /// Convert image to PCX format for PCDAAD (320x200, 256 colors)
+    /// PCX Version 5, 8-bit, RLE encoded, with VGA palette appended
+    pub fn to_pcx(img: &DynamicImage, height: u16) -> Vec<u8> {
+        let width: u16 = 320;
+        let img_height = height.min(200);
+        let palette = Self::vga_palette();
+        let indexed = Self::convert_to_indexed_format(img, img_height, width as u32, 200, &palette);
+
+        let mut pcx = Vec::new();
+
+        // PCX Header (128 bytes)
+        pcx.push(0x0A);        // Manufacturer (ZSoft)
+        pcx.push(5);           // Version 5 (256-colour with palette)
+        pcx.push(1);           // Encoding: RLE
+        pcx.push(8);           // Bits per pixel per plane
+        // Window: xMin, yMin, xMax, yMax (little-endian u16)
+        pcx.extend_from_slice(&0u16.to_le_bytes());  // xMin
+        pcx.extend_from_slice(&0u16.to_le_bytes());  // yMin
+        pcx.extend_from_slice(&(width - 1).to_le_bytes());   // xMax
+        pcx.extend_from_slice(&(img_height - 1).to_le_bytes()); // yMax
+        // DPI
+        pcx.extend_from_slice(&320u16.to_le_bytes()); // hDPI
+        pcx.extend_from_slice(&200u16.to_le_bytes()); // vDPI
+        // EGA palette (48 bytes) — not used for 256-colour, fill with zeros
+        pcx.extend_from_slice(&[0u8; 48]);
+        pcx.push(0);           // Reserved
+        pcx.push(1);           // Number of colour planes
+        // Bytes per scan line (must be even)
+        let bytes_per_line = if width % 2 == 0 { width } else { width + 1 };
+        pcx.extend_from_slice(&bytes_per_line.to_le_bytes());
+        pcx.extend_from_slice(&1u16.to_le_bytes());   // Palette type (1=colour)
+        pcx.extend_from_slice(&320u16.to_le_bytes());  // hScreenSize
+        pcx.extend_from_slice(&200u16.to_le_bytes());  // vScreenSize
+        // Padding to 128 bytes
+        let header_so_far = pcx.len();
+        pcx.extend_from_slice(&vec![0u8; 128 - header_so_far]);
+
+        // RLE-encoded pixel data
+        for y in 0..img_height {
+            let row_start = (y as usize) * (width as usize);
+            let row = &indexed[row_start..row_start + width as usize];
+
+            let mut x = 0usize;
+            while x < width as usize {
+                let pixel = row[x];
+                let mut run_len = 1usize;
+                while x + run_len < width as usize && row[x + run_len] == pixel && run_len < 63 {
+                    run_len += 1;
+                }
+
+                if run_len > 1 || pixel >= 0xC0 {
+                    pcx.push(0xC0 | (run_len as u8));
+                    pcx.push(pixel);
+                } else {
+                    pcx.push(pixel);
+                }
+                x += run_len;
+            }
+            // Pad to bytes_per_line if needed
+            if width % 2 != 0 {
+                pcx.push(0);
+            }
+        }
+
+        // 256-colour VGA palette at end (marker + 768 bytes)
+        pcx.push(0x0C); // Palette marker
+        for color in &palette {
+            pcx.push(color[0]);
+            pcx.push(color[1]);
+            pcx.push(color[2]);
+        }
+        // Pad palette to exactly 256 entries if needed
+        for _ in palette.len()..256 {
+            pcx.extend_from_slice(&[0, 0, 0]);
+        }
+
+        pcx
     }
 
     /// Generic indexed color format converter

@@ -76,6 +76,10 @@ pub struct ObjectRequest {
     pub container_capacity: Option<u8>,
     #[serde(default = "default_icon")]
     pub icon: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub otx_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attributes: Option<Vec<u8>>,
 }
 
 fn default_true() -> bool {
@@ -170,6 +174,8 @@ pub struct RuleRequest {
     pub actions: Vec<Action>,
     #[serde(default = "default_true")]
     pub enabled: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub additional_triggers: Option<Vec<crate::types::VerbNounTrigger>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -236,6 +242,12 @@ pub struct GameSettingsRequest {
     pub version: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub intro_text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub part_number: Option<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub system_messages: Option<std::collections::HashMap<u8, String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status_bar_config: Option<crate::types::StatusBarConfig>,
 }
 
 // ============================================================================
@@ -505,7 +517,8 @@ async fn create_object(
     is_psi: req.is_psi,
     container_capacity: req.container_capacity,
     icon: req.icon,
-    otx_text: None,   
+    otx_text: req.otx_text,
+    attributes: req.attributes,
 };
 
         game.objects.push(object);
@@ -1107,6 +1120,7 @@ async fn create_rule(
             conditions: req.conditions,
             actions: req.actions,
             enabled: req.enabled,
+            additional_triggers: None,
         };
 
         game.rules.push(rule);
@@ -1551,6 +1565,15 @@ async fn update_game_settings(
         if let Some(intro_text) = req.intro_text {
             game.intro_text = Some(intro_text);
         }
+        if let Some(part_number) = req.part_number {
+            game.part_number = part_number;
+        }
+        if let Some(system_messages) = req.system_messages {
+            game.system_messages = Some(system_messages);
+        }
+        if let Some(status_bar_config) = req.status_bar_config {
+            game.status_bar_config = Some(status_bar_config);
+        }
 
         emit_game_updated(&app_handle, game);
 
@@ -1836,6 +1859,74 @@ pub async fn start_api_server(
         .and(with_app_handle(app_handle.clone()))
         .and_then(update_game_settings);
 
+    // Export DSF endpoint
+    let export_dsf_route = warp::path!("api" / "export" / "dsf")
+        .and(warp::get())
+        .and(with_state(state.clone()))
+        .and_then(|state: SharedGameState| async move {
+            let game_lock = state.lock();
+            if let Some(game) = game_lock.as_ref() {
+                let (dsf, logs) = crate::codegen::DaadCodeGenerator::generate_verbose(game);
+                let errors = crate::codegen::DaadCodeGenerator::validate_dsf(&dsf);
+                Ok::<_, Infallible>(warp::reply::json(&serde_json::json!({
+                    "success": true,
+                    "dsf": dsf,
+                    "lines": dsf.lines().count(),
+                    "errors": errors,
+                    "logs": logs,
+                })))
+            } else {
+                Ok(warp::reply::json(&ApiResponse {
+                    success: false,
+                    message: "No game loaded".to_string(),
+                    id: None,
+                }))
+            }
+        });
+
+    // Validate game endpoint
+    let validate_game_route = warp::path!("api" / "validate")
+        .and(warp::get())
+        .and(with_state(state.clone()))
+        .and_then(|state: SharedGameState| async move {
+            let game_lock = state.lock();
+            if let Some(game) = game_lock.as_ref() {
+                let (dsf, _) = crate::codegen::DaadCodeGenerator::generate_verbose(game);
+                let dsf_errors = crate::codegen::DaadCodeGenerator::validate_dsf(&dsf);
+                let mut issues = Vec::new();
+                // Basic game validation
+                if game.locations.is_empty() {
+                    issues.push("No locations defined".to_string());
+                }
+                if game.objects.is_empty() {
+                    issues.push("No objects defined".to_string());
+                }
+                if game.rules.is_empty() {
+                    issues.push("No rules defined".to_string());
+                }
+                if game.vocabulary.is_empty() {
+                    issues.push("No vocabulary defined".to_string());
+                }
+                issues.extend(dsf_errors);
+                Ok::<_, Infallible>(warp::reply::json(&serde_json::json!({
+                    "success": true,
+                    "issues": issues,
+                    "issue_count": issues.len(),
+                    "locations": game.locations.len(),
+                    "objects": game.objects.len(),
+                    "rules": game.rules.len(),
+                    "messages": game.messages.len(),
+                    "vocabulary": game.vocabulary.len(),
+                })))
+            } else {
+                Ok(warp::reply::json(&ApiResponse {
+                    success: false,
+                    message: "No game loaded".to_string(),
+                    id: None,
+                }))
+            }
+        });
+
     // Combine all routes
     let routes = health
         .or(create_location_route)
@@ -1873,6 +1964,8 @@ pub async fn start_api_server(
         .or(list_music_route)
         .or(get_game_route)
         .or(update_game_settings_route)
+        .or(export_dsf_route)
+        .or(validate_game_route)
         .with(cors);
 
     println!("DAAD Builder MCP API server starting on http://127.0.0.1:3042");

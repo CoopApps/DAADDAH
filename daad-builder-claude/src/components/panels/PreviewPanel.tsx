@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { DaadGame } from "../../types/daad";
-import { processCommand, executePRO2, GameState, EngineContext } from "../../engine/ruleEngine";
+import { processCommand, executePRO2, executePRO0Wildcards, executePRO4, GameState, EngineContext } from "../../engine/ruleEngine";
 import { DEFAULT_AUTO_WALK_SPEED } from "../../utils/constants";
 import { PlatformId, PLATFORMS, PLATFORM_LIST } from "../../types/platforms";
 
@@ -31,13 +31,13 @@ export default function PreviewPanel({ game }: PreviewPanelProps) {
   // Initialize game
   useEffect(() => {
     // Debug: Check game structure
-    console.log("[PREVIEW] Game loaded, checking location structure:");
+    // debug: console.log("[PREVIEW] Game loaded, checking location structure:");
     const loc1 = (game.locations || []).find(l => l.id === 1);
     if (loc1) {
-      console.log("  Location 1 name:", loc1.name);
-      console.log("  Location 1 exits:", loc1.exits);
-      console.log("  Has 'in' exit:", loc1.exits?.in);
-      console.log("  Has 'connections' property:", ('connections' in loc1));
+      // debug: console.log("  Location 1 name:", loc1.name);
+      // debug: console.log("  Location 1 exits:", loc1.exits);
+      // debug: console.log("  Has 'in' exit:", loc1.exits?.in);
+      // debug: console.log("  Has 'connections' property:", ('connections' in loc1));
     }
     resetGame();
   }, [game]);
@@ -63,7 +63,7 @@ export default function PreviewPanel({ game }: PreviewPanelProps) {
     // Process next command in queue
     const timeoutId = setTimeout(() => {
       const [nextCommand, ...remainingCommands] = autoWalkQueue;
-      console.log(`[AUTO-WALKTHROUGH] Executing: "${nextCommand}" (${remainingCommands.length} remaining)`);
+      // debug: console.log(`[AUTO-WALKTHROUGH] Executing: "${nextCommand}" (${remainingCommands.length} remaining)`);
 
       handleCommand(nextCommand);
       setAutoWalkQueue(remainingCommands);
@@ -166,8 +166,8 @@ export default function PreviewPanel({ game }: PreviewPanelProps) {
       return;
     }
 
-    console.log(`=== DESCRIBING LOCATION ${loc.id}: ${loc.name} ===`);
-    console.log("Exits data:", JSON.stringify(loc.exits, null, 2));
+    // debug: console.log(`=== DESCRIBING LOCATION ${loc.id}: ${loc.name} ===`);
+    // debug: console.log("Exits data:", JSON.stringify(loc.exits, null, 2));
 
     // Display location image if available
     if (loc.image && loc.image.sourceData) {
@@ -308,8 +308,8 @@ export default function PreviewPanel({ game }: PreviewPanelProps) {
         const loc = (game.locations || []).find(l => l.id === gameState.currentLocation);
         if (loc) {
           const targetId = loc.exits[direction as keyof typeof loc.exits];
-          console.log(`Movement: from location ${loc.id} (${loc.name}) going ${direction} to target ${targetId}`);
-          console.log("All exits:", loc.exits);
+          // debug: console.log(`Movement: from location ${loc.id} (${loc.name}) going ${direction} to target ${targetId}`);
+          // debug: console.log("All exits:", loc.exits);
           if (targetId !== null && targetId !== undefined) {
             setGameState(prev => ({ ...prev, currentLocation: targetId }));
             // Execute PRO2 after movement
@@ -474,11 +474,11 @@ export default function PreviewPanel({ game }: PreviewPanelProps) {
   };
 
   const autoWalkthrough = () => {
-    console.log("[AUTO-WALKTHROUGH] Button clicked, isAutoWalking:", isAutoWalking);
+    // debug: console.log("[AUTO-WALKTHROUGH] Button clicked, isAutoWalking:", isAutoWalking);
 
     if (isAutoWalking) {
       // Stop auto-walkthrough
-      console.log("[AUTO-WALKTHROUGH] Stopping...");
+      // debug: console.log("[AUTO-WALKTHROUGH] Stopping...");
       setIsAutoWalking(false);
       setAutoWalkQueue([]);
       addOutput("\n=== AUTO-WALKTHROUGH STOPPED ===\n");
@@ -487,14 +487,14 @@ export default function PreviewPanel({ game }: PreviewPanelProps) {
 
     // Handle intro screen first
     if (showingIntro && game.introText) {
-      console.log("[AUTO-WALKTHROUGH] Clearing intro screen...");
+      // debug: console.log("[AUTO-WALKTHROUGH] Clearing intro screen...");
       setShowingIntro(false);
       setHistory([]);
       describeLocation();
     }
 
     // Start auto-walkthrough
-    console.log("[AUTO-WALKTHROUGH] Starting...");
+    // debug: console.log("[AUTO-WALKTHROUGH] Starting...");
     addOutput("\n=== AUTO-WALKTHROUGH STARTED ===\n");
 
     // Use game.walkthrough if available, otherwise fall back to basic test
@@ -507,7 +507,7 @@ export default function PreviewPanel({ game }: PreviewPanelProps) {
       "help",
     ];
 
-    console.log(`[AUTO-WALKTHROUGH] Queued ${commandQueue.length} commands`);
+    // debug: console.log(`[AUTO-WALKTHROUGH] Queued ${commandQueue.length} commands`);
     setAutoWalkQueue(commandQueue);
     setIsAutoWalking(true);
   };
@@ -523,6 +523,14 @@ export default function PreviewPanel({ game }: PreviewPanelProps) {
         <div style={{ marginBottom: 12, display: "flex", gap: 8, width: "100%", flexWrap: "wrap", alignItems: "center" }}>
           <button className="btn btn-primary" onClick={resetGame}>
             Restart Game
+          </button>
+          <button className="btn btn-secondary" onClick={() => saveGameState(0)}
+            title="Save game state to slot 0">
+            Save
+          </button>
+          <button className="btn btn-secondary" onClick={() => loadGameState(0)}
+            title="Load game state from slot 0">
+            Load
           </button>
           <button
             className={isAutoWalking ? "btn btn-danger" : "btn btn-secondary"}

@@ -210,14 +210,11 @@ fn validate_drc_requirements(game: &DaadGame) -> Result<(), CommandError> {
         )));
     }
 
-    // Check vocabulary word length (max 5 characters)
+    // Check vocabulary word length (max 5 characters) — warning only, DRC truncates automatically
     for vocab in &game.vocabulary {
         if vocab.word.len() > 5 {
-            eprintln!(
-                "Warning: Vocabulary word '{}' exceeds 5-character limit and will be truncated to '{}'",
-                vocab.word,
-                &vocab.word[0..5]
-            );
+            // Note: this is a warning, not an error. DRC handles truncation.
+            // The warning is surfaced via compilation_logs in compile_game().
         }
     }
 
@@ -470,24 +467,33 @@ pub async fn compile_game(
     compilation_logs.push(format!("Platform: {}", platform_name));
     compilation_logs.push("=".repeat(60));
 
-    // Map platform names to DRC platform codes
+    // Map platform names to DRC target/subtarget codes
+    // DRF targets: ZX, CPC, C64, CP4, MSX, MSX2, PCW, PC, AMIGA, ST, HTML
+    // DRB targets: same list
     let (drc_platform, drc_mode) = match platform_name.as_str() {
         "msdos" => ("pc", "vga"),
+        "msdos_vga256" => ("pc", "vga256"),
         "msdos_ega" => ("pc", "ega"),
         "msdos_cga" => ("pc", "cga"),
-        "zx_spectrum_48k" => ("spectrum", "48k"),
-        "zx_spectrum_128k" => ("spectrum", "128k"),
+        "msdos_text" => ("pc", "text"),
+        "zx_spectrum_48k" => ("zx", "48k"),
+        "zx_spectrum_128k" => ("zx", "128k"),
+        "zx_spectrum_plus3" => ("zx", "plus3"),
+        "zx_spectrum_esxdos" => ("zx", "esxdos"),
+        "zx_spectrum_next" => ("zx", "next"),
+        "zx_spectrum_uno" => ("zx", "uno"),
         "c64" => ("c64", ""),
         "amstrad_cpc" => ("cpc", ""),
         "msx" => ("msx", ""),
         "amiga" => ("amiga", ""),
         "atari_st" => ("st", ""),
         "pcw" => ("pcw", ""),
-        "plus4" => ("plus4", ""),
+        "plus4" => ("cp4", ""),
+        "html" => ("html", ""),
         _ => {
             return Err(CommandError::Io(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
-                format!("Unknown platform: {}", platform_name),
+                format!("Unknown platform: {}. Valid: msdos, zx_spectrum_48k, zx_spectrum_128k, zx_spectrum_plus3, zx_spectrum_esxdos, zx_spectrum_next, zx_spectrum_uno, c64, amstrad_cpc, msx, amiga, atari_st, pcw, plus4, html", platform_name),
             )));
         }
     };
@@ -498,6 +504,13 @@ pub async fn compile_game(
     let (code, dsf_logs) = DaadCodeGenerator::generate_verbose(&game);
     compilation_logs.extend(dsf_logs);
 
+    // Surface vocabulary truncation warnings
+    for vocab in &game.vocabulary {
+        if vocab.word.len() > 5 {
+            compilation_logs.push(format!("  ⚠ Vocabulary: '{}' will be truncated to '{}' (DAAD 5-char limit)",
+                vocab.word, &vocab.word[0..5]));
+        }
+    }
     compilation_logs.push(String::new());
 
     // Validate DSF before writing — catch all syntax errors at once
@@ -556,13 +569,17 @@ pub async fn compile_game(
 
     // Create platform-specific image directory
     let platform_suffix = match platform_name.as_str() {
-        "zx_spectrum_48k" | "zx_spectrum_128k" => "zx_spectrum",
+        "zx_spectrum_48k" | "zx_spectrum_128k" | "zx_spectrum_plus3"
+        | "zx_spectrum_esxdos" | "zx_spectrum_next" | "zx_spectrum_uno" => "zx_spectrum",
         "c64" => "c64",
+        "plus4" => "plus4",
         "amstrad_cpc" => "amstrad_cpc",
+        "pcw" => "pcw",
         "msx" => "msx",
         "amiga" => "amiga",
         "atari_st" => "atari_st",
-        "msdos" => "msdos",
+        "msdos" | "msdos_vga256" | "msdos_ega" | "msdos_cga" | "msdos_text" => "msdos",
+        "html" => "html",
         _ => "generic"
     };
 
@@ -570,27 +587,63 @@ pub async fn compile_game(
     std::fs::create_dir_all(&images_dir)?;
 
     // Export images for locations that have them
+    let mut image_count_exported = 0;
     for loc in &game.locations {
         if let Some(image) = &loc.image {
             match ImageConverter::decode_base64(&image.source_data) {
                 Ok(img) => {
-                    let (image_data, ext) = match platform_suffix {
-                        "zx_spectrum" => (ImageConverter::to_zx_spectrum(&img, image.height), "scr"),
-                        "c64" => (ImageConverter::to_c64(&img, image.height), "prg"),
-                        "amstrad_cpc" => (ImageConverter::to_amstrad_cpc_mode0(&img, image.height), "bin"),
-                        "msx" => (ImageConverter::to_msx(&img, image.height), "sc2"),
-                        "amiga" => (ImageConverter::to_amiga(&img, image.height), "iff"),
-                        "atari_st" => (ImageConverter::to_atari_st(&img, image.height), "neo"),
-                        "msdos" => (ImageConverter::to_msdos_vga(&img, image.height), "vga"),
+                    // For PCDAAD (msdos): output as PCX files named {locId:03d}.PCX
+                    // placed alongside the DDB in the output directory.
+                    // PCDAAD loads PICTURE N from file "{N:03d}.PCX".
+                    // For other platforms: use platform-specific format in images subdir.
+                    let (image_data, filename) = match platform_suffix {
+                        "msdos" => {
+                            let pcx = ImageConverter::to_pcx(&img, image.height);
+                            let name = format!("{:03}.PCX", loc.id);
+                            (pcx, name)
+                        },
+                        "zx_spectrum" => (ImageConverter::to_zx_spectrum(&img, image.height),
+                            format!("{}_loc{}.scr", base_name, loc.id)),
+                        "c64" => (ImageConverter::to_c64(&img, image.height),
+                            format!("{}_loc{}.prg", base_name, loc.id)),
+                        "amstrad_cpc" => (ImageConverter::to_amstrad_cpc_mode0(&img, image.height),
+                            format!("{}_loc{}.bin", base_name, loc.id)),
+                        "msx" => (ImageConverter::to_msx(&img, image.height),
+                            format!("{}_loc{}.sc2", base_name, loc.id)),
+                        "amiga" => (ImageConverter::to_amiga(&img, image.height),
+                            format!("{}_loc{}.iff", base_name, loc.id)),
+                        "atari_st" => (ImageConverter::to_atari_st(&img, image.height),
+                            format!("{}_loc{}.neo", base_name, loc.id)),
                         _ => continue,
                     };
 
-                    let image_file = images_dir.join(format!("{}_loc{}.{}", base_name, loc.id, ext));
-                    std::fs::write(&image_file, image_data)?;
+                    // PCDAAD images go alongside the DDB; others go to images subdir
+                    let image_path = if platform_suffix == "msdos" {
+                        base_dir.join(&filename)
+                    } else {
+                        images_dir.join(&filename)
+                    };
+                    std::fs::write(&image_path, image_data)?;
+                    image_count_exported += 1;
+                    compilation_logs.push(format!("  Image: {} ({} bytes)", image_path.display(),
+                        std::fs::metadata(&image_path).map(|m| m.len()).unwrap_or(0)));
                 }
                 Err(e) => {
-                    eprintln!("Warning: Failed to decode image for location {}: {}", loc.id, e);
+                    compilation_logs.push(format!("  ⚠ Image error for location {}: {}", loc.id, e));
                 }
+            }
+        }
+    }
+
+    // Copy font file for PCDAAD
+    if platform_suffix == "msdos" {
+        let daadready_check = find_daadready_dir();
+        if let Ok(ref dr) = daadready_check {
+            let font_src = dr.join("ASSETS").join("CHARSET").join("MSDOS.FNT");
+            let font_dst = base_dir.join("DAAD.FNT");
+            if font_src.exists() && !font_dst.exists() {
+                std::fs::copy(&font_src, &font_dst)?;
+                compilation_logs.push(format!("  Font: {} copied", font_dst.display()));
             }
         }
     }
@@ -703,6 +756,90 @@ pub async fn compile_game(
     }
 
     compilation_logs.push("  ✓ DRB compilation successful".to_string());
+
+    // Step 5: Copy DAAD.FNT for PCDAAD (if not already done by image pipeline)
+    if platform_suffix == "msdos" {
+        let font_src = daadready_path.join("ASSETS").join("CHARSET").join("MSDOS.FNT");
+        let font_dst_ddb = std::path::Path::new(&ddb_path).parent()
+            .unwrap_or(std::path::Path::new(".")).join("DAAD.FNT");
+        if font_src.exists() && !font_dst_ddb.exists() {
+            if let Ok(_) = std::fs::copy(&font_src, &font_dst_ddb) {
+                compilation_logs.push(format!("  Font: {} copied", font_dst_ddb.display()));
+            }
+        }
+        // Also rename DDB to DAAD.DDB for PCDAAD
+        let daad_ddb = std::path::Path::new(&ddb_path).parent()
+            .unwrap_or(std::path::Path::new(".")).join("DAAD.DDB");
+        if ddb_path != daad_ddb.to_string_lossy() {
+            let _ = std::fs::copy(&ddb_path, &daad_ddb);
+            compilation_logs.push(format!("  Also copied as: {}", daad_ddb.display()));
+        }
+    }
+
+    // Step 6: Platform-specific packaging
+    // Copy interpreter + DDB + assets into platform distribution format
+    compilation_logs.push(String::new());
+    compilation_logs.push("[Step 6] Platform packaging...".to_string());
+
+    let output_dir = std::path::Path::new(&ddb_path).parent()
+        .unwrap_or(std::path::Path::new("."));
+
+    match platform_suffix {
+        "msdos" => {
+            // PCDAAD: copy interpreter alongside DDB
+            let pcdaad_src = daadready_path.join("ASSETS").join("MSDOS").join("GAME").join("PCDAAD.EXE");
+            if pcdaad_src.exists() {
+                let pcdaad_dst = output_dir.join("PCDAAD.EXE");
+                let _ = std::fs::copy(&pcdaad_src, &pcdaad_dst);
+                compilation_logs.push("  ✓ PCDAAD.EXE copied (run this to play)".to_string());
+            }
+            // Copy DOSBox for easy testing
+            let dosbox_src = daadready_path.join("ASSETS").join("MSDOS").join("dosbox.exe");
+            if dosbox_src.exists() {
+                let dosbox_dst = output_dir.join("dosbox.exe");
+                let _ = std::fs::copy(&dosbox_src, &dosbox_dst);
+                compilation_logs.push("  ✓ dosbox.exe copied (for testing on modern OS)".to_string());
+            }
+        },
+        "c64" | "plus4" => {
+            // C64/Plus4: copy interpreter binary
+            let interp_name = if platform_suffix == "c64" { "C64" } else { "CP4" };
+            let interp_dir = daadready_path.join("ASSETS").join(interp_name);
+            if interp_dir.exists() {
+                compilation_logs.push(format!("  ✓ {} DDB ready. Use daadready {} tools for disk image packaging.", interp_name, interp_name));
+            }
+        },
+        "amstrad_cpc" => {
+            compilation_logs.push("  ✓ CPC DDB ready. Use daadready CPC tools + CPCDiskXP for DSK packaging.".to_string());
+        },
+        "msx" => {
+            compilation_logs.push("  ✓ MSX DDB ready. Use daadready MSX tools + dsktool for disk packaging.".to_string());
+        },
+        "zx_spectrum" => {
+            // Check which ZX variant
+            let variant = match drc_mode {
+                "plus3" => "ZX +3 (disk)",
+                "esxdos" => "ZX ESXDOS (SD card)",
+                "next" => "ZX Next",
+                "uno" => "ZX-Uno",
+                "128k" => "ZX 128K (tape)",
+                _ => "ZX 48K (tape)",
+            };
+            compilation_logs.push(format!("  ✓ {} DDB ready. Use daadready ZX tools for TAP/+3DOS packaging.", variant));
+        },
+        "amiga" => {
+            compilation_logs.push("  ✓ Amiga DDB ready. Use daadready AMIGA tools + exe2adf for ADF packaging.".to_string());
+        },
+        "atari_st" => {
+            compilation_logs.push("  ✓ Atari ST DDB ready. Use daadready ATARIST tools + MSA for disk packaging.".to_string());
+        },
+        "html" => {
+            compilation_logs.push("  ✓ HTML/jDAAD target — use 'Compile to HTML' for full web packaging.".to_string());
+        },
+        _ => {
+            compilation_logs.push(format!("  ✓ DDB ready for {}", platform_suffix));
+        },
+    }
 
     // Get file size
     let file_size = std::fs::metadata(&ddb_path)

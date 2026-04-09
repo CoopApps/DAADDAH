@@ -97,7 +97,8 @@ a:hover {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-	height: 100vh;
+	width: min(100vw, calc(100vh * 320 / 200));
+	height: min(100vh, calc(100vw * 200 / 320));
 }
 
 .mobileScreenClass 

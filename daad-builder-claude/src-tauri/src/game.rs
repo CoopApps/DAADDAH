@@ -19,6 +19,19 @@ pub struct DaadGame {
     pub flags: Vec<Flag>,
     pub messages: Vec<String>,
     pub vocabulary: Vec<VocabEntry>,
+    /// Custom system messages (STX overrides).
+    /// Sparse map: key = message index (0-64), value = custom text.
+    /// Unset indices use default English text from blank_en.dsf.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub system_messages: Option<std::collections::HashMap<u8, String>>,
+    /// Status bar configuration.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status_bar_config: Option<StatusBarConfig>,
+    /// Height of graphics area in character rows (each row = 8px).
+    /// 0 = no graphics, 13 = Rabenstein default (104px).
+    /// Status bar sits below graphics; text window fills the rest.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image_height: Option<u8>,
 }
 
 impl Default for DaadGame {
@@ -71,6 +84,9 @@ impl Default for DaadGame {
                     id: 18,
                 },
             ],
+            system_messages: None,
+            status_bar_config: None,
+            image_height: None,
         }
     }
 }
